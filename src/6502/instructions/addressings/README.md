@@ -1,6 +1,24 @@
 # 6502: Addressing Modes
 
-## Absolute Mode
+## Implicit
+Instructions using this mode doesn't use any of external value (register and memory). Source and destination of
+the instruction is implied directly by its function. The instruction length will be only one byte (the opcode only).
+
+For example, instruction `BRK` is represented in binary format simply as `00`.
+
+## Accumulator
+
+Instructions using this mode (not really an addressing mode) will able to directly use value of accumulator (register `A`). Since it is implied that accumulator value is used, the instruction length will be only one byte (the opcode only).
+
+For example, instruction `ASL A` is represented in binary format simply as `0A`.
+
+### Instructions
+
+| Opcode | Instruction |
+| ------ | ----------- |
+| 0A     | ASL A | 
+
+## Absolute
 
 This addressing mode is used to get value in memory by its absolute address.
 The 6502 has 16-bit addressing bus, and therefore has the ability to access up to 64MB of memory. However, since 6502 is a 8-bit CPU, the address takes up 2 bytes.
