@@ -8,11 +8,10 @@ Instructions using this mode will use 3 bytes of memory consisting of first byte
 
 For example, instruction `STA $0400` is represented in binary format as `8D 00 04`. Note that address is stored in little-endian order.
 
-------------------------
 | Opcode | Instruction |
--------------------------
-| 0D     | ORA         | 
 ------------------------
+| 0D     | ORA         | 
+
 
 ## Zero Page
 
