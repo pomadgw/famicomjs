@@ -8,7 +8,7 @@ For example, instruction `BRK` is represented in binary format simply as `00`.
 
 ## Accumulator
 
-Instructions using this mode (not really an addressing mode) will able to directly use value of accumulator (register `A`). Since it is implied that accumulator value is used, the instruction length will be only one byte (the opcode only).
+Instructions using this mode (not really an addressing mode) will be able to directly operate on the accumulator (register `A`). Since it is implied that accumulator is the source and destination of the operation, the instruction length will be only one byte (the opcode only).
 
 For example, instruction `ASL A` is represented in binary format simply as `0A`.
 
