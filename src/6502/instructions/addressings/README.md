@@ -51,3 +51,7 @@ There are also *indexed absolute* where the absolute address is obtained by addi
 This addressing mode is used to access first 256 bytes of memory. In effect, this mode is similar to absolute mode except that the high byte is always set to $00. Instructions using this mode will use only 2 bytes of memory consisting of first byte for opcode and another byte (8 bit) for operand.
 
 For example, instruction `STA $04` is represented in binary format as `85 04`.
+
+## Source
+
+- http://www.obelisk.me.uk/6502/addressing.html
