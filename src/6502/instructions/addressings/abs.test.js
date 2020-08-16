@@ -1,5 +1,5 @@
 import absMode from './abs'
-import CPU from '../cpu'
+import CPU from '../../cpu'
 
 describe('addressing mode: absolute', () => {
   it('should return correct value for absolute address', () => {
