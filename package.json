@@ -25,7 +25,9 @@
     "eslint-plugin-prettier": "^3.1.4",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
+    "husky": ">=4",
     "jest": "^26.4.0",
+    "lint-staged": ">=10",
     "nollup": "^0.13.5",
     "prettier": "^2.0.5",
     "rollup": "^2.26.2",
@@ -34,5 +36,13 @@
     "rollup-plugin-terser": "^7.0.0",
     "serve": "^11.3.2",
     "shx": "^0.3.2"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js": "eslint --cache --fix"
   }
 }
