@@ -2,9 +2,10 @@ module.exports = {
   env: {
     browser: true,
     es2020: true,
-    node: true
+    node: true,
+    jest: true
   },
-  extends: ['plugin:prettier/recommended', 'standard'],
+  extends: ['standard', 'plugin:prettier/recommended'],
   parserOptions: {
     ecmaVersion: 11,
     sourceType: 'module'
