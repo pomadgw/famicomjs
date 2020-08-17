@@ -1,4 +1,4 @@
-import absMode from './abs'
+import absMode from './absolute'
 import CPU from '../../cpu'
 
 describe('addressing mode: absolute', () => {
