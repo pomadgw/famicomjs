@@ -29,8 +29,8 @@ describe('instructions: bitwise operators', () => {
       expect(cpudummy.registers.A).toBe(0x00)
 
       // Resulting value: 0xff, expected status flag value:
-      // Z: 0
-      // N: 1
+      // Z: 1
+      // N: 0
       expect(cpudummy.registers.STATUS.getStatus('Z')).toBe(true)
       expect(cpudummy.registers.STATUS.getStatus('N')).toBe(false)
     })
@@ -63,8 +63,8 @@ describe('instructions: bitwise operators', () => {
       expect(cpudummy.registers.A).toBe(0x00)
 
       // Resulting value: 0xff, expected status flag value:
-      // Z: 0
-      // N: 1
+      // Z: 1
+      // N: 0
       expect(cpudummy.registers.STATUS.getStatus('Z')).toBe(true)
       expect(cpudummy.registers.STATUS.getStatus('N')).toBe(false)
     })
