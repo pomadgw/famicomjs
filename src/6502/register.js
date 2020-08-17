@@ -1,4 +1,4 @@
-export const STATUS = {
+export const FLAGS = {
   N: 1 << 7,
   V: 1 << 6,
   NONE: 1 << 5,
@@ -14,15 +14,15 @@ export default class RegisterStatus {
     this.status = status
   }
 
-  getStatus(status) {
-    return (this.status & STATUS[status]) > 0
+  getStatus(flag) {
+    return (this.status & FLAGS[flag]) > 0
   }
 
-  setStatus(status, value) {
+  setStatus(flag, value) {
     if (value) {
-      this.status = this.status | STATUS[status]
+      this.status = this.status | FLAGS[flag]
     } else {
-      this.status = this.status & (~STATUS[status] & 0xff)
+      this.status = this.status & (~FLAGS[flag] & 0xff)
     }
   }
 }
