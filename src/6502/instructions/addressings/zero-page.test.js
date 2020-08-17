@@ -1,7 +1,7 @@
 import zeroPage from './zero-page'
 import CPU from '../../cpu'
 
-describe('addressing mode: absolute', () => {
+describe('addressing mode: zero page', () => {
   it('should return correct value for zero page address', () => {
     const ram = [0x0f, 0]
     const CPUDummy = new CPU(ram)
