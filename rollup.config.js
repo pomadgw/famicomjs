@@ -2,7 +2,7 @@
 import node_resolve from 'rollup-plugin-node-resolve'
 import static_files from 'rollup-plugin-static-files'
 import { terser } from 'rollup-plugin-terser'
-import babel from 'rollup-plugin-babel'
+import babel from '@rollup/plugin-babel'
 
 const config = {
   input: './src/index.js',
