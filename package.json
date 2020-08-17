@@ -38,6 +38,10 @@
     "serve": "^11.3.2",
     "shx": "^0.3.2"
   },
+  "jest": {
+    "verbose": true,
+    "collectCoverageFrom": ["src/**/*.js", "!src/index.js"]
+  },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged"
