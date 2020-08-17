@@ -1,7 +1,7 @@
 import relativeMode from './relative'
 import CPU from '../../cpu'
 
-describe('addressing mode: absolute', () => {
+describe('addressing mode: relative', () => {
   it('should return correct value for offset', () => {
     const ram = [0x0f, 0x0f, 0]
     const CPUDummy = new CPU(ram)
