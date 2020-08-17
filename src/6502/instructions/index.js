@@ -14,6 +14,10 @@ export default {
     addressing: zpg,
     operator: ORA
   },
+  0x09: {
+    addressing: imm,
+    operator: ORA
+  },
   0x0d: {
     addressing: abs,
     operator: ORA

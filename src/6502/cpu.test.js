@@ -41,4 +41,16 @@ describe('CPU', () => {
 
     expect(cpu.registers.A).toBe(0x05 | 0x02)
   })
+
+  it('should be able to execute correctly (immediate)', () => {
+    // ORA #10
+    // operator: ORA, addressing mode: immediate
+    const cpu = new CPU([0x09, 0x10])
+
+    cpu.registers.A = 0x02
+
+    cpu.clock()
+
+    expect(cpu.registers.A).toBe(0x02 | 0x10)
+  })
 })
