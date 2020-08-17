@@ -11,4 +11,8 @@ export default class CPU {
       STATUS: 0
     }
   }
+
+  nextPC() {
+    return this.registers.PC++
+  }
 }

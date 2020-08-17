@@ -1,9 +1,10 @@
-export default function absMode(cpu) {
-  const lo = cpu.ram[cpu.registers.PC]
-  cpu.registers.PC += 1
-  const hi = cpu.ram[cpu.registers.PC]
+export default function absMode(cpu, index) {
+  const lo = cpu.ram[cpu.nextPC()]
+  const hi = cpu.ram[cpu.nextPC()]
+
+  const offset = index ? cpu.registers[index] : 0
 
   return {
-    absoluteAddress: (hi << 8) | lo
+    absoluteAddress: ((hi << 8) | lo) + offset
   }
 }
