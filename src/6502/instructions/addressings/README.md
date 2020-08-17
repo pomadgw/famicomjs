@@ -18,7 +18,6 @@ Instructions using this mode (not really an addressing mode) will be able to dir
 
 For example, instruction `ASL A` is represented in binary format simply as `0A`.
 
-
 ### Instructions
 
 | Opcode | Instruction |
@@ -60,6 +59,12 @@ This addressing mode is used to access first 256 bytes of memory. In effect, thi
 For example, instruction `STA $04` is represented in binary format as `85 04`.
 
 There are also *indexed zero page mode* where the absolute address is obtained by adding the operand with value of register `X` or `Y`. For example, `STA $10,X` with register `X` valued `$02` will store accumulator value to address `$12`.
+
+## Relative
+
+Instructions using this addressing mode, which is primarry used by branch instructions, receive operand which is a 8-bit signed integer which is added to program counter register if the condition is true. Instructions using this mode will use only 2 bytes of memory consisting of first byte for opcode and another byte (8 bit) for operand.
+
+For example, instruction `BEQ LABEL` which label refers to next two bytes instruction is represented in binary format as `F0 02`.
 
 ## Source
 
