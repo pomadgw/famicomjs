@@ -66,6 +66,12 @@ Instructions using this addressing mode, which is primarry used by branch instru
 
 For example, instruction `BEQ LABEL` which label refers to next two bytes instruction is represented in binary format as `F0 02`.
 
+## Indirect
+
+Indirect mode is only used by `JMP` instruction. The instruction will contain 16-bit address, which refer to location of the least significant byte of another 16 bit address which is the real target of the instruction.
+
+For example if location `$0120` contains `$FC` and location `$0121` contains `$BA` then the instruction `JMP ($0120)` will cause the next instruction execution to occur at `$BAFC` (e.g. the contents of `$0120` and `$0121`).
+
 ## Source
 
 - http://www.obelisk.me.uk/6502/addressing.html
