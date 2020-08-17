@@ -1,3 +1,5 @@
+import RegisterStatus from './RegisterStatus'
+
 export default class CPU {
   constructor(ram) {
     this.ram = ram
@@ -8,7 +10,7 @@ export default class CPU {
       Y: 0,
       SP: 0,
       PC: 0,
-      STATUS: 0
+      STATUS: new RegisterStatus()
     }
   }
 
