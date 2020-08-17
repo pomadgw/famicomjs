@@ -13,5 +13,13 @@ export default {
   0x05: {
     addressing: zpg,
     operator: ORA
+  },
+  0x0d: {
+    addressing: abs,
+    operator: ORA
+  },
+  0x15: {
+    addressing: (cpu) => zpg(cpu, 'X'),
+    operator: ORA
   }
 }
