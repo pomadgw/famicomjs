@@ -1,0 +1,17 @@
+/* eslint-disable no-unused-vars */
+import abs from './addressings/absolute'
+import rel from './addressings/relative'
+import imm from './addressings/immediate'
+import ind from './addressings/indirect'
+import inx from './addressings/indexed-indirect'
+import iny from './addressings/indirect-indexed'
+import zpg from './addressings/zero-page'
+
+import { ORA } from './operations/bitwise'
+
+export default {
+  0x05: {
+    addressing: zpg,
+    operator: ORA
+  }
+}

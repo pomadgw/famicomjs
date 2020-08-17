@@ -1,4 +1,5 @@
 import RegisterStatus from './register'
+import mapping from './instructions/index'
 
 export default class CPU {
   constructor(ram) {
@@ -14,6 +15,12 @@ export default class CPU {
     }
 
     this.fetched = 0
+  }
+
+  clock() {
+    const opcode = this.readRAM(this.nextPC())
+    this.fetch(mapping[opcode].addressing(this))
+    mapping[opcode].operator(this)
   }
 
   fetch({ absoluteAddress, value, relativeAddress }) {
