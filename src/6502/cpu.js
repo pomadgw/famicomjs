@@ -1,4 +1,4 @@
-import RegisterStatus from './RegisterStatus'
+import RegisterStatus from './register'
 
 export default class CPU {
   constructor(ram) {
@@ -12,6 +12,16 @@ export default class CPU {
       PC: 0,
       STATUS: new RegisterStatus()
     }
+
+    this.fetched = 0
+  }
+
+  fetch({ absoluteAddress, value, relativeAddress }) {
+    this.fetched = value ?? this.readRAM(absoluteAddress)
+  }
+
+  readRAM(address) {
+    return this.ram[address]
   }
 
   nextPC() {
