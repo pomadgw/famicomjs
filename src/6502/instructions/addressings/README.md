@@ -26,7 +26,7 @@ Instructions using this mode will use 3 bytes of memory consisting of first byte
 
 For example, instruction `STA $0400` is represented in binary format as `8D 00 04`. Note that address is stored in little-endian order.
 
-There are also *indexed absolute* where the absolute address is obtained by adding the operand with value of register `X` or `Y`. For example, `STA $0400,X` with register `X` valued `$02` will store accumulator value to address `$0402`.
+There are also *indexed absolute mode* where the absolute address is obtained by adding the operand with value of register `X` or `Y`. For example, `STA $0400,X` with register `X` valued `$02` will store accumulator value to address `$0402`.
 
 ### Instructions
 
@@ -51,6 +51,8 @@ There are also *indexed absolute* where the absolute address is obtained by addi
 This addressing mode is used to access first 256 bytes of memory. In effect, this mode is similar to absolute mode except that the high byte is always set to $00. Instructions using this mode will use only 2 bytes of memory consisting of first byte for opcode and another byte (8 bit) for operand.
 
 For example, instruction `STA $04` is represented in binary format as `85 04`.
+
+There are also *indexed zero page mode* where the absolute address is obtained by adding the operand with value of register `X` or `Y`. For example, `STA $10,X` with register `X` valued `$02` will store accumulator value to address `$12`.
 
 ## Source
 
