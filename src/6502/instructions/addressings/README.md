@@ -6,11 +6,18 @@ the instruction is implied directly by its function. The instruction length will
 
 For example, instruction `BRK` is represented in binary format simply as `00`.
 
+## Immediate
+
+Instructions using this mode can use an 8-bit constant within the instruction. The instruction length will be two byte the opcode and the constant).
+
+For example, instruction `LDA #10` is represented in binary format simply as `EA 10`.
+
 ## Accumulator
 
 Instructions using this mode (not really an addressing mode) will be able to directly operate on the accumulator (register `A`). Since it is implied that accumulator is the source and destination of the operation, the instruction length will be only one byte (the opcode only).
 
 For example, instruction `ASL A` is represented in binary format simply as `0A`.
+
 
 ### Instructions
 
