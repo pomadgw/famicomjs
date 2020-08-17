@@ -1,4 +1,5 @@
 # famicomjs
+[![codecov](https://codecov.io/gh/pomadgw/famicomjs/branch/master/graph/badge.svg)](https://codecov.io/gh/pomadgw/famicomjs)
 
 ## What is this?
 
