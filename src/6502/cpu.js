@@ -11,7 +11,7 @@ export default class CPU {
       Y: 0,
       SP: 0,
       PC: 0,
-      STATUS: new RegisterStatus()
+      STATUS: RegisterStatus.create()
     }
 
     this.fetched = 0

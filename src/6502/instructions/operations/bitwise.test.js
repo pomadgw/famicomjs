@@ -15,8 +15,8 @@ describe('instructions: bitwise operators', () => {
       // Resulting value: 0xff, expected status flag value:
       // Z: 0
       // N: 1
-      expect(cpudummy.registers.STATUS.getStatus('Z')).toBe(false)
-      expect(cpudummy.registers.STATUS.getStatus('N')).toBe(true)
+      expect(cpudummy.registers.STATUS.Z).toBe(false)
+      expect(cpudummy.registers.STATUS.N).toBe(true)
     })
 
     it('should return correct value (trigger Z flag)', () => {
@@ -31,8 +31,8 @@ describe('instructions: bitwise operators', () => {
       // Resulting value: 0xff, expected status flag value:
       // Z: 1
       // N: 0
-      expect(cpudummy.registers.STATUS.getStatus('Z')).toBe(true)
-      expect(cpudummy.registers.STATUS.getStatus('N')).toBe(false)
+      expect(cpudummy.registers.STATUS.Z).toBe(true)
+      expect(cpudummy.registers.STATUS.N).toBe(false)
     })
   })
 
@@ -49,8 +49,8 @@ describe('instructions: bitwise operators', () => {
       // Resulting value: 0xfa, expected status flag value:
       // Z: 0
       // N: 1
-      expect(cpudummy.registers.STATUS.getStatus('Z')).toBe(false)
-      expect(cpudummy.registers.STATUS.getStatus('N')).toBe(true)
+      expect(cpudummy.registers.STATUS.Z).toBe(false)
+      expect(cpudummy.registers.STATUS.N).toBe(true)
     })
 
     it('should return correct value (trigger Z flag)', () => {
@@ -65,8 +65,8 @@ describe('instructions: bitwise operators', () => {
       // Resulting value: 0xff, expected status flag value:
       // Z: 1
       // N: 0
-      expect(cpudummy.registers.STATUS.getStatus('Z')).toBe(true)
-      expect(cpudummy.registers.STATUS.getStatus('N')).toBe(false)
+      expect(cpudummy.registers.STATUS.Z).toBe(true)
+      expect(cpudummy.registers.STATUS.N).toBe(false)
     })
   })
 })
