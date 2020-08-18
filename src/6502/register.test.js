@@ -1,6 +1,14 @@
 import RegisterStatus from './register'
 
 describe('RegisterStatus', () => {
+  describe('#valueOf', () => {
+    it('should return correct value', () => {
+      const status = new RegisterStatus(0b00000001)
+
+      expect(+status).toBe(0b00000001)
+    })
+  })
+
   it('should fetch correct value', () => {
     const status = new RegisterStatus(0b00000001)
 

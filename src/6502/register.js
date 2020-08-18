@@ -26,6 +26,10 @@ export default class RegisterStatus {
     }
   }
 
+  valueOf() {
+    return this.status
+  }
+
   static create(status) {
     const newStatus = new RegisterStatus(status)
 
