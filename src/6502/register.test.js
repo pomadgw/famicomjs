@@ -41,5 +41,9 @@ describe('RegisterStatus', () => {
 
     status.C = true
     expect(status.status).toBe(0b01000001)
+
+    status.status = 0b11000000
+    expect(status.C).toBe(false)
+    expect(status.N).toBe(true)
   })
 })
