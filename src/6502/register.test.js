@@ -26,4 +26,12 @@ describe('RegisterStatus', () => {
     status.setStatus('N', false)
     expect(status.status).toBe(0b01000000)
   })
+
+  it('should create a proxy', () => {
+    const status = RegisterStatus.create(0b01000000)
+    expect(status.V).toBe(true)
+
+    status.C = true
+    expect(status.status).toBe(0b01000001)
+  })
 })

@@ -25,4 +25,29 @@ export default class RegisterStatus {
       this.status = this.status & (~FLAGS[flag] & 0xff)
     }
   }
+
+  static create(status) {
+    const newStatus = new RegisterStatus(status)
+
+    const proxiedStatus = new Proxy(newStatus, {
+      get(target, prop) {
+        if (Object.keys(FLAGS).includes(prop)) {
+          return target.getStatus(prop)
+        }
+
+        return target[prop]
+      },
+      set(target, prop, value) {
+        if (Object.keys(FLAGS).includes(prop)) {
+          target.setStatus(prop, value)
+        } else {
+          target[prop] = value
+        }
+
+        return true
+      }
+    })
+
+    return proxiedStatus
+  }
 }
