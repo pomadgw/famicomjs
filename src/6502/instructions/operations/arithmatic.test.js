@@ -1,7 +1,7 @@
 import * as arithmatic from './arithmatic'
 import CPU from '../../cpu'
 
-describe('instructions: bitwise operators', () => {
+describe('instructions: arithmatic operators', () => {
   describe('ADC', () => {
     let cpudummy
     let ram
