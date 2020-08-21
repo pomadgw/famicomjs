@@ -18,3 +18,10 @@ function jumpIfTrue(cpu, condition) {
 }
 
 export const BCC = (cpu) => jumpIfTrue(cpu, !cpu.registers.STATUS.C)
+export const BCS = (cpu) => jumpIfTrue(cpu, cpu.registers.STATUS.C)
+export const BEQ = (cpu) => jumpIfTrue(cpu, cpu.registers.STATUS.Z)
+export const BNE = (cpu) => jumpIfTrue(cpu, !cpu.registers.STATUS.Z)
+export const BMI = (cpu) => jumpIfTrue(cpu, cpu.registers.STATUS.N)
+export const BPL = (cpu) => jumpIfTrue(cpu, !cpu.registers.STATUS.N)
+export const BVS = (cpu) => jumpIfTrue(cpu, cpu.registers.STATUS.V)
+export const BVC = (cpu) => jumpIfTrue(cpu, !cpu.registers.STATUS.V)
