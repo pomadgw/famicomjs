@@ -3,6 +3,8 @@ export function ORA(cpu) {
   cpu.registers.A = result
   cpu.registers.STATUS.Z = result === 0
   cpu.registers.STATUS.N = result > 0x80
+
+  return 1
 }
 
 export function AND(cpu) {
@@ -10,6 +12,8 @@ export function AND(cpu) {
   cpu.registers.A = result
   cpu.registers.STATUS.Z = result === 0
   cpu.registers.STATUS.N = result > 0x80
+
+  return 1
 }
 
 export function ASL(cpu) {
@@ -24,4 +28,6 @@ export function ASL(cpu) {
   } else {
     cpu.ram[cpu.addresses.absoluteAddress] = temp
   }
+
+  return 0
 }

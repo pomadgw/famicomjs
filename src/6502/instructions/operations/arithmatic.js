@@ -18,6 +18,8 @@ export function ADC(cpu) {
 
   cpu.registers.STATUS.V = isOverflow
   cpu.registers.A = temp
+
+  return 1
 }
 
 export function SBC(cpu) {
@@ -41,4 +43,6 @@ export function SBC(cpu) {
 
   cpu.registers.STATUS.V = isOverflow
   cpu.registers.A = temp & 0xff
+
+  return 1
 }
