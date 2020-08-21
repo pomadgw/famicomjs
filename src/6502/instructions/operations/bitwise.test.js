@@ -69,4 +69,60 @@ describe('instructions: bitwise operators', () => {
       expect(cpudummy.registers.STATUS.N).toBe(false)
     })
   })
+
+  describe('ASL', () => {
+    it('should be able to shift value of register A to left and save to a specified address', () => {
+      const cpudummy = new CPU([0, 0x00, 0, 0])
+      cpudummy.registers.A = 0x01
+      cpudummy.fetch({ absoluteAddress: 0x0001 })
+
+      bitwise.ASL(cpudummy)
+
+      expect(cpudummy.registers.A).toBe(0x01)
+      expect(cpudummy.ram[0x1]).toBe(0x01 << 1)
+    })
+
+    it('should be able to shift value of register A in-place', () => {
+      const cpudummy = new CPU([0, 0x00, 0, 0])
+      cpudummy.registers.A = 0x01
+      cpudummy.fetch()
+
+      bitwise.ASL(cpudummy)
+
+      expect(cpudummy.registers.A).toBe(0x01 << 1)
+    })
+
+    it('should toggle C flag', () => {
+      const cpudummy = new CPU([0, 0x00, 0, 0])
+      cpudummy.registers.A = 0xff
+      cpudummy.fetch()
+
+      bitwise.ASL(cpudummy)
+
+      expect(cpudummy.registers.A).toBe((0xff << 1) & 0xff)
+      expect(cpudummy.registers.STATUS.C).toBe(true)
+    })
+
+    it('should toggle Z flag', () => {
+      const cpudummy = new CPU([0, 0x00, 0, 0])
+      cpudummy.registers.A = 0b10000000
+      cpudummy.fetch()
+
+      bitwise.ASL(cpudummy)
+
+      expect(cpudummy.registers.A).toBe(0)
+      expect(cpudummy.registers.STATUS.Z).toBe(true)
+    })
+
+    it('should toggle N flag', () => {
+      const cpudummy = new CPU([0, 0x00, 0, 0])
+      cpudummy.registers.A = 0x79
+      cpudummy.fetch()
+
+      bitwise.ASL(cpudummy)
+
+      expect(cpudummy.registers.A).toBe(0x79 << 1)
+      expect(cpudummy.registers.STATUS.N).toBe(true)
+    })
+  })
 })
