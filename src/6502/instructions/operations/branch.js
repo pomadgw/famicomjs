@@ -1,5 +1,5 @@
-export function BCC(cpu) {
-  if (!cpu.registers.STATUS.C) {
+function jumpIfTrue(cpu, condition) {
+  if (condition) {
     cpu.cycles += 1
     cpu.addresses.absoluteAddress =
       cpu.addresses.relativeAddress + cpu.registers.PC
@@ -16,3 +16,5 @@ export function BCC(cpu) {
 
   return 0
 }
+
+export const BCC = (cpu) => jumpIfTrue(cpu, !cpu.registers.STATUS.C)
