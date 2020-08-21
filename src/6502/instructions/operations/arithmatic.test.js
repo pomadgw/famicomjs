@@ -71,7 +71,6 @@ describe('instructions: arithmatic operators', () => {
         cpudummy.fetch({ absoluteAddress: 0x0001 })
 
         arithmatic.ADC(cpudummy)
-        console.log(cpudummy.registers.A)
 
         expect(cpudummy.registers.STATUS.V).toBe(true)
       })
@@ -182,7 +181,6 @@ describe('instructions: arithmatic operators', () => {
         cpudummy.fetch({ absoluteAddress: 0x0001 })
 
         arithmatic.SBC(cpudummy)
-        console.log(cpudummy.registers.A)
 
         expect(cpudummy.registers.STATUS.V).toBe(true)
       })
