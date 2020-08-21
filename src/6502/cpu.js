@@ -1,20 +1,46 @@
 import RegisterStatus from './register'
 import mapping from './instructions/index'
 
+const proxyRAM = (ram) =>
+  new Proxy(ram, {
+    get(target, prop) {
+      return target[prop]
+    },
+    set(target, prop, value) {
+      if (typeof prop === 'number') target[prop] = value & 0xff
+      else target[prop] = value
+      return true
+    }
+  })
+
 export default class CPU {
   constructor(ram) {
-    this.ram = ram
+    this.ram = proxyRAM(ram)
 
-    this.registers = {
-      A: 0,
-      X: 0,
-      Y: 0,
-      SP: 0,
-      PC: 0,
-      STATUS: RegisterStatus.create()
-    }
+    this.registers = new Proxy(
+      {
+        A: 0,
+        X: 0,
+        Y: 0,
+        SP: 0,
+        PC: 0,
+        STATUS: RegisterStatus.create()
+      },
+      {
+        set(target, prop, value) {
+          if (prop === 'STATUS') target[prop] = value
+          else target[prop] = value & 0xff
+          return true
+        }
+      }
+    )
 
     this.fetched = 0
+
+    this.addresses = {
+      absoluteAddress: 0,
+      relativeAddress: 0
+    }
   }
 
   clock() {
@@ -23,12 +49,22 @@ export default class CPU {
     mapping[opcode].operator(this)
   }
 
-  fetch({ absoluteAddress, value, relativeAddress }) {
+  fetch({ absoluteAddress, value, relativeAddress } = {}) {
     this.fetched = value ?? this.readRAM(absoluteAddress)
+    this.addresses.absoluteAddress = absoluteAddress
+    this.addresses.relativeAddress = relativeAddress
+  }
+
+  get isImplicit() {
+    return this.addresses.absoluteAddress == null
   }
 
   readRAM(address) {
     return this.ram[address]
+  }
+
+  writeRAM(address, value) {
+    this.ram[address] = value
   }
 
   nextPC() {
