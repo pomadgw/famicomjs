@@ -3,6 +3,7 @@ export default function relativeMode(cpu) {
   if (offset > 0x7f) offset = offset - 0x100
 
   return {
-    relativeAddress: offset
+    relativeAddress: offset,
+    clocks: 0
   }
 }

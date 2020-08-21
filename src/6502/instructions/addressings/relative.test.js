@@ -6,7 +6,7 @@ describe('addressing mode: relative', () => {
     const ram = [0x0f, 0x0f, 0]
     const CPUDummy = new CPU(ram)
     CPUDummy.nextPC()
-    expect(relativeMode(CPUDummy)).toEqual({ relativeAddress: 0x0f })
+    expect(relativeMode(CPUDummy)).toEqual({ relativeAddress: 0x0f, clocks: 0 })
   })
 
   it('should return correct value for offset (negative)', () => {
@@ -14,6 +14,9 @@ describe('addressing mode: relative', () => {
     const expectOffset = 0xfa - 0x100
     const CPUDummy = new CPU(ram)
     CPUDummy.nextPC()
-    expect(relativeMode(CPUDummy)).toEqual({ relativeAddress: expectOffset })
+    expect(relativeMode(CPUDummy)).toEqual({
+      relativeAddress: expectOffset,
+      clocks: 0
+    })
   })
 })
