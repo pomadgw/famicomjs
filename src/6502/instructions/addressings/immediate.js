@@ -1,6 +1,6 @@
 export default function immediateMode(cpu) {
   return {
-    value: cpu.ram[cpu.nextPC()],
+    absoluteAddress: cpu.nextPC(),
     clocks: 0
   }
 }
