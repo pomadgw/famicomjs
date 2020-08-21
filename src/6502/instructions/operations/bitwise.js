@@ -17,7 +17,7 @@ export function AND(cpu) {
 }
 
 export function ASL(cpu) {
-  const temp = cpu.registers.A << 1
+  const temp = cpu.fetched << 1
 
   cpu.registers.STATUS.C = (temp & 0xff00) > 0
   cpu.registers.STATUS.Z = (temp & 0xff) === 0

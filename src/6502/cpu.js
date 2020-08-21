@@ -41,22 +41,22 @@ export default class CPU {
       absoluteAddress: 0,
       relativeAddress: 0
     }
+
+    this.isImplicit = false
   }
 
   clock() {
     const opcode = this.readRAM(this.nextPC())
-    this.fetch(mapping[opcode].addressing(this))
-    mapping[opcode].operator(this)
+    this.operation = mapping[opcode]
+    this.fetch(this.operation.addressing(this))
+    this.operation.operator(this)
   }
 
   fetch({ absoluteAddress, value, relativeAddress } = {}) {
+    this.isImplicit = value != null
     this.fetched = value ?? this.readRAM(absoluteAddress)
     this.addresses.absoluteAddress = absoluteAddress
     this.addresses.relativeAddress = relativeAddress
-  }
-
-  get isImplicit() {
-    return this.addresses.absoluteAddress == null
   }
 
   readRAM(address) {

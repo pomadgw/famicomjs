@@ -71,21 +71,19 @@ describe('instructions: bitwise operators', () => {
   })
 
   describe('ASL', () => {
-    it('should be able to shift value of register A to left and save to a specified address', () => {
-      const cpudummy = new CPU([0, 0x00, 0, 0])
-      cpudummy.registers.A = 0x01
+    it('should be able to shift value of a memory at specified address', () => {
+      const cpudummy = new CPU([0, 0x01, 0, 0])
       cpudummy.fetch({ absoluteAddress: 0x0001 })
 
       bitwise.ASL(cpudummy)
 
-      expect(cpudummy.registers.A).toBe(0x01)
-      expect(cpudummy.ram[0x1]).toBe(0x01 << 1)
+      expect(cpudummy.ram[0x01]).toBe(0x01 << 1)
     })
 
     it('should be able to shift value of register A in-place', () => {
       const cpudummy = new CPU([0, 0x00, 0, 0])
       cpudummy.registers.A = 0x01
-      cpudummy.fetch()
+      cpudummy.fetch({ value: cpudummy.registers.A })
 
       bitwise.ASL(cpudummy)
 
@@ -95,7 +93,7 @@ describe('instructions: bitwise operators', () => {
     it('should toggle C flag', () => {
       const cpudummy = new CPU([0, 0x00, 0, 0])
       cpudummy.registers.A = 0xff
-      cpudummy.fetch()
+      cpudummy.fetch({ value: cpudummy.registers.A })
 
       bitwise.ASL(cpudummy)
 
@@ -106,7 +104,7 @@ describe('instructions: bitwise operators', () => {
     it('should toggle Z flag', () => {
       const cpudummy = new CPU([0, 0x00, 0, 0])
       cpudummy.registers.A = 0b10000000
-      cpudummy.fetch()
+      cpudummy.fetch({ value: cpudummy.registers.A })
 
       bitwise.ASL(cpudummy)
 
@@ -117,7 +115,7 @@ describe('instructions: bitwise operators', () => {
     it('should toggle N flag', () => {
       const cpudummy = new CPU([0, 0x00, 0, 0])
       cpudummy.registers.A = 0x79
-      cpudummy.fetch()
+      cpudummy.fetch({ value: cpudummy.registers.A })
 
       bitwise.ASL(cpudummy)
 
