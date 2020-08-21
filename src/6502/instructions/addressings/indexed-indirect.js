@@ -6,6 +6,7 @@ export default function indexedIndirectMode(cpu) {
   const absoluteAddress = (hi << 8) | lo
 
   return {
-    absoluteAddress
+    absoluteAddress,
+    clocks: 0
   }
 }

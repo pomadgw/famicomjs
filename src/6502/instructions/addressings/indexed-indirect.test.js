@@ -12,6 +12,6 @@ describe('addressing mode: indexed indirect', () => {
     const CPUDummy = new CPU(ram)
     CPUDummy.nextPC()
     CPUDummy.registers.X = 0x02
-    expect(inxMode(CPUDummy)).toEqual({ absoluteAddress: 0xf000 })
+    expect(inxMode(CPUDummy)).toEqual({ absoluteAddress: 0xf000, clocks: 0 })
   })
 })

@@ -9,5 +9,5 @@ export default function indirectMode(cpu) {
   const pointerHi = lo === 0xff ? pointer & 0xff00 : pointer + 1
   const actualHi = cpu.ram[pointerHi]
 
-  return { absoluteAddress: (actualHi << 8) | actualLo }
+  return { absoluteAddress: (actualHi << 8) | actualLo, clocks: 0 }
 }
