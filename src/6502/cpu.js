@@ -29,6 +29,7 @@ export default class CPU {
       {
         set(target, prop, value) {
           if (prop === 'STATUS') target[prop] = value
+          else if (prop === 'PC') target[prop] = value & 0xffff
           else target[prop] = value & 0xff
           return true
         }
@@ -43,13 +44,14 @@ export default class CPU {
     }
 
     this.isImplicit = false
+    this.cycles = 0
   }
 
   clock() {
     const opcode = this.readRAM(this.nextPC())
     this.operation = mapping[opcode]
-    this.fetch(this.operation.addressing(this))
-    this.operation.operator(this)
+    this.cycles += this.fetch(this.operation.addressing(this))
+    this.cycles += this.operation.operator(this)
   }
 
   fetch({ absoluteAddress, value, relativeAddress } = {}) {
