@@ -63,10 +63,6 @@ export default class CPU {
     return this.ram[address]
   }
 
-  writeRAM(address, value) {
-    this.ram[address] = value
-  }
-
   nextPC() {
     return this.registers.PC++
   }
