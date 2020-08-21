@@ -6,5 +6,8 @@ export default function indirectIndexedMode(cpu) {
 
   const absoluteAddress = ((hi << 8) | lo) + cpu.registers.Y
 
-  return { absoluteAddress }
+  return {
+    absoluteAddress,
+    clocks: (absoluteAddress & 0xff00) !== hi << 8 ? 1 : 0
+  }
 }
