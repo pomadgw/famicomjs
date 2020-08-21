@@ -1,0 +1,12 @@
+coverage:
+  status:
+    patch:
+      default:
+        target: 80%
+    project:
+      default:
+        target: 90
+        threshold: 1%
+      CPU:
+        paths:
+          - src/6502
