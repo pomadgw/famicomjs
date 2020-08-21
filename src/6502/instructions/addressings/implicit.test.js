@@ -6,6 +6,6 @@ describe('addressing mode: implicit', () => {
     const ram = [0x0f, 0x0f, 0]
     const CPUDummy = new CPU(ram)
     CPUDummy.registers.A = 0xff
-    expect(impMode(CPUDummy)).toEqual({ value: 0xff })
+    expect(impMode(CPUDummy)).toEqual({ value: 0xff, clocks: 0 })
   })
 })
