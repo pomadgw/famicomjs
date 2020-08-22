@@ -22,7 +22,7 @@ export default class CPU {
         A: 0,
         X: 0,
         Y: 0,
-        SP: 0,
+        SP: 0xff,
         PC: 0,
         STATUS: RegisterStatus.create()
       },
@@ -68,5 +68,17 @@ export default class CPU {
 
   nextPC() {
     return this.registers.PC++
+  }
+
+  pushStack(value) {
+    this.ram[this.registers.SP + 0x100] = value
+    this.registers.SP--
+  }
+
+  popStack() {
+    const temp = this.ram[this.registers.SP + 0x100]
+    this.registers.SP++
+
+    return temp
   }
 }
