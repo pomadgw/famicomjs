@@ -135,4 +135,20 @@ describe('CPU', () => {
 
     expect(cpu.registers.A).toBe(0x5)
   })
+
+  it('should be able to execute correctly (indirect)', () => {
+    // JMP ($1234)
+    // operator: JMP, addressing mode: indirect
+    const cpu = new CPU([...new Array(0x2000)].map((_) => 0))
+    cpu.ram[0x00] = 0x6c
+    cpu.ram[0x01] = 0x34
+    cpu.ram[0x02] = 0x12
+
+    cpu.ram[0x1234] = 0x00
+    cpu.ram[0x1235] = 0x10
+
+    cpu.clock()
+
+    expect(cpu.registers.PC).toBe(0x1000)
+  })
 })
