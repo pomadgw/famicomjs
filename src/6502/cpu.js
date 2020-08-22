@@ -57,11 +57,13 @@ export default class CPU {
     this.cycles += this.operation.operator(this)
   }
 
-  fetch({ absoluteAddress, value, relativeAddress } = {}) {
+  fetch({ absoluteAddress, value, relativeAddress, clocks } = {}) {
     this.isImplicit = value != null
     this.fetched = value ?? this.readRAM(absoluteAddress)
     this.addresses.absoluteAddress = absoluteAddress
     this.addresses.relativeAddress = relativeAddress
+
+    return clocks
   }
 
   readRAM(address) {
