@@ -21,1537 +21,1537 @@ const ZPX = (cpu) => ZP0(cpu, 'X')
 const ZPY = (cpu) => ZP0(cpu, 'Y')
 
 export default {
-  0: {
+  0x00: {
     name: 'BRK',
     operator: NOP,
     addressing: IMM,
     cycles: 7
   },
-  1: {
+  0x01: {
     name: 'ORA',
     operator: ORA,
     addressing: IZX,
     cycles: 6
   },
-  2: {
+  0x02: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  3: {
+  0x03: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 8
   },
-  4: {
+  0x04: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 3
   },
-  5: {
+  0x05: {
     name: 'ORA',
     operator: ORA,
     addressing: ZP0,
     cycles: 3
   },
-  6: {
+  0x06: {
     name: 'ASL',
     operator: ASL,
     addressing: ZP0,
     cycles: 5
   },
-  7: {
+  0x07: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 5
   },
-  8: {
+  0x08: {
     name: 'PHP',
     operator: NOP,
     addressing: IMP,
     cycles: 3
   },
-  9: {
+  0x09: {
     name: 'ORA',
     operator: ORA,
     addressing: IMM,
     cycles: 2
   },
-  10: {
+  0x0a: {
     name: 'ASL',
     operator: ASL,
     addressing: IMP,
     cycles: 2
   },
-  11: {
+  0x0b: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  12: {
+  0x0c: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 4
   },
-  13: {
+  0x0d: {
     name: 'ORA',
     operator: ORA,
     addressing: ABS,
     cycles: 4
   },
-  14: {
+  0x0e: {
     name: 'ASL',
     operator: ASL,
     addressing: ABS,
     cycles: 6
   },
-  15: {
+  0x0f: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 6
   },
-  16: {
+  0x10: {
     name: 'BPL',
     operator: BPL,
     addressing: REL,
     cycles: 2
   },
-  17: {
+  0x11: {
     name: 'ORA',
     operator: ORA,
     addressing: IZY,
     cycles: 5
   },
-  18: {
+  0x12: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  19: {
+  0x13: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 8
   },
-  20: {
+  0x14: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 4
   },
-  21: {
+  0x15: {
     name: 'ORA',
     operator: ORA,
     addressing: ZPX,
     cycles: 4
   },
-  22: {
+  0x16: {
     name: 'ASL',
     operator: ASL,
     addressing: ZPX,
     cycles: 6
   },
-  23: {
+  0x17: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 6
   },
-  24: {
+  0x18: {
     name: 'CLC',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  25: {
+  0x19: {
     name: 'ORA',
     operator: ORA,
     addressing: ABY,
     cycles: 4
   },
-  26: {
+  0x1a: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  27: {
+  0x1b: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 7
   },
-  28: {
+  0x1c: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 4
   },
-  29: {
+  0x1d: {
     name: 'ORA',
     operator: ORA,
     addressing: ABX,
     cycles: 4
   },
-  30: {
+  0x1e: {
     name: 'ASL',
     operator: ASL,
     addressing: ABX,
     cycles: 7
   },
-  31: {
+  0x1f: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 7
   },
-  32: {
+  0x20: {
     name: 'JSR',
     operator: NOP,
     addressing: ABS,
     cycles: 6
   },
-  33: {
+  0x21: {
     name: 'AND',
     operator: AND,
     addressing: IZX,
     cycles: 6
   },
-  34: {
+  0x22: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  35: {
+  0x23: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 8
   },
-  36: {
+  0x24: {
     name: 'BIT',
     operator: NOP,
     addressing: ZP0,
     cycles: 3
   },
-  37: {
+  0x25: {
     name: 'AND',
     operator: AND,
     addressing: ZP0,
     cycles: 3
   },
-  38: {
+  0x26: {
     name: 'ROL',
     operator: NOP,
     addressing: ZP0,
     cycles: 5
   },
-  39: {
+  0x27: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 5
   },
-  40: {
+  0x28: {
     name: 'PLP',
     operator: NOP,
     addressing: IMP,
     cycles: 4
   },
-  41: {
+  0x29: {
     name: 'AND',
     operator: AND,
     addressing: IMM,
     cycles: 2
   },
-  42: {
+  0x2a: {
     name: 'ROL',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  43: {
+  0x2b: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  44: {
+  0x2c: {
     name: 'BIT',
     operator: NOP,
     addressing: ABS,
     cycles: 4
   },
-  45: {
+  0x2d: {
     name: 'AND',
     operator: AND,
     addressing: ABS,
     cycles: 4
   },
-  46: {
+  0x2e: {
     name: 'ROL',
     operator: NOP,
     addressing: ABS,
     cycles: 6
   },
-  47: {
+  0x2f: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 6
   },
-  48: {
+  0x30: {
     name: 'BMI',
     operator: BMI,
     addressing: REL,
     cycles: 2
   },
-  49: {
+  0x31: {
     name: 'AND',
     operator: AND,
     addressing: IZY,
     cycles: 5
   },
-  50: {
+  0x32: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  51: {
+  0x33: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 8
   },
-  52: {
+  0x34: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 4
   },
-  53: {
+  0x35: {
     name: 'AND',
     operator: AND,
     addressing: ZPX,
     cycles: 4
   },
-  54: {
+  0x36: {
     name: 'ROL',
     operator: NOP,
     addressing: ZPX,
     cycles: 6
   },
-  55: {
+  0x37: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 6
   },
-  56: {
+  0x38: {
     name: 'SEC',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  57: {
+  0x39: {
     name: 'AND',
     operator: AND,
     addressing: ABY,
     cycles: 4
   },
-  58: {
+  0x3a: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  59: {
+  0x3b: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 7
   },
-  60: {
+  0x3c: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 4
   },
-  61: {
+  0x3d: {
     name: 'AND',
     operator: AND,
     addressing: ABX,
     cycles: 4
   },
-  62: {
+  0x3e: {
     name: 'ROL',
     operator: NOP,
     addressing: ABX,
     cycles: 7
   },
-  63: {
+  0x3f: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 7
   },
-  64: {
+  0x40: {
     name: 'RTI',
     operator: NOP,
     addressing: IMP,
     cycles: 6
   },
-  65: {
+  0x41: {
     name: 'EOR',
     operator: NOP,
     addressing: IZX,
     cycles: 6
   },
-  66: {
+  0x42: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  67: {
+  0x43: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 8
   },
-  68: {
+  0x44: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 3
   },
-  69: {
+  0x45: {
     name: 'EOR',
     operator: NOP,
     addressing: ZP0,
     cycles: 3
   },
-  70: {
+  0x46: {
     name: 'LSR',
     operator: NOP,
     addressing: ZP0,
     cycles: 5
   },
-  71: {
+  0x47: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 5
   },
-  72: {
+  0x48: {
     name: 'PHA',
     operator: NOP,
     addressing: IMP,
     cycles: 3
   },
-  73: {
+  0x49: {
     name: 'EOR',
     operator: NOP,
     addressing: IMM,
     cycles: 2
   },
-  74: {
+  0x4a: {
     name: 'LSR',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  75: {
+  0x4b: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  76: {
+  0x4c: {
     name: 'JMP',
     operator: NOP,
     addressing: ABS,
     cycles: 3
   },
-  77: {
+  0x4d: {
     name: 'EOR',
     operator: NOP,
     addressing: ABS,
     cycles: 4
   },
-  78: {
+  0x4e: {
     name: 'LSR',
     operator: NOP,
     addressing: ABS,
     cycles: 6
   },
-  79: {
+  0x4f: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 6
   },
-  80: {
+  0x50: {
     name: 'BVC',
     operator: BVC,
     addressing: REL,
     cycles: 2
   },
-  81: {
+  0x51: {
     name: 'EOR',
     operator: NOP,
     addressing: IZY,
     cycles: 5
   },
-  82: {
+  0x52: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  83: {
+  0x53: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 8
   },
-  84: {
+  0x54: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 4
   },
-  85: {
+  0x55: {
     name: 'EOR',
     operator: NOP,
     addressing: ZPX,
     cycles: 4
   },
-  86: {
+  0x56: {
     name: 'LSR',
     operator: NOP,
     addressing: ZPX,
     cycles: 6
   },
-  87: {
+  0x57: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 6
   },
-  88: {
+  0x58: {
     name: 'CLI',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  89: {
+  0x59: {
     name: 'EOR',
     operator: NOP,
     addressing: ABY,
     cycles: 4
   },
-  90: {
+  0x5a: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  91: {
+  0x5b: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 7
   },
-  92: {
+  0x5c: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 4
   },
-  93: {
+  0x5d: {
     name: 'EOR',
     operator: NOP,
     addressing: ABX,
     cycles: 4
   },
-  94: {
+  0x5e: {
     name: 'LSR',
     operator: NOP,
     addressing: ABX,
     cycles: 7
   },
-  95: {
+  0x5f: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 7
   },
-  96: {
+  0x60: {
     name: 'RTS',
     operator: NOP,
     addressing: IMP,
     cycles: 6
   },
-  97: {
+  0x61: {
     name: 'ADC',
     operator: ADC,
     addressing: IZX,
     cycles: 6
   },
-  98: {
+  0x62: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  99: {
+  0x63: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 8
   },
-  100: {
+  0x64: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 3
   },
-  101: {
+  0x65: {
     name: 'ADC',
     operator: ADC,
     addressing: ZP0,
     cycles: 3
   },
-  102: {
+  0x66: {
     name: 'ROR',
     operator: NOP,
     addressing: ZP0,
     cycles: 5
   },
-  103: {
+  0x67: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 5
   },
-  104: {
+  0x68: {
     name: 'PLA',
     operator: NOP,
     addressing: IMP,
     cycles: 4
   },
-  105: {
+  0x69: {
     name: 'ADC',
     operator: ADC,
     addressing: IMM,
     cycles: 2
   },
-  106: {
+  0x6a: {
     name: 'ROR',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  107: {
+  0x6b: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  108: {
+  0x6c: {
     name: 'JMP',
     operator: NOP,
     addressing: IND,
     cycles: 5
   },
-  109: {
+  0x6d: {
     name: 'ADC',
     operator: ADC,
     addressing: ABS,
     cycles: 4
   },
-  110: {
+  0x6e: {
     name: 'ROR',
     operator: NOP,
     addressing: ABS,
     cycles: 6
   },
-  111: {
+  0x6f: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 6
   },
-  112: {
+  0x70: {
     name: 'BVS',
     operator: BVS,
     addressing: REL,
     cycles: 2
   },
-  113: {
+  0x71: {
     name: 'ADC',
     operator: ADC,
     addressing: IZY,
     cycles: 5
   },
-  114: {
+  0x72: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  115: {
+  0x73: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 8
   },
-  116: {
+  0x74: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 4
   },
-  117: {
+  0x75: {
     name: 'ADC',
     operator: ADC,
     addressing: ZPX,
     cycles: 4
   },
-  118: {
+  0x76: {
     name: 'ROR',
     operator: NOP,
     addressing: ZPX,
     cycles: 6
   },
-  119: {
+  0x77: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 6
   },
-  120: {
+  0x78: {
     name: 'SEI',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  121: {
+  0x79: {
     name: 'ADC',
     operator: ADC,
     addressing: ABY,
     cycles: 4
   },
-  122: {
+  0x7a: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  123: {
+  0x7b: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 7
   },
-  124: {
+  0x7c: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 4
   },
-  125: {
+  0x7d: {
     name: 'ADC',
     operator: ADC,
     addressing: ABX,
     cycles: 4
   },
-  126: {
+  0x7e: {
     name: 'ROR',
     operator: NOP,
     addressing: ABX,
     cycles: 7
   },
-  127: {
+  0x7f: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 7
   },
-  128: {
+  0x80: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  129: {
+  0x81: {
     name: 'STA',
     operator: NOP,
     addressing: IZX,
     cycles: 6
   },
-  130: {
+  0x82: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  131: {
+  0x83: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 6
   },
-  132: {
+  0x84: {
     name: 'STY',
     operator: NOP,
     addressing: ZP0,
     cycles: 3
   },
-  133: {
+  0x85: {
     name: 'STA',
     operator: NOP,
     addressing: ZP0,
     cycles: 3
   },
-  134: {
+  0x86: {
     name: 'STX',
     operator: NOP,
     addressing: ZP0,
     cycles: 3
   },
-  135: {
+  0x87: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 3
   },
-  136: {
+  0x88: {
     name: 'DEY',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  137: {
+  0x89: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  138: {
+  0x8a: {
     name: 'TXA',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  139: {
+  0x8b: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  140: {
+  0x8c: {
     name: 'STY',
     operator: NOP,
     addressing: ABS,
     cycles: 4
   },
-  141: {
+  0x8d: {
     name: 'STA',
     operator: NOP,
     addressing: ABS,
     cycles: 4
   },
-  142: {
+  0x8e: {
     name: 'STX',
     operator: NOP,
     addressing: ABS,
     cycles: 4
   },
-  143: {
+  0x8f: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 4
   },
-  144: {
+  0x90: {
     name: 'BCC',
     operator: BCC,
     addressing: REL,
     cycles: 2
   },
-  145: {
+  0x91: {
     name: 'STA',
     operator: NOP,
     addressing: IZY,
     cycles: 6
   },
-  146: {
+  0x92: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  147: {
+  0x93: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 6
   },
-  148: {
+  0x94: {
     name: 'STY',
     operator: NOP,
     addressing: ZPX,
     cycles: 4
   },
-  149: {
+  0x95: {
     name: 'STA',
     operator: NOP,
     addressing: ZPX,
     cycles: 4
   },
-  150: {
+  0x96: {
     name: 'STX',
     operator: NOP,
     addressing: ZPY,
     cycles: 4
   },
-  151: {
+  0x97: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 4
   },
-  152: {
+  0x98: {
     name: 'TYA',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  153: {
+  0x99: {
     name: 'STA',
     operator: NOP,
     addressing: ABY,
     cycles: 5
   },
-  154: {
+  0x9a: {
     name: 'TXS',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  155: {
+  0x9b: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 5
   },
-  156: {
+  0x9c: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 5
   },
-  157: {
+  0x9d: {
     name: 'STA',
     operator: NOP,
     addressing: ABX,
     cycles: 5
   },
-  158: {
+  0x9e: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 5
   },
-  159: {
+  0x9f: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 5
   },
-  160: {
+  0xa0: {
     name: 'LDY',
     operator: NOP,
     addressing: IMM,
     cycles: 2
   },
-  161: {
+  0xa1: {
     name: 'LDA',
     operator: NOP,
     addressing: IZX,
     cycles: 6
   },
-  162: {
+  0xa2: {
     name: 'LDX',
     operator: NOP,
     addressing: IMM,
     cycles: 2
   },
-  163: {
+  0xa3: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 6
   },
-  164: {
+  0xa4: {
     name: 'LDY',
     operator: NOP,
     addressing: ZP0,
     cycles: 3
   },
-  165: {
+  0xa5: {
     name: 'LDA',
     operator: NOP,
     addressing: ZP0,
     cycles: 3
   },
-  166: {
+  0xa6: {
     name: 'LDX',
     operator: NOP,
     addressing: ZP0,
     cycles: 3
   },
-  167: {
+  0xa7: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 3
   },
-  168: {
+  0xa8: {
     name: 'TAY',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  169: {
+  0xa9: {
     name: 'LDA',
     operator: NOP,
     addressing: IMM,
     cycles: 2
   },
-  170: {
+  0xaa: {
     name: 'TAX',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  171: {
+  0xab: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  172: {
+  0xac: {
     name: 'LDY',
     operator: NOP,
     addressing: ABS,
     cycles: 4
   },
-  173: {
+  0xad: {
     name: 'LDA',
     operator: NOP,
     addressing: ABS,
     cycles: 4
   },
-  174: {
+  0xae: {
     name: 'LDX',
     operator: NOP,
     addressing: ABS,
     cycles: 4
   },
-  175: {
+  0xaf: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 4
   },
-  176: {
+  0xb0: {
     name: 'BCS',
     operator: BCS,
     addressing: REL,
     cycles: 2
   },
-  177: {
+  0xb1: {
     name: 'LDA',
     operator: NOP,
     addressing: IZY,
     cycles: 5
   },
-  178: {
+  0xb2: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  179: {
+  0xb3: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 5
   },
-  180: {
+  0xb4: {
     name: 'LDY',
     operator: NOP,
     addressing: ZPX,
     cycles: 4
   },
-  181: {
+  0xb5: {
     name: 'LDA',
     operator: NOP,
     addressing: ZPX,
     cycles: 4
   },
-  182: {
+  0xb6: {
     name: 'LDX',
     operator: NOP,
     addressing: ZPY,
     cycles: 4
   },
-  183: {
+  0xb7: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 4
   },
-  184: {
+  0xb8: {
     name: 'CLV',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  185: {
+  0xb9: {
     name: 'LDA',
     operator: NOP,
     addressing: ABY,
     cycles: 4
   },
-  186: {
+  0xba: {
     name: 'TSX',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  187: {
+  0xbb: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 4
   },
-  188: {
+  0xbc: {
     name: 'LDY',
     operator: NOP,
     addressing: ABX,
     cycles: 4
   },
-  189: {
+  0xbd: {
     name: 'LDA',
     operator: NOP,
     addressing: ABX,
     cycles: 4
   },
-  190: {
+  0xbe: {
     name: 'LDX',
     operator: NOP,
     addressing: ABY,
     cycles: 4
   },
-  191: {
+  0xbf: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 4
   },
-  192: {
+  0xc0: {
     name: 'CPY',
     operator: NOP,
     addressing: IMM,
     cycles: 2
   },
-  193: {
+  0xc1: {
     name: 'CMP',
     operator: NOP,
     addressing: IZX,
     cycles: 6
   },
-  194: {
+  0xc2: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  195: {
+  0xc3: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 8
   },
-  196: {
+  0xc4: {
     name: 'CPY',
     operator: NOP,
     addressing: ZP0,
     cycles: 3
   },
-  197: {
+  0xc5: {
     name: 'CMP',
     operator: NOP,
     addressing: ZP0,
     cycles: 3
   },
-  198: {
+  0xc6: {
     name: 'DEC',
     operator: NOP,
     addressing: ZP0,
     cycles: 5
   },
-  199: {
+  0xc7: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 5
   },
-  200: {
+  0xc8: {
     name: 'INY',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  201: {
+  0xc9: {
     name: 'CMP',
     operator: NOP,
     addressing: IMM,
     cycles: 2
   },
-  202: {
+  0xca: {
     name: 'DEX',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  203: {
+  0xcb: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  204: {
+  0xcc: {
     name: 'CPY',
     operator: NOP,
     addressing: ABS,
     cycles: 4
   },
-  205: {
+  0xcd: {
     name: 'CMP',
     operator: NOP,
     addressing: ABS,
     cycles: 4
   },
-  206: {
+  0xce: {
     name: 'DEC',
     operator: NOP,
     addressing: ABS,
     cycles: 6
   },
-  207: {
+  0xcf: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 6
   },
-  208: {
+  0xd0: {
     name: 'BNE',
     operator: BNE,
     addressing: REL,
     cycles: 2
   },
-  209: {
+  0xd1: {
     name: 'CMP',
     operator: NOP,
     addressing: IZY,
     cycles: 5
   },
-  210: {
+  0xd2: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  211: {
+  0xd3: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 8
   },
-  212: {
+  0xd4: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 4
   },
-  213: {
+  0xd5: {
     name: 'CMP',
     operator: NOP,
     addressing: ZPX,
     cycles: 4
   },
-  214: {
+  0xd6: {
     name: 'DEC',
     operator: NOP,
     addressing: ZPX,
     cycles: 6
   },
-  215: {
+  0xd7: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 6
   },
-  216: {
+  0xd8: {
     name: 'CLD',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  217: {
+  0xd9: {
     name: 'CMP',
     operator: NOP,
     addressing: ABY,
     cycles: 4
   },
-  218: {
+  0xda: {
     name: 'NOP',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  219: {
+  0xdb: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 7
   },
-  220: {
+  0xdc: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 4
   },
-  221: {
+  0xdd: {
     name: 'CMP',
     operator: NOP,
     addressing: ABX,
     cycles: 4
   },
-  222: {
+  0xde: {
     name: 'DEC',
     operator: NOP,
     addressing: ABX,
     cycles: 7
   },
-  223: {
+  0xdf: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 7
   },
-  224: {
+  0xe0: {
     name: 'CPX',
     operator: NOP,
     addressing: IMM,
     cycles: 2
   },
-  225: {
+  0xe1: {
     name: 'SBC',
     operator: SBC,
     addressing: IZX,
     cycles: 6
   },
-  226: {
+  0xe2: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  227: {
+  0xe3: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 8
   },
-  228: {
+  0xe4: {
     name: 'CPX',
     operator: NOP,
     addressing: ZP0,
     cycles: 3
   },
-  229: {
+  0xe5: {
     name: 'SBC',
     operator: SBC,
     addressing: ZP0,
     cycles: 3
   },
-  230: {
+  0xe6: {
     name: 'INC',
     operator: NOP,
     addressing: ZP0,
     cycles: 5
   },
-  231: {
+  0xe7: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 5
   },
-  232: {
+  0xe8: {
     name: 'INX',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  233: {
+  0xe9: {
     name: 'SBC',
     operator: SBC,
     addressing: IMM,
     cycles: 2
   },
-  234: {
+  0xea: {
     name: 'NOP',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  235: {
+  0xeb: {
     name: '???',
     operator: SBC,
     addressing: IMP,
     cycles: 2
   },
-  236: {
+  0xec: {
     name: 'CPX',
     operator: NOP,
     addressing: ABS,
     cycles: 4
   },
-  237: {
+  0xed: {
     name: 'SBC',
     operator: SBC,
     addressing: ABS,
     cycles: 4
   },
-  238: {
+  0xee: {
     name: 'INC',
     operator: NOP,
     addressing: ABS,
     cycles: 6
   },
-  239: {
+  0xef: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 6
   },
-  240: {
+  0xf0: {
     name: 'BEQ',
     operator: BEQ,
     addressing: REL,
     cycles: 2
   },
-  241: {
+  0xf1: {
     name: 'SBC',
     operator: SBC,
     addressing: IZY,
     cycles: 5
   },
-  242: {
+  0xf2: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  243: {
+  0xf3: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 8
   },
-  244: {
+  0xf4: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 4
   },
-  245: {
+  0xf5: {
     name: 'SBC',
     operator: SBC,
     addressing: ZPX,
     cycles: 4
   },
-  246: {
+  0xf6: {
     name: 'INC',
     operator: NOP,
     addressing: ZPX,
     cycles: 6
   },
-  247: {
+  0xf7: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 6
   },
-  248: {
+  0xf8: {
     name: 'SED',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  249: {
+  0xf9: {
     name: 'SBC',
     operator: SBC,
     addressing: ABY,
     cycles: 4
   },
-  250: {
+  0xfa: {
     name: 'NOP',
     operator: NOP,
     addressing: IMP,
     cycles: 2
   },
-  251: {
+  0xfb: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 7
   },
-  252: {
+  0xfc: {
     name: '???',
     operator: NOP,
     addressing: IMP,
     cycles: 4
   },
-  253: {
+  0xfd: {
     name: 'SBC',
     operator: SBC,
     addressing: ABX,
     cycles: 4
   },
-  254: {
+  0xfe: {
     name: 'INC',
     operator: NOP,
     addressing: ABX,
     cycles: 7
   },
-  255: {
+  0xff: {
     name: '???',
     operator: NOP,
     addressing: IMP,

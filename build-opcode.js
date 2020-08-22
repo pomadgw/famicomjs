@@ -86,7 +86,7 @@ export default {
     const opKey = operate.toUpperCase()
     const operator = implementedOpcodes.includes(opKey) ? opKey : 'NOP'
     const intendedBody = parser.parse(`const x = {
-      ${index}: {
+      0x${index.toString(16).padStart(2, '0')}: {
         name: '${name}',
         operator: ${operator},
         addressing: ${addr_mode},
