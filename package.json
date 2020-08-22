@@ -8,6 +8,7 @@
     "clean": "shx rm -rf dist",
     "start": "nollup -c --environment NODE_ENV:development",
     "build": "npm run clean && rollup -c --environment NODE_ENV:production",
+    "generate-opcodes": "node build-opcode.js && eslint --fix src/6502/instructions/index.js",
     "test": "jest --coverage"
   },
   "devDependencies": {
