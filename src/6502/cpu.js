@@ -49,15 +49,22 @@ export default class CPU {
   }
 
   clock() {
-    const opcode = this.readRAM(this.nextPC())
-    this.opcode = opcode
-    this.operation = mapping[opcode]
-    this.cycles = this.operation.cycles
-    this.cycles += this.fetch(this.operation.addressing(this))
-    this.cycles += this.operation.operator(this)
+    while (this.cycles > 0) this.cycles -= 1
+    this.atomicClock()
   }
 
-  fetch({ absoluteAddress, value, relativeAddress, clocks } = {}) {
+  atomicClock() {
+    if (this.cycles === 0) {
+      const opcode = this.readRAM(this.nextPC())
+      this.opcode = opcode
+      this.operation = mapping[opcode]
+      this.cycles = this.operation.cycles
+      this.cycles += this.fetch(this.operation.addressing(this))
+      this.cycles += this.operation.operator(this)
+    }
+  }
+
+  fetch({ absoluteAddress, value, relativeAddress, clocks } = { clocks: 0 }) {
     this.isImplicit = value != null
     this.fetched = value ?? this.readRAM(absoluteAddress)
     this.addresses.absoluteAddress = absoluteAddress
