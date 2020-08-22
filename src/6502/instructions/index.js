@@ -9,6 +9,7 @@ import ZPG from './addressings/zero-page'
 import IMP from './addressings/implicit'
 
 import * as bitwise from './operations/bitwise'
+import * as arithmatic from './operations/arithmatic'
 
 import opcodes from './opcodes.json'
 
@@ -22,6 +23,8 @@ const addressingTable = {
   REL,
   IND,
   IMP,
+  INX,
+  INY,
   ZP0: ZPG,
   ZPX: (cpu) => ZPG(cpu, 'X'),
   ZPY: (cpu) => ZPG(cpu, 'Y')
@@ -31,9 +34,10 @@ const generateOpcodeTable = () => {
   const result = {}
   // eslint-disable-next-line camelcase
   opcodes.forEach(({ name, operate, addr_mode, cycles }, index) => {
+    const opKey = operate.toUpperCase()
     result[index] = {
       name,
-      operator: bitwise[operate.toUpperCase()] ?? NOP,
+      operator: bitwise[opKey] ?? arithmatic[opKey] ?? NOP,
       addressing: addressingTable[addr_mode],
       cycles
     }
@@ -43,22 +47,3 @@ const generateOpcodeTable = () => {
 }
 
 export default generateOpcodeTable()
-
-// export default {
-//   0x05: {
-//     addressing: zpg,
-//     operator: ORA
-//   },
-//   0x09: {
-//     addressing: imm,
-//     operator: ORA
-//   },
-//   0x0d: {
-//     addressing: abs,
-//     operator: ORA
-//   },
-//   0x15: {
-//     addressing: (cpu) => zpg(cpu, 'X'),
-//     operator: ORA
-//   }
-// }
