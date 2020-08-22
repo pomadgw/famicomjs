@@ -125,7 +125,7 @@ describe('instructions: bitwise operators', () => {
   })
 
   describe('BIT', () => {
-    it('should toggle Z flags', () => {
+    it('should toggle Z flags if specify value ANDed with accumulator resulting in zero', () => {
       const cpudummy = new CPU([0, 0x00, 0, 0])
       cpudummy.registers.A = 0x79
       cpudummy.fetch({ absoluteAddress: 0x01 })
@@ -134,7 +134,7 @@ describe('instructions: bitwise operators', () => {
       expect(cpudummy.registers.STATUS.Z).toBe(true)
     })
 
-    it('should toggle N and V flags', () => {
+    it('should copy bit 7 and 6 of specified value into N and V flags', () => {
       const cpudummy = new CPU([0, 0b11000000, 0, 0])
       cpudummy.registers.A = 0b00000000
       cpudummy.fetch({ absoluteAddress: 0x01 })
