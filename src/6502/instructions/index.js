@@ -10,6 +10,7 @@ import { ADC, SBC } from './operations/arithmatic'
 import { ORA, AND, ASL, BIT } from './operations/bitwise'
 import { BCC, BCS, BEQ, BNE, BMI, BPL, BVS, BVC } from './operations/branch'
 import { CLC, CLD, CLI, CLV } from './operations/clear'
+import { LDA, LDX, LDY, STA, STX, STY } from './operations/memory'
 import { PHA, PLA, PHP, PLP, TXS, TSX } from './operations/stack'
 
 const NOP = () => {}
@@ -799,7 +800,7 @@ export default {
   },
   0x81: {
     name: 'STA',
-    operator: NOP,
+    operator: STA,
     addressing: IZX,
     cycles: 6
   },
@@ -817,19 +818,19 @@ export default {
   },
   0x84: {
     name: 'STY',
-    operator: NOP,
+    operator: STY,
     addressing: ZP0,
     cycles: 3
   },
   0x85: {
     name: 'STA',
-    operator: NOP,
+    operator: STA,
     addressing: ZP0,
     cycles: 3
   },
   0x86: {
     name: 'STX',
-    operator: NOP,
+    operator: STX,
     addressing: ZP0,
     cycles: 3
   },
@@ -865,19 +866,19 @@ export default {
   },
   0x8c: {
     name: 'STY',
-    operator: NOP,
+    operator: STY,
     addressing: ABS,
     cycles: 4
   },
   0x8d: {
     name: 'STA',
-    operator: NOP,
+    operator: STA,
     addressing: ABS,
     cycles: 4
   },
   0x8e: {
     name: 'STX',
-    operator: NOP,
+    operator: STX,
     addressing: ABS,
     cycles: 4
   },
@@ -895,7 +896,7 @@ export default {
   },
   0x91: {
     name: 'STA',
-    operator: NOP,
+    operator: STA,
     addressing: IZY,
     cycles: 6
   },
@@ -913,19 +914,19 @@ export default {
   },
   0x94: {
     name: 'STY',
-    operator: NOP,
+    operator: STY,
     addressing: ZPX,
     cycles: 4
   },
   0x95: {
     name: 'STA',
-    operator: NOP,
+    operator: STA,
     addressing: ZPX,
     cycles: 4
   },
   0x96: {
     name: 'STX',
-    operator: NOP,
+    operator: STX,
     addressing: ZPY,
     cycles: 4
   },
@@ -943,7 +944,7 @@ export default {
   },
   0x99: {
     name: 'STA',
-    operator: NOP,
+    operator: STA,
     addressing: ABY,
     cycles: 5
   },
@@ -967,7 +968,7 @@ export default {
   },
   0x9d: {
     name: 'STA',
-    operator: NOP,
+    operator: STA,
     addressing: ABX,
     cycles: 5
   },
@@ -985,19 +986,19 @@ export default {
   },
   0xa0: {
     name: 'LDY',
-    operator: NOP,
+    operator: LDY,
     addressing: IMM,
     cycles: 2
   },
   0xa1: {
     name: 'LDA',
-    operator: NOP,
+    operator: LDA,
     addressing: IZX,
     cycles: 6
   },
   0xa2: {
     name: 'LDX',
-    operator: NOP,
+    operator: LDX,
     addressing: IMM,
     cycles: 2
   },
@@ -1009,19 +1010,19 @@ export default {
   },
   0xa4: {
     name: 'LDY',
-    operator: NOP,
+    operator: LDY,
     addressing: ZP0,
     cycles: 3
   },
   0xa5: {
     name: 'LDA',
-    operator: NOP,
+    operator: LDA,
     addressing: ZP0,
     cycles: 3
   },
   0xa6: {
     name: 'LDX',
-    operator: NOP,
+    operator: LDX,
     addressing: ZP0,
     cycles: 3
   },
@@ -1039,7 +1040,7 @@ export default {
   },
   0xa9: {
     name: 'LDA',
-    operator: NOP,
+    operator: LDA,
     addressing: IMM,
     cycles: 2
   },
@@ -1057,19 +1058,19 @@ export default {
   },
   0xac: {
     name: 'LDY',
-    operator: NOP,
+    operator: LDY,
     addressing: ABS,
     cycles: 4
   },
   0xad: {
     name: 'LDA',
-    operator: NOP,
+    operator: LDA,
     addressing: ABS,
     cycles: 4
   },
   0xae: {
     name: 'LDX',
-    operator: NOP,
+    operator: LDX,
     addressing: ABS,
     cycles: 4
   },
@@ -1087,7 +1088,7 @@ export default {
   },
   0xb1: {
     name: 'LDA',
-    operator: NOP,
+    operator: LDA,
     addressing: IZY,
     cycles: 5
   },
@@ -1105,19 +1106,19 @@ export default {
   },
   0xb4: {
     name: 'LDY',
-    operator: NOP,
+    operator: LDY,
     addressing: ZPX,
     cycles: 4
   },
   0xb5: {
     name: 'LDA',
-    operator: NOP,
+    operator: LDA,
     addressing: ZPX,
     cycles: 4
   },
   0xb6: {
     name: 'LDX',
-    operator: NOP,
+    operator: LDX,
     addressing: ZPY,
     cycles: 4
   },
@@ -1135,7 +1136,7 @@ export default {
   },
   0xb9: {
     name: 'LDA',
-    operator: NOP,
+    operator: LDA,
     addressing: ABY,
     cycles: 4
   },
@@ -1153,19 +1154,19 @@ export default {
   },
   0xbc: {
     name: 'LDY',
-    operator: NOP,
+    operator: LDY,
     addressing: ABX,
     cycles: 4
   },
   0xbd: {
     name: 'LDA',
-    operator: NOP,
+    operator: LDA,
     addressing: ABX,
     cycles: 4
   },
   0xbe: {
     name: 'LDX',
-    operator: NOP,
+    operator: LDX,
     addressing: ABY,
     cycles: 4
   },
