@@ -123,4 +123,25 @@ describe('instructions: bitwise operators', () => {
       expect(cpudummy.registers.STATUS.N).toBe(true)
     })
   })
+
+  describe('BIT', () => {
+    it('should toggle Z flags', () => {
+      const cpudummy = new CPU([0, 0x00, 0, 0])
+      cpudummy.registers.A = 0x79
+      cpudummy.fetch({ absoluteAddress: 0x01 })
+
+      bitwise.BIT(cpudummy)
+      expect(cpudummy.registers.STATUS.Z).toBe(true)
+    })
+
+    it('should toggle N and V flags', () => {
+      const cpudummy = new CPU([0, 0b11000000, 0, 0])
+      cpudummy.registers.A = 0b00000000
+      cpudummy.fetch({ absoluteAddress: 0x01 })
+
+      bitwise.BIT(cpudummy)
+      expect(cpudummy.registers.STATUS.N).toBe(true)
+      expect(cpudummy.registers.STATUS.V).toBe(true)
+    })
+  })
 })

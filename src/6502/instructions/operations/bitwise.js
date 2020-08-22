@@ -1,3 +1,5 @@
+import { FLAGS } from '../../register'
+
 export function ORA(cpu) {
   const result = cpu.registers.A | cpu.fetched
   cpu.registers.A = result
@@ -28,6 +30,16 @@ export function ASL(cpu) {
   } else {
     cpu.ram[cpu.addresses.absoluteAddress] = temp
   }
+
+  return 0
+}
+
+export function BIT(cpu) {
+  const temp = cpu.fetched & cpu.registers.A
+  cpu.registers.STATUS.Z = temp === 0
+
+  cpu.registers.STATUS.N = (cpu.fetched & FLAGS.N) > 0
+  cpu.registers.STATUS.V = (cpu.fetched & FLAGS.V) > 0
 
   return 0
 }
