@@ -8,7 +8,17 @@ import ZP0 from './addressings/zero-page'
 import IMP from './addressings/implicit'
 import { ADC, SBC } from './operations/arithmatic'
 import { ORA, AND, ASL, BIT } from './operations/bitwise'
-import { BCC, BCS, BEQ, BNE, BMI, BPL, BVS, BVC } from './operations/branch'
+import {
+  BCC,
+  BCS,
+  BEQ,
+  BNE,
+  BMI,
+  BPL,
+  BVS,
+  BVC,
+  JMP
+} from './operations/branch'
 import { CLC, CLD, CLI, CLV } from './operations/clear'
 import { LDA, LDX, LDY, STA, STX, STY } from './operations/memory'
 import { NOP } from './operations/nop'
@@ -481,7 +491,7 @@ export default {
   },
   0x4c: {
     name: 'JMP',
-    operator: NOP,
+    operator: JMP,
     addressing: ABS,
     cycles: 3
   },
@@ -673,7 +683,7 @@ export default {
   },
   0x6c: {
     name: 'JMP',
-    operator: NOP,
+    operator: JMP,
     addressing: IND,
     cycles: 5
   },
