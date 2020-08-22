@@ -48,7 +48,8 @@
     "verbose": true,
     "collectCoverageFrom": [
       "src/**/*.js",
-      "!src/index.js"
+      "!src/index.js",
+      "!src/6502/instructions/index.js"
     ]
   },
   "husky": {
