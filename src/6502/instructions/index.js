@@ -7,8 +7,10 @@ import IZY from './addressings/indirect-indexed'
 import ZP0 from './addressings/zero-page'
 import IMP from './addressings/implicit'
 import { ADC, SBC } from './operations/arithmatic'
-import { ORA, AND, ASL } from './operations/bitwise'
+import { ORA, AND, ASL, BIT } from './operations/bitwise'
 import { BCC, BCS, BEQ, BNE, BMI, BPL, BVS, BVC } from './operations/branch'
+import { CLC, CLD, CLI, CLV } from './operations/clear'
+import { PHA, PLA, PHP, PLP, TXS, TSX } from './operations/stack'
 
 const NOP = () => {}
 
@@ -71,7 +73,7 @@ export default {
   },
   0x08: {
     name: 'PHP',
-    operator: NOP,
+    operator: PHP,
     addressing: IMP,
     cycles: 3
   },
@@ -167,7 +169,7 @@ export default {
   },
   0x18: {
     name: 'CLC',
-    operator: NOP,
+    operator: CLC,
     addressing: IMP,
     cycles: 2
   },
@@ -239,7 +241,7 @@ export default {
   },
   0x24: {
     name: 'BIT',
-    operator: NOP,
+    operator: BIT,
     addressing: ZP0,
     cycles: 3
   },
@@ -263,7 +265,7 @@ export default {
   },
   0x28: {
     name: 'PLP',
-    operator: NOP,
+    operator: PLP,
     addressing: IMP,
     cycles: 4
   },
@@ -287,7 +289,7 @@ export default {
   },
   0x2c: {
     name: 'BIT',
-    operator: NOP,
+    operator: BIT,
     addressing: ABS,
     cycles: 4
   },
@@ -455,7 +457,7 @@ export default {
   },
   0x48: {
     name: 'PHA',
-    operator: NOP,
+    operator: PHA,
     addressing: IMP,
     cycles: 3
   },
@@ -551,7 +553,7 @@ export default {
   },
   0x58: {
     name: 'CLI',
-    operator: NOP,
+    operator: CLI,
     addressing: IMP,
     cycles: 2
   },
@@ -647,7 +649,7 @@ export default {
   },
   0x68: {
     name: 'PLA',
-    operator: NOP,
+    operator: PLA,
     addressing: IMP,
     cycles: 4
   },
@@ -947,7 +949,7 @@ export default {
   },
   0x9a: {
     name: 'TXS',
-    operator: NOP,
+    operator: TXS,
     addressing: IMP,
     cycles: 2
   },
@@ -1127,7 +1129,7 @@ export default {
   },
   0xb8: {
     name: 'CLV',
-    operator: NOP,
+    operator: CLV,
     addressing: IMP,
     cycles: 2
   },
@@ -1139,7 +1141,7 @@ export default {
   },
   0xba: {
     name: 'TSX',
-    operator: NOP,
+    operator: TSX,
     addressing: IMP,
     cycles: 2
   },
@@ -1319,7 +1321,7 @@ export default {
   },
   0xd8: {
     name: 'CLD',
-    operator: NOP,
+    operator: CLD,
     addressing: IMP,
     cycles: 2
   },
