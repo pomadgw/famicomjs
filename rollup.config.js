@@ -3,6 +3,7 @@ import node_resolve from 'rollup-plugin-node-resolve'
 import static_files from 'rollup-plugin-static-files'
 import { terser } from 'rollup-plugin-terser'
 import babel from '@rollup/plugin-babel'
+import json from '@rollup/plugin-json'
 
 const config = {
   input: './src/index.js',
@@ -12,7 +13,7 @@ const config = {
     entryFileNames: '[name].[hash].js',
     assetFileNames: '[name].[hash][extname]'
   },
-  plugins: [babel(), node_resolve()]
+  plugins: [babel(), node_resolve(), json()]
 }
 
 if (process.env.NODE_ENV === 'production') {
