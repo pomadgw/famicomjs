@@ -57,8 +57,6 @@ ${Object.entries(implementedOpcodesObj)
   })
   .join('\n')}
 
-const NOP = () => {}
-
 const ABX = (cpu) => ABS(cpu, 'X')
 const ABY = (cpu) => ABS(cpu, 'Y')
 const ZPX = (cpu) => ZP0(cpu, 'X')

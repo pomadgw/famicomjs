@@ -11,9 +11,8 @@ import { ORA, AND, ASL, BIT } from './operations/bitwise'
 import { BCC, BCS, BEQ, BNE, BMI, BPL, BVS, BVC } from './operations/branch'
 import { CLC, CLD, CLI, CLV } from './operations/clear'
 import { LDA, LDX, LDY, STA, STX, STY } from './operations/memory'
+import { NOP } from './operations/nop'
 import { PHA, PLA, PHP, PLP, TXS, TSX } from './operations/stack'
-
-const NOP = () => {}
 
 const ABX = (cpu) => ABS(cpu, 'X')
 
