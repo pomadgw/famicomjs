@@ -45,10 +45,12 @@ export default class CPU {
 
     this.isImplicit = false
     this.cycles = 0
+    this.opcode = 0
   }
 
   clock() {
     const opcode = this.readRAM(this.nextPC())
+    this.opcode = opcode
     this.operation = mapping[opcode]
     this.cycles = this.operation.cycles
     this.cycles += this.fetch(this.operation.addressing(this))
