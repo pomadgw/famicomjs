@@ -8,13 +8,17 @@
     "clean": "shx rm -rf dist",
     "start": "nollup -c --environment NODE_ENV:development",
     "build": "npm run clean && rollup -c --environment NODE_ENV:production",
+    "generate-opcodes": "node build-opcode.js && eslint --fix src/6502/instructions/index.js",
     "test": "jest --coverage"
   },
   "devDependencies": {
     "@babel/core": "^7.11.1",
+    "@babel/eslint-parser": "^7.11.4",
+    "@babel/generator": "^7.11.4",
     "@babel/preset-env": "^7.11.0",
     "@rollup/plugin-babel": "^5.2.0",
     "@rollup/plugin-html": "^0.2.0",
+    "@rollup/plugin-json": "^4.1.0",
     "@types/jest": "^26.0.10",
     "babel-jest": "^26.3.0",
     "codecov": "^3.7.2",
@@ -27,6 +31,7 @@
     "eslint-plugin-prettier": "^3.1.4",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
+    "glob": "^7.1.6",
     "husky": ">=4",
     "jest": "^26.4.0",
     "lint-staged": ">=10",
@@ -41,7 +46,11 @@
   },
   "jest": {
     "verbose": true,
-    "collectCoverageFrom": ["src/**/*.js", "!src/index.js"]
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/index.js",
+      "!src/6502/instructions/index.js"
+    ]
   },
   "husky": {
     "hooks": {
