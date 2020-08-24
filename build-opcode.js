@@ -67,6 +67,7 @@ export default {
     name: 'BRK',
     operator: BRK,
     addressing: IMP,
+    addressingName: 'IMP',
     cycles: 1
   }
 }
@@ -88,6 +89,7 @@ export default {
         name: '${name}',
         operator: ${operator},
         addressing: ${addr_mode},
+        addressingName: '${addr_mode}',
         cycles: ${cycles}
       }
     }`)
