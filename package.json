@@ -49,6 +49,7 @@
     "collectCoverageFrom": [
       "src/**/*.js",
       "!src/index.js",
+      "!src/6502/assembler.js",
       "!src/6502/instructions/index.js"
     ]
   },
