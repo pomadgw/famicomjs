@@ -22,7 +22,7 @@ export default class CPU {
         A: 0,
         X: 0,
         Y: 0,
-        SP: 0,
+        SP: 0xff,
         PC: 0,
         STATUS: RegisterStatus.create()
       },
@@ -45,21 +45,32 @@ export default class CPU {
 
     this.isImplicit = false
     this.cycles = 0
+    this.opcode = 0
   }
 
   clock() {
-    const opcode = this.readRAM(this.nextPC())
-    this.operation = mapping[opcode]
-    this.cycles = this.operation.cycles
-    this.cycles += this.fetch(this.operation.addressing(this))
-    this.cycles += this.operation.operator(this)
+    while (this.cycles > 0) this.cycles -= 1
+    this.atomicClock()
   }
 
-  fetch({ absoluteAddress, value, relativeAddress } = {}) {
+  atomicClock() {
+    if (this.cycles === 0) {
+      const opcode = this.readRAM(this.nextPC())
+      this.opcode = opcode
+      this.operation = mapping[opcode]
+      this.cycles = this.operation.cycles
+      this.cycles += this.fetch(this.operation.addressing(this))
+      this.cycles += this.operation.operator(this)
+    }
+  }
+
+  fetch({ absoluteAddress, value, relativeAddress, clocks } = { clocks: 0 }) {
     this.isImplicit = value != null
     this.fetched = value ?? this.readRAM(absoluteAddress)
     this.addresses.absoluteAddress = absoluteAddress
     this.addresses.relativeAddress = relativeAddress
+
+    return clocks
   }
 
   readRAM(address) {
@@ -68,5 +79,17 @@ export default class CPU {
 
   nextPC() {
     return this.registers.PC++
+  }
+
+  pushStack(value) {
+    this.ram[this.registers.SP + 0x100] = value
+    this.registers.SP--
+  }
+
+  popStack() {
+    const temp = this.ram[this.registers.SP + 0x100]
+    this.registers.SP++
+
+    return temp
   }
 }

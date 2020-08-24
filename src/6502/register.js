@@ -1,7 +1,7 @@
 export const FLAGS = {
   N: 1 << 7,
   V: 1 << 6,
-  NONE: 1 << 5,
+  U: 1 << 5,
   B: 1 << 4,
   D: 1 << 3,
   I: 1 << 2,

@@ -25,3 +25,8 @@ export const BMI = (cpu) => jumpIfTrue(cpu, cpu.registers.STATUS.N)
 export const BPL = (cpu) => jumpIfTrue(cpu, !cpu.registers.STATUS.N)
 export const BVS = (cpu) => jumpIfTrue(cpu, cpu.registers.STATUS.V)
 export const BVC = (cpu) => jumpIfTrue(cpu, !cpu.registers.STATUS.V)
+
+export function JMP(cpu) {
+  cpu.registers.PC = cpu.addresses.absoluteAddress
+  return 0
+}

@@ -45,6 +45,16 @@ const definitions = [
 ]
 
 describe('instructions: branch instructions', () => {
+  describe('JMP', () => {
+    it('should change PC register to specified value', () => {
+      const cpudummy = new CPU([0x02, 0, 0, 0])
+      cpudummy.registers.PC = 0
+      cpudummy.fetch({ absoluteAddress: 0x0100 })
+      branch.JMP(cpudummy)
+      expect(cpudummy.registers.PC).toBe(0x0100)
+    })
+  })
+
   definitions.forEach(({ instruction, flagToTest, jumpIfFlagIs }) => {
     describe(instruction, () => {
       it(`should change PC if ${flagToTest} flags is ${
