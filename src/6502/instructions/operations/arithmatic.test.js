@@ -216,4 +216,81 @@ describe('instructions: arithmatic operators', () => {
       })
     })
   })
+
+  const testDecrease = (targetRegister) => {
+    const instruction = `DE${targetRegister}`
+
+    describe(instruction, () => {
+      let cpu
+      beforeEach(() => {
+        cpu = new CPU([0, 0, 0])
+      })
+
+      it(`should decrease value of ${targetRegister} register by one`, () => {
+        cpu.registers[targetRegister] = 0x11
+        cpu.fetch()
+
+        arithmatic[instruction](cpu)
+
+        expect(cpu.registers[targetRegister]).toBe(0x10)
+      })
+
+      it(`should set zero flag if resulting value is zero`, () => {
+        cpu.registers[targetRegister] = 0x01
+        cpu.fetch()
+
+        arithmatic[instruction](cpu)
+
+        expect(cpu.registers[targetRegister]).toBe(0x00)
+        expect(cpu.registers.STATUS.Z).toBe(true)
+      })
+
+      it(`should set negative flag if resulting value is negative`, () => {
+        cpu.registers[targetRegister] = 0x00
+        cpu.fetch()
+
+        arithmatic[instruction](cpu)
+
+        expect(cpu.registers[targetRegister]).toBe(0xff)
+        expect(cpu.registers.STATUS.N).toBe(true)
+      })
+    })
+  }
+
+  describe('DEC', () => {
+    let cpu
+    beforeEach(() => {
+      cpu = new CPU([0, 0x01, 0])
+    })
+
+    it(`should decrease value of a memory by one`, () => {
+      cpu.fetch({ absoluteAddress: 0x0001 })
+
+      arithmatic.DEC(cpu)
+
+      expect(cpu.ram[0x0001]).toBe(0x00)
+    })
+
+    it(`should set zero flag if resulting value is zero`, () => {
+      cpu.ram[0x0001] = 0x01
+      cpu.fetch({ absoluteAddress: 0x0001 })
+
+      arithmatic.DEC(cpu)
+
+      expect(cpu.registers.STATUS.Z).toBe(true)
+    })
+
+    it(`should set negative flag if resulting value is negative`, () => {
+      cpu.ram[0x0001] = 0x00
+      cpu.fetch({ absoluteAddress: 0x0001 })
+
+      arithmatic.DEC(cpu)
+
+      expect(cpu.ram[0x0001]).toBe(0xff)
+      expect(cpu.registers.STATUS.N).toBe(true)
+    })
+  })
+
+  testDecrease('X')
+  testDecrease('Y')
 })
