@@ -18,6 +18,15 @@ export function AND(cpu) {
   return 1
 }
 
+export function EOR(cpu) {
+  const result = cpu.registers.A ^ cpu.fetched
+  cpu.registers.A = result
+  cpu.registers.STATUS.Z = result === 0
+  cpu.registers.STATUS.N = result > 0x80
+
+  return 1
+}
+
 export function ASL(cpu) {
   const temp = cpu.fetched << 1
 
