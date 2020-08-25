@@ -30,3 +30,22 @@ export function JMP(cpu) {
   cpu.registers.PC = cpu.addresses.absoluteAddress
   return 0
 }
+
+export function JSR(cpu) {
+  const pc = cpu.registers.PC - 1
+
+  cpu.pushStack((pc >> 8) & 0xff)
+  cpu.pushStack(pc & 0xff)
+
+  JMP(cpu)
+  return 0
+}
+
+export function RTS(cpu) {
+  let pc = cpu.popStack()
+  pc |= cpu.popStack() << 8
+
+  cpu.registers.PC = pc
+
+  return 0
+}
