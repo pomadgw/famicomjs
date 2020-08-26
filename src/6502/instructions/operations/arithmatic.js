@@ -46,3 +46,61 @@ export function SBC(cpu) {
 
   return 1
 }
+
+export function DEC(cpu) {
+  const fetched = cpu.fetched
+
+  const result = (fetched - 1) & 0xff
+
+  cpu.ram[cpu.addresses.absoluteAddress] = result
+
+  cpu.registers.STATUS.Z = result === 0
+  cpu.registers.STATUS.N = (result & 0x80) > 0
+
+  return 0
+}
+
+function decreaseRegisterValue(cpu, register) {
+  const fetched = cpu.registers[register]
+
+  const result = (fetched - 1) & 0xff
+
+  cpu.registers[register] = result
+
+  cpu.registers.STATUS.Z = result === 0
+  cpu.registers.STATUS.N = (result & 0x80) > 0
+
+  return 0
+}
+
+export const DEX = (cpu) => decreaseRegisterValue(cpu, 'X')
+export const DEY = (cpu) => decreaseRegisterValue(cpu, 'Y')
+
+export function INC(cpu) {
+  const fetched = cpu.fetched
+
+  const result = (fetched + 1) & 0xff
+
+  cpu.ram[cpu.addresses.absoluteAddress] = result
+
+  cpu.registers.STATUS.Z = result === 0
+  cpu.registers.STATUS.N = (result & 0x80) > 0
+
+  return 0
+}
+
+function increaseRegisterValue(cpu, register) {
+  const fetched = cpu.registers[register]
+
+  const result = (fetched + 1) & 0xff
+
+  cpu.registers[register] = result
+
+  cpu.registers.STATUS.Z = result === 0
+  cpu.registers.STATUS.N = (result & 0x80) > 0
+
+  return 0
+}
+
+export const INX = (cpu) => increaseRegisterValue(cpu, 'X')
+export const INY = (cpu) => increaseRegisterValue(cpu, 'Y')

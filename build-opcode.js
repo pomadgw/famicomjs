@@ -62,6 +62,8 @@ const ABY = (cpu) => ABS(cpu, 'Y')
 const ZPX = (cpu) => ZP0(cpu, 'X')
 const ZPY = (cpu) => ZP0(cpu, 'Y')
 
+const XXX = () => 0
+
 export default {
   0x00: {
     name: 'BRK',
@@ -83,7 +85,7 @@ export default {
   // add new entries to the object
   opcodes.forEach(({ name, operate, addr_mode, cycles }, index) => {
     const opKey = operate.toUpperCase()
-    const operator = implementedOpcodes.includes(opKey) ? opKey : 'NOP'
+    const operator = implementedOpcodes.includes(opKey) ? opKey : 'XXX'
     const intendedBody = parser.parse(`const x = {
       0x${index.toString(16).padStart(2, '0')}: {
         name: '${name}',
