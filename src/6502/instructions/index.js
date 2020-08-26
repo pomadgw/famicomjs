@@ -37,6 +37,8 @@ const ZPX = (cpu) => ZP0(cpu, 'X')
 
 const ZPY = (cpu) => ZP0(cpu, 'Y')
 
+const XXX = () => 0
+
 export default {
   0x00: {
     name: 'BRK',
@@ -52,13 +54,13 @@ export default {
   },
   0x02: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 2
   },
   0x03: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 8
   },
@@ -82,7 +84,7 @@ export default {
   },
   0x07: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 5
   },
@@ -106,7 +108,7 @@ export default {
   },
   0x0b: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 2
   },
@@ -130,7 +132,7 @@ export default {
   },
   0x0f: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 6
   },
@@ -148,13 +150,13 @@ export default {
   },
   0x12: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 2
   },
   0x13: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 8
   },
@@ -178,7 +180,7 @@ export default {
   },
   0x17: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 6
   },
@@ -202,7 +204,7 @@ export default {
   },
   0x1b: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 7
   },
@@ -226,7 +228,7 @@ export default {
   },
   0x1f: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 7
   },
@@ -244,13 +246,13 @@ export default {
   },
   0x22: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 2
   },
   0x23: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 8
   },
@@ -274,7 +276,7 @@ export default {
   },
   0x27: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 5
   },
@@ -298,7 +300,7 @@ export default {
   },
   0x2b: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 2
   },
@@ -322,7 +324,7 @@ export default {
   },
   0x2f: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 6
   },
@@ -340,13 +342,13 @@ export default {
   },
   0x32: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 2
   },
   0x33: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 8
   },
@@ -370,13 +372,13 @@ export default {
   },
   0x37: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 6
   },
   0x38: {
     name: 'SEC',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 2
   },
@@ -394,7 +396,7 @@ export default {
   },
   0x3b: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 7
   },
@@ -418,7 +420,7 @@ export default {
   },
   0x3f: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 7
   },
@@ -436,13 +438,13 @@ export default {
   },
   0x42: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 2
   },
   0x43: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 8
   },
@@ -466,7 +468,7 @@ export default {
   },
   0x47: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 5
   },
@@ -490,7 +492,7 @@ export default {
   },
   0x4b: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 2
   },
@@ -514,7 +516,7 @@ export default {
   },
   0x4f: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 6
   },
@@ -532,13 +534,13 @@ export default {
   },
   0x52: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 2
   },
   0x53: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 8
   },
@@ -562,7 +564,7 @@ export default {
   },
   0x57: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 6
   },
@@ -586,7 +588,7 @@ export default {
   },
   0x5b: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 7
   },
@@ -610,7 +612,7 @@ export default {
   },
   0x5f: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 7
   },
@@ -628,13 +630,13 @@ export default {
   },
   0x62: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 2
   },
   0x63: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 8
   },
@@ -658,7 +660,7 @@ export default {
   },
   0x67: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 5
   },
@@ -682,7 +684,7 @@ export default {
   },
   0x6b: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 2
   },
@@ -706,7 +708,7 @@ export default {
   },
   0x6f: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 6
   },
@@ -724,13 +726,13 @@ export default {
   },
   0x72: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 2
   },
   0x73: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 8
   },
@@ -754,13 +756,13 @@ export default {
   },
   0x77: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 6
   },
   0x78: {
     name: 'SEI',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 2
   },
@@ -778,7 +780,7 @@ export default {
   },
   0x7b: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 7
   },
@@ -802,7 +804,7 @@ export default {
   },
   0x7f: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 7
   },
@@ -826,7 +828,7 @@ export default {
   },
   0x83: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 6
   },
@@ -850,7 +852,7 @@ export default {
   },
   0x87: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 3
   },
@@ -874,7 +876,7 @@ export default {
   },
   0x8b: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 2
   },
@@ -898,7 +900,7 @@ export default {
   },
   0x8f: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 4
   },
@@ -916,13 +918,13 @@ export default {
   },
   0x92: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 2
   },
   0x93: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 6
   },
@@ -946,7 +948,7 @@ export default {
   },
   0x97: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 4
   },
@@ -970,7 +972,7 @@ export default {
   },
   0x9b: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 5
   },
@@ -988,13 +990,13 @@ export default {
   },
   0x9e: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 5
   },
   0x9f: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 5
   },
@@ -1018,7 +1020,7 @@ export default {
   },
   0xa3: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 6
   },
@@ -1042,7 +1044,7 @@ export default {
   },
   0xa7: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 3
   },
@@ -1066,7 +1068,7 @@ export default {
   },
   0xab: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 2
   },
@@ -1090,7 +1092,7 @@ export default {
   },
   0xaf: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 4
   },
@@ -1108,13 +1110,13 @@ export default {
   },
   0xb2: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 2
   },
   0xb3: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 5
   },
@@ -1138,7 +1140,7 @@ export default {
   },
   0xb7: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 4
   },
@@ -1162,7 +1164,7 @@ export default {
   },
   0xbb: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 4
   },
@@ -1186,7 +1188,7 @@ export default {
   },
   0xbf: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 4
   },
@@ -1210,7 +1212,7 @@ export default {
   },
   0xc3: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 8
   },
@@ -1234,7 +1236,7 @@ export default {
   },
   0xc7: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 5
   },
@@ -1258,7 +1260,7 @@ export default {
   },
   0xcb: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 2
   },
@@ -1282,7 +1284,7 @@ export default {
   },
   0xcf: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 6
   },
@@ -1300,13 +1302,13 @@ export default {
   },
   0xd2: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 2
   },
   0xd3: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 8
   },
@@ -1330,7 +1332,7 @@ export default {
   },
   0xd7: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 6
   },
@@ -1354,7 +1356,7 @@ export default {
   },
   0xdb: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 7
   },
@@ -1378,7 +1380,7 @@ export default {
   },
   0xdf: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 7
   },
@@ -1402,7 +1404,7 @@ export default {
   },
   0xe3: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 8
   },
@@ -1426,7 +1428,7 @@ export default {
   },
   0xe7: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 5
   },
@@ -1474,7 +1476,7 @@ export default {
   },
   0xef: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 6
   },
@@ -1492,13 +1494,13 @@ export default {
   },
   0xf2: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 2
   },
   0xf3: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 8
   },
@@ -1522,13 +1524,13 @@ export default {
   },
   0xf7: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 6
   },
   0xf8: {
     name: 'SED',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 2
   },
@@ -1546,7 +1548,7 @@ export default {
   },
   0xfb: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 7
   },
@@ -1570,7 +1572,7 @@ export default {
   },
   0xff: {
     name: '???',
-    operator: NOP,
+    operator: XXX,
     addressing: IMP,
     cycles: 7
   }
