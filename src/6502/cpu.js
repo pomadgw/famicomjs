@@ -1,21 +1,10 @@
 import RegisterStatus from './register'
 import mapping from './instructions/index'
-
-const proxyRAM = (ram) =>
-  new Proxy(ram, {
-    get(target, prop) {
-      return target[prop]
-    },
-    set(target, prop, value) {
-      if (typeof prop === 'number') target[prop] = value & 0xff
-      else target[prop] = value
-      return true
-    }
-  })
+import { toUint8, toUint16 } from './utils'
 
 export default class CPU {
   constructor(ram) {
-    this.ram = proxyRAM(ram)
+    this.ram = new Uint8Array(ram)
 
     this.registers = new Proxy(
       {
@@ -29,8 +18,8 @@ export default class CPU {
       {
         set(target, prop, value) {
           if (prop === 'STATUS') target[prop] = value
-          else if (prop === 'PC') target[prop] = value & 0xffff
-          else target[prop] = value & 0xff
+          else if (prop === 'PC') target[prop] = toUint16(value)
+          else target[prop] = toUint8(value)
           return true
         }
       }

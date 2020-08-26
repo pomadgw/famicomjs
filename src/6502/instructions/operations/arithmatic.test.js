@@ -140,7 +140,7 @@ describe('instructions: arithmatic operators', () => {
 
     it('should be able to set carry flag', () => {
       cpudummy.registers.A = 0x07
-      cpudummy.ram[1] = -2 & 0xff
+      cpudummy.ram[1] = -2
       cpudummy.fetch({ absoluteAddress: 0x0001 })
       cpudummy.registers.STATUS.C = true
 

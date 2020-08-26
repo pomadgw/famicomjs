@@ -50,7 +50,7 @@ export function SBC(cpu) {
 export function DEC(cpu) {
   const fetched = cpu.fetched
 
-  const result = (fetched - 1) & 0xff
+  const result = fetched - 1
 
   cpu.ram[cpu.addresses.absoluteAddress] = result
 
@@ -63,7 +63,7 @@ export function DEC(cpu) {
 function decreaseRegisterValue(cpu, register) {
   const fetched = cpu.registers[register]
 
-  const result = (fetched - 1) & 0xff
+  const result = fetched - 1
 
   cpu.registers[register] = result
 
