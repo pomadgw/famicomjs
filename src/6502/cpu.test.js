@@ -1,5 +1,5 @@
 import CPU from './cpu'
-import assemblerGenerator from './assembler'
+import assemblerGenerator from './assembler/index'
 
 describe('CPU', () => {
   const a6502 = assemblerGenerator({ memorySize: 0x2000, PC: 0 })
