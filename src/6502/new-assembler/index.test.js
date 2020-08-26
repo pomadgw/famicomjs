@@ -162,7 +162,7 @@ STA $1000
 LABEL:
 DEC
 LABEL2:
-INC
+JMP LABEL
       `
         .trim()
         .split('\n')
@@ -171,8 +171,22 @@ INC
         [0, 'LDA #$10', undefined],
         [1, 'STA $1000', undefined],
         [2, 'DEC', 'LABEL'],
-        [3, 'INC', 'LABEL2']
+        [3, 'JMP LABEL', 'LABEL2']
       ])
+    })
+
+    it('should throw error message if label is written incorrectly', () => {
+      const lines = `
+LDA #$10
+STA $1000
+LABEL:
+      `
+        .trim()
+        .split('\n')
+
+      expect(() => assembler.labelLines(lines)).toThrow(
+        'Label without associated instruction'
+      )
     })
   })
 })

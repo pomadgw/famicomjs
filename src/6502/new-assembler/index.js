@@ -86,6 +86,10 @@ export function labelLines(lines) {
 
     if (label) {
       i += 1
+      if (i === lines.length) {
+        throw new Error('Label without associated instruction')
+      }
+
       offset++
       result.push([i - offset, lines[i], label[1]])
     } else {
