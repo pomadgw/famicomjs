@@ -1,5 +1,16 @@
 import opcodes from '../instructions'
 
+const branchingOperators = [
+  'bcc',
+  'bcs',
+  'beq',
+  'bne',
+  'bmi',
+  'bpl',
+  'bvs',
+  'bvc'
+]
+
 export function compileParam(string) {
   const result = /\(?(#)?(\$?)([\da-f]+)\)?(?:,([xy]))?\)?/.exec(
     string.toLowerCase()
@@ -52,17 +63,6 @@ export function assembleLine(string) {
   const [, instruction, rawParams] = /([a-z]+)(\s+.+?)?$/.exec(lowerString)
   let { params, addressingMode } = compileParam((rawParams ?? '').trim())
 
-  const branchingOperators = [
-    'bcc',
-    'bcs',
-    'beq',
-    'bne',
-    'bmi',
-    'bpl',
-    'bvs',
-    'bvc'
-  ]
-
   if (branchingOperators.includes(instruction)) {
     addressingMode = 'REL'
   }
@@ -96,6 +96,38 @@ export function labelLines(lines) {
       result.push([i - offset, currentLine, undefined])
     }
   }
+
+  return result
+}
+
+export function compileLabelToAddress(lines, pc = 0) {
+  const labels = {}
+
+  lines.forEach(([lineNo, , label]) => {
+    if (label) {
+      labels[label] = lineNo
+    }
+  })
+
+  const result = []
+
+  lines.forEach(([lineNo, instruction, label]) => {
+    const [operator, params] = instruction.split(/\s+/)
+    if (labels[params] != null) {
+      if (branchingOperators.includes(operator.toLowerCase())) {
+        const relativeAddress = (labels[params] - lineNo) & 0xff
+        instruction = `${operator} $${relativeAddress
+          .toString(16)
+          .padStart(2, '0')}`
+      } else {
+        const absoluteAddress = pc + labels[params]
+        instruction = `${operator} $${absoluteAddress
+          .toString(16)
+          .padStart(4, '0')}`
+      }
+    }
+    result.push([lineNo, instruction, label])
+  })
 
   return result
 }

@@ -188,4 +188,38 @@ LABEL:
       )
     })
   })
+
+  describe('#compileLabelToAddress', () => {
+    it('should replace label with absolute address', () => {
+      expect(
+        assembler.compileLabelToAddress([
+          [0, 'LDA #$10', undefined],
+          [1, 'STA $1000', undefined],
+          [2, 'DEC', 'LABEL'],
+          [3, 'JMP LABEL', 'LABEL2']
+        ])
+      ).toEqual([
+        [0, 'LDA #$10', undefined],
+        [1, 'STA $1000', undefined],
+        [2, 'DEC', 'LABEL'],
+        [3, 'JMP $0002', 'LABEL2']
+      ])
+    })
+
+    it('should replace label with relative address', () => {
+      expect(
+        assembler.compileLabelToAddress([
+          [0, 'LDA #$10', undefined],
+          [1, 'STA $1000', undefined],
+          [2, 'DEC', 'LABEL'],
+          [3, 'BEQ LABEL', 'LABEL2']
+        ])
+      ).toEqual([
+        [0, 'LDA #$10', undefined],
+        [1, 'STA $1000', undefined],
+        [2, 'DEC', 'LABEL'],
+        [3, 'BEQ $ff', 'LABEL2']
+      ])
+    })
+  })
 })
