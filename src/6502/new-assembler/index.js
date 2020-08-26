@@ -168,3 +168,19 @@ export function assemble(string, pc = 0) {
 
   return lines.reduce((acc, arr) => [...acc, ...arr], [])
 }
+
+export default function assembler(
+  { memorySize, PC } = { memorySize: 0x600, PC: 0x600 }
+) {
+  return function compile(string) {
+    const ram = [...new Array(memorySize)].map((_) => 0)
+
+    const compiled = assemble(string[0], PC)
+
+    for (let i = PC; i < PC + compiled.length; i++) {
+      ram[i] = compiled[i - PC]
+    }
+
+    return ram
+  }
+}
