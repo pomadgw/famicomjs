@@ -121,4 +121,22 @@ describe('assembler', () => {
       )
     })
   })
+
+  describe('#assembleLine', () => {
+    it('should assemble single line correctly', () => {
+      expect(assembler.assembleLine('ASL A')).toEqual([0x0a])
+      expect(assembler.assembleLine('PHP')).toEqual([0x08])
+      expect(assembler.assembleLine('LDY #$10')).toEqual([0xa0, 0x10])
+      expect(assembler.assembleLine('ASL $10')).toEqual([0x06, 0x10])
+      expect(assembler.assembleLine('STA $10,X')).toEqual([0x95, 0x10])
+      expect(assembler.assembleLine('STX $10,Y')).toEqual([0x96, 0x10])
+      expect(assembler.assembleLine('STA $1000')).toEqual([0x8d, 0x00, 0x10])
+      expect(assembler.assembleLine('STA $1000,X')).toEqual([0x9d, 0x00, 0x10])
+      expect(assembler.assembleLine('STA $1000,Y')).toEqual([0x99, 0x00, 0x10])
+      expect(assembler.assembleLine('JMP ($1000)')).toEqual([0x6c, 0x00, 0x10])
+      expect(assembler.assembleLine('ORA ($10,X)')).toEqual([0x01, 0x10])
+      expect(assembler.assembleLine('ORA ($10),Y')).toEqual([0x11, 0x10])
+      expect(assembler.assembleLine('BEQ $10')).toEqual([0xf0, 0x10])
+    })
+  })
 })

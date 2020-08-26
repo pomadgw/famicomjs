@@ -1,3 +1,5 @@
+import opcodes from '../instructions'
+
 export function compileParam(string) {
   const result = /\(?(#)?(\$?)([\da-f]+)\)?(?:,([xy]))?\)?/.exec(
     string.toLowerCase()
@@ -43,4 +45,33 @@ export function compileParam(string) {
   }
 
   return { params, addressingMode }
+}
+
+export function assembleLine(string) {
+  const lowerString = string.toLowerCase()
+  const [, instruction, rawParams] = /([a-z]+)(\s+.+?)?$/.exec(lowerString)
+  let { params, addressingMode } = compileParam((rawParams ?? '').trim())
+
+  const branchingOperators = [
+    'bcc',
+    'bcs',
+    'beq',
+    'bne',
+    'bmi',
+    'bpl',
+    'bvs',
+    'bvc'
+  ]
+
+  if (branchingOperators.includes(instruction)) {
+    addressingMode = 'REL'
+  }
+
+  const opcode = Object.entries(opcodes).find(
+    ([, value]) =>
+      value.name.toLowerCase() === instruction &&
+      value.addressingName === addressingMode
+  )
+
+  return [Number(opcode[0]), ...params]
 }
