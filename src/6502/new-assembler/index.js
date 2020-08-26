@@ -81,6 +81,21 @@ export function labelLines(lines) {
   const result = []
   let offset = 0
 
+  const determineByteLength = (instruction) => {
+    let byteLength = 1
+    const operator = instruction.split(/\s+/)
+
+    if (operator[0].toLowerCase() === 'jmp' && !/\(.+?\)/.test(operator[1])) {
+      byteLength = 3
+    } else if (branchingOperators.includes(operator[0].toLowerCase())) {
+      byteLength = 2
+    } else {
+      byteLength = assembleLine(instruction).length
+    }
+
+    return byteLength
+  }
+
   for (let i = 0; i < lines.length; i++) {
     const currentLine = lines[i]
     const label = /\s*(.+?):\s*(.+)?$/.exec(currentLine.trim())
@@ -95,30 +110,12 @@ export function labelLines(lines) {
       }
 
       const instruction = label[2]?.trim() ?? lines[i]
-      let byteLength = 1
-      const operator = instruction.split(/\s+/)
+      const byteLength = determineByteLength(instruction)
 
-      if (operator[0].toLowerCase() === 'jmp' && !/\(.+?\)/.test(operator[1])) {
-        byteLength = 3
-      } else if (branchingOperators.includes(operator[0].toLowerCase())) {
-        byteLength = 2
-      } else {
-        byteLength = assembleLine(instruction).length
-      }
-
-      result.push([offset, label[2]?.trim() ?? lines[i], label[1]])
+      result.push([offset, instruction, label[1]])
       offset += byteLength
     } else {
-      let byteLength = 1
-      const operator = currentLine.split(/\s+/)
-
-      if (operator[0].toLowerCase() === 'jmp' && !/\(.+?\)/.test(operator[1])) {
-        byteLength = 3
-      } else if (branchingOperators.includes(operator[0].toLowerCase())) {
-        byteLength = 2
-      } else {
-        byteLength = assembleLine(currentLine).length
-      }
+      const byteLength = determineByteLength(currentLine)
 
       result.push([offset, currentLine, undefined])
       offset += byteLength
