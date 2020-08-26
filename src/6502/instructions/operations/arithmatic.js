@@ -1,3 +1,5 @@
+import { toUint8 } from '../../utils'
+
 export function ADC(cpu) {
   const carryBit = cpu.registers.STATUS.C ? 1 : 0
   let temp = cpu.registers.A + cpu.fetched + carryBit
@@ -50,7 +52,7 @@ export function SBC(cpu) {
 export function DEC(cpu) {
   const fetched = cpu.fetched
 
-  const result = (fetched - 1) & 0xff
+  const result = toUint8(fetched - 1)
 
   cpu.ram[cpu.addresses.absoluteAddress] = result
 
@@ -63,7 +65,7 @@ export function DEC(cpu) {
 function decreaseRegisterValue(cpu, register) {
   const fetched = cpu.registers[register]
 
-  const result = (fetched - 1) & 0xff
+  const result = toUint8(fetched - 1)
 
   cpu.registers[register] = result
 
