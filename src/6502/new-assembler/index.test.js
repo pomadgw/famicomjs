@@ -204,6 +204,7 @@ LABEL:
 DEX
 LABEL2: JMP LABEL
 JMP LABEL2
+BEQ LABEL2
       `
         .trim()
         .split('\n')
@@ -213,7 +214,8 @@ JMP LABEL2
         [2, 'STA $1000', undefined],
         [5, 'DEX', 'LABEL'],
         [6, 'JMP LABEL', 'LABEL2'],
-        [9, 'JMP LABEL2', undefined]
+        [9, 'JMP LABEL2', undefined],
+        [12, 'BEQ LABEL2', undefined]
       ])
     })
 
