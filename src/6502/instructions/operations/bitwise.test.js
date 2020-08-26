@@ -178,4 +178,150 @@ describe('instructions: bitwise operators', () => {
       expect(cpudummy.registers.STATUS.V).toBe(true)
     })
   })
+
+  describe('LSR', () => {
+    let cpu
+
+    beforeEach(() => {
+      cpu = new CPU([0, 0, 0, 0])
+    })
+
+    it('should shift accumulator value to right', () => {
+      cpu.registers.A = 0x1f
+      cpu.fetch({ value: cpu.registers.A })
+      bitwise.LSR(cpu)
+
+      expect(cpu.registers.A).toBe(0x1f >> 1)
+    })
+
+    it('should shift a memory value to right given absolute address', () => {
+      cpu.ram[0x0001] = 0x1f
+      cpu.fetch({ absoluteAddress: 0x0001 })
+      bitwise.LSR(cpu)
+
+      expect(cpu.ram[0x0001]).toBe(0x1f >> 1)
+    })
+
+    it('should put bit 0 to carry flag', () => {
+      cpu.registers.A = 0x1f
+      cpu.fetch({ value: cpu.registers.A })
+      bitwise.LSR(cpu)
+
+      expect(cpu.registers.STATUS.C).toBe(true)
+    })
+
+    it('should trigger Z flag if resulting value is zero', () => {
+      cpu.registers.A = 0x01
+      cpu.fetch({ value: cpu.registers.A })
+      bitwise.LSR(cpu)
+
+      expect(cpu.registers.STATUS.Z).toBe(true)
+    })
+
+    it('should reset N flag if resulting value is not negative (given it was previously set)', () => {
+      cpu.registers.STATUS.N = true
+
+      cpu.registers.A = 0x1f
+      cpu.fetch({ value: cpu.registers.A })
+      bitwise.LSR(cpu)
+
+      expect(cpu.registers.STATUS.N).toBe(false)
+    })
+  })
+
+  describe('ROL', () => {
+    let cpu
+
+    beforeEach(() => {
+      cpu = new CPU([0, 0, 0, 0])
+    })
+
+    it('should rotate accumulator value to left', () => {
+      cpu.registers.A = 0b00000010
+      cpu.registers.STATUS.C = true
+
+      cpu.fetch({ value: cpu.registers.A })
+      bitwise.ROL(cpu)
+
+      expect(cpu.registers.A).toBe(0b00000101)
+      expect(cpu.registers.STATUS.C).toBe(false)
+    })
+
+    it('should rotate a memory value to right given absolute address', () => {
+      cpu.ram[0x0001] = 0b10000010
+      cpu.registers.STATUS.C = false
+      cpu.fetch({ absoluteAddress: 0x0001 })
+      bitwise.ROL(cpu)
+
+      expect(cpu.ram[0x0001]).toBe(0b00000100)
+      expect(cpu.registers.STATUS.C).toBe(true)
+    })
+
+    it('should trigger Z flag if resulting value is zero', () => {
+      cpu.registers.A = 0b10000000
+      cpu.fetch({ value: cpu.registers.A })
+      bitwise.ROL(cpu)
+
+      expect(cpu.registers.STATUS.Z).toBe(true)
+    })
+
+    it('should set N flag if resulting value is negative', () => {
+      cpu.registers.STATUS.N = false
+
+      cpu.registers.A = 0b01100000
+      cpu.fetch({ value: cpu.registers.A })
+      bitwise.ROL(cpu)
+
+      expect(cpu.registers.STATUS.N).toBe(true)
+    })
+  })
+
+  describe('ROR', () => {
+    let cpu
+
+    beforeEach(() => {
+      cpu = new CPU([0, 0, 0, 0])
+    })
+
+    it('should rotate accumulator value to left', () => {
+      cpu.registers.A = 0b00000010
+      cpu.registers.STATUS.C = true
+
+      cpu.fetch({ value: cpu.registers.A })
+      bitwise.ROR(cpu)
+
+      expect(cpu.registers.A).toBe(0b10000001)
+      expect(cpu.registers.STATUS.C).toBe(false)
+    })
+
+    it('should rotate a memory value to right given absolute address', () => {
+      cpu.ram[0x0001] = 0b10000011
+      cpu.registers.STATUS.C = false
+      cpu.fetch({ absoluteAddress: 0x0001 })
+      bitwise.ROR(cpu)
+
+      expect(cpu.ram[0x0001]).toBe(0b01000001)
+      expect(cpu.registers.STATUS.C).toBe(true)
+    })
+
+    it('should trigger Z flag if resulting value is zero', () => {
+      cpu.registers.A = 0b00000001
+      cpu.registers.STATUS.C = false
+      cpu.fetch({ value: cpu.registers.A })
+      bitwise.ROR(cpu)
+
+      expect(cpu.registers.STATUS.Z).toBe(true)
+    })
+
+    it('should set N flag if resulting value is negative', () => {
+      cpu.registers.STATUS.N = false
+
+      cpu.registers.STATUS.C = true
+      cpu.registers.A = 0b01100000
+      cpu.fetch({ value: cpu.registers.A })
+      bitwise.ROR(cpu)
+
+      expect(cpu.registers.STATUS.N).toBe(true)
+    })
+  })
 })

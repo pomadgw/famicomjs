@@ -7,7 +7,7 @@ import IZY from './addressings/indirect-indexed'
 import ZP0 from './addressings/zero-page'
 import IMP from './addressings/implicit'
 import { ADC, SBC, DEC, DEX, DEY, INC, INX, INY } from './operations/arithmatic'
-import { ORA, AND, EOR, ASL, BIT } from './operations/bitwise'
+import { ORA, AND, EOR, ASL, BIT, LSR, ROL, ROR } from './operations/bitwise'
 import {
   BCC,
   BCS,
@@ -267,7 +267,7 @@ export default {
   },
   0x26: {
     name: 'ROL',
-    operator: NOP,
+    operator: ROL,
     addressing: ZP0,
     cycles: 5
   },
@@ -291,7 +291,7 @@ export default {
   },
   0x2a: {
     name: 'ROL',
-    operator: NOP,
+    operator: ROL,
     addressing: IMP,
     cycles: 2
   },
@@ -315,7 +315,7 @@ export default {
   },
   0x2e: {
     name: 'ROL',
-    operator: NOP,
+    operator: ROL,
     addressing: ABS,
     cycles: 6
   },
@@ -363,7 +363,7 @@ export default {
   },
   0x36: {
     name: 'ROL',
-    operator: NOP,
+    operator: ROL,
     addressing: ZPX,
     cycles: 6
   },
@@ -411,7 +411,7 @@ export default {
   },
   0x3e: {
     name: 'ROL',
-    operator: NOP,
+    operator: ROL,
     addressing: ABX,
     cycles: 7
   },
@@ -459,7 +459,7 @@ export default {
   },
   0x46: {
     name: 'LSR',
-    operator: NOP,
+    operator: LSR,
     addressing: ZP0,
     cycles: 5
   },
@@ -483,7 +483,7 @@ export default {
   },
   0x4a: {
     name: 'LSR',
-    operator: NOP,
+    operator: LSR,
     addressing: IMP,
     cycles: 2
   },
@@ -507,7 +507,7 @@ export default {
   },
   0x4e: {
     name: 'LSR',
-    operator: NOP,
+    operator: LSR,
     addressing: ABS,
     cycles: 6
   },
@@ -555,7 +555,7 @@ export default {
   },
   0x56: {
     name: 'LSR',
-    operator: NOP,
+    operator: LSR,
     addressing: ZPX,
     cycles: 6
   },
@@ -603,7 +603,7 @@ export default {
   },
   0x5e: {
     name: 'LSR',
-    operator: NOP,
+    operator: LSR,
     addressing: ABX,
     cycles: 7
   },
@@ -651,7 +651,7 @@ export default {
   },
   0x66: {
     name: 'ROR',
-    operator: NOP,
+    operator: ROR,
     addressing: ZP0,
     cycles: 5
   },
@@ -675,7 +675,7 @@ export default {
   },
   0x6a: {
     name: 'ROR',
-    operator: NOP,
+    operator: ROR,
     addressing: IMP,
     cycles: 2
   },
@@ -699,7 +699,7 @@ export default {
   },
   0x6e: {
     name: 'ROR',
-    operator: NOP,
+    operator: ROR,
     addressing: ABS,
     cycles: 6
   },
@@ -747,7 +747,7 @@ export default {
   },
   0x76: {
     name: 'ROR',
-    operator: NOP,
+    operator: ROR,
     addressing: ZPX,
     cycles: 6
   },
@@ -795,7 +795,7 @@ export default {
   },
   0x7e: {
     name: 'ROR',
-    operator: NOP,
+    operator: ROR,
     addressing: ABX,
     cycles: 7
   },
