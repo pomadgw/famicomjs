@@ -1,6 +1,46 @@
 import * as assembler from './index'
 
 describe('assembler', () => {
+  describe('#assemble', () => {
+    it('should assemble correctly', () => {
+      expect(
+        assembler.assemble(`
+        LDA #$01
+        STA $0200
+        LDA #$05
+        STA $0201
+        LDA #$08
+        STA $0202
+      `)
+      ).toEqual(
+        'a9 01 8d 00 02 a9 05 8d 01 02 a9 08 8d 02 02'
+          .split(' ')
+          .map((e) => parseInt(e, 16))
+      )
+    })
+
+    it('should assemble correctly with a branching operator', () => {
+      expect(
+        assembler.assemble(
+          `
+        LDX #$08
+        decrement:
+          DEX
+          STX $0200
+          CPX #$03
+          BNE decrement
+          STX $0201
+          BRK
+      `,
+          0x600
+        )
+      ).toEqual(
+        'a2 08 ca 8e 00 02 e0 03 d0 f8 8e 01 02 00'
+          .split(' ')
+          .map((e) => parseInt(e, 16))
+      )
+    })
+  })
   describe('#compileParam', () => {
     it('should compile $xx to correct format', () => {
       expect(assembler.compileParam('$ff')).toEqual(
@@ -125,6 +165,7 @@ describe('assembler', () => {
   describe('#assembleLine', () => {
     it('should assemble single line correctly', () => {
       expect(assembler.assembleLine('ASL A')).toEqual([0x0a])
+      expect(assembler.assembleLine('BRK')).toEqual([0x00])
       expect(assembler.assembleLine('PHP')).toEqual([0x08])
       expect(assembler.assembleLine('LDY #$10')).toEqual([0xa0, 0x10])
       expect(assembler.assembleLine('ASL $10')).toEqual([0x06, 0x10])
@@ -151,7 +192,7 @@ STA $1000
 
       expect(assembler.labelLines(lines)).toEqual([
         [0, 'LDA #$10', undefined],
-        [1, 'STA $1000', undefined]
+        [2, 'STA $1000', undefined]
       ])
     })
 
@@ -168,9 +209,9 @@ LABEL2: JMP LABEL
 
       expect(assembler.labelLines(lines)).toEqual([
         [0, 'LDA #$10', undefined],
-        [1, 'STA $1000', undefined],
-        [2, 'DEC', 'LABEL'],
-        [3, 'JMP LABEL', 'LABEL2']
+        [2, 'STA $1000', undefined],
+        [5, 'DEC', 'LABEL'],
+        [6, 'JMP LABEL', 'LABEL2']
       ])
     })
 
@@ -194,15 +235,15 @@ LABEL:
       expect(
         assembler.compileLabelToAddress([
           [0, 'LDA #$10', undefined],
-          [1, 'STA $1000', undefined],
-          [2, 'DEC', 'LABEL'],
-          [3, 'JMP LABEL', 'LABEL2']
+          [2, 'STA $1000', undefined],
+          [5, 'DEC', 'LABEL'],
+          [6, 'JMP LABEL', 'LABEL2']
         ])
       ).toEqual([
         [0, 'LDA #$10', undefined],
-        [1, 'STA $1000', undefined],
-        [2, 'DEC', 'LABEL'],
-        [3, 'JMP $0002', 'LABEL2']
+        [2, 'STA $1000', undefined],
+        [5, 'DEC', 'LABEL'],
+        [6, 'JMP $0005', 'LABEL2']
       ])
     })
 
@@ -210,15 +251,15 @@ LABEL:
       expect(
         assembler.compileLabelToAddress([
           [0, 'LDA #$10', undefined],
-          [1, 'STA $1000', undefined],
-          [2, 'DEC', 'LABEL'],
-          [3, 'BEQ LABEL', 'LABEL2']
+          [2, 'STA $1000', undefined],
+          [5, 'LDA #$10', 'LABEL'],
+          [7, 'BEQ LABEL', 'LABEL2']
         ])
       ).toEqual([
         [0, 'LDA #$10', undefined],
-        [1, 'STA $1000', undefined],
-        [2, 'DEC', 'LABEL'],
-        [3, 'BEQ $ff', 'LABEL2']
+        [2, 'STA $1000', undefined],
+        [5, 'DEC', 'LABEL'],
+        [7, 'BEQ $fe', 'LABEL2']
       ])
     })
   })

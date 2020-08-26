@@ -131,3 +131,15 @@ export function compileLabelToAddress(lines, pc = 0) {
 
   return result
 }
+
+export function assemble(string, pc = 0) {
+  let lines = string
+    .trim()
+    .split('\n')
+    .map((e) => e.trim())
+  lines = labelLines(lines)
+  lines = compileLabelToAddress(lines, pc)
+  lines = lines.map((e) => assembleLine(e[1]))
+
+  return lines.reduce((acc, arr) => [...acc, ...arr], [])
+}
