@@ -45,7 +45,7 @@ export function RTS(cpu) {
   let pc = cpu.popStack()
   pc |= cpu.popStack() << 8
 
-  cpu.registers.PC = pc
+  cpu.registers.PC = pc + 1
 
   return 0
 }

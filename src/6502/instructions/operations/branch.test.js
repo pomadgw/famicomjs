@@ -89,7 +89,7 @@ describe('instructions: branch instructions', () => {
       cpudummy.fetch()
       branch.RTS(cpudummy)
 
-      expect(cpudummy.registers.PC).toBe(0x1233)
+      expect(cpudummy.registers.PC).toBe(0x1234)
     })
   })
 
