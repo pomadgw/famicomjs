@@ -23,7 +23,7 @@ import {
 } from './operations/branch'
 import { CLC, CLD, CLI, CLV } from './operations/clear'
 import { CMP, CPX, CPY } from './operations/comparison'
-import { BRK } from './operations/interrupts'
+import { BRK, RTI } from './operations/interrupts'
 import { LDA, LDX, LDY, STA, STX, STY } from './operations/memory'
 import { NOP } from './operations/nop'
 import { PHA, PLA, PHP, PLP, TXS, TSX } from './operations/stack'
@@ -423,7 +423,7 @@ export default {
   },
   0x40: {
     name: 'RTI',
-    operator: NOP,
+    operator: RTI,
     addressing: IMP,
     cycles: 6
   },

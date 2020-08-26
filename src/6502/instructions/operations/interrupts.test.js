@@ -38,4 +38,35 @@ describe('instructions: interrupts', () => {
       expect(cpu.registers.PC).toBe(0x1234)
     })
   })
+
+  describe('RTI', () => {
+    it('should restore saved PC in stack back to PC register correctly', () => {
+      const cpudummy = new CPU(generateArray(0x1000))
+      cpudummy.registers.PC = 0x1000
+
+      cpudummy.ram[0x1ff] = 0x12
+      cpudummy.ram[0x1fe] = 0x33
+      cpudummy.ram[0x1fd] = 0x33
+      cpudummy.registers.SP = 0xfc
+      cpudummy.fetch()
+      interrupts.RTI(cpudummy)
+
+      expect(cpudummy.registers.PC).toBe(0x1233)
+    })
+
+    it('should restore saved status in stack back to status register correctly', () => {
+      const status = 0b11111111
+      const cpudummy = new CPU(generateArray(0x1000))
+      cpudummy.registers.PC = 0x1000
+
+      cpudummy.ram[0x1ff] = 0x12
+      cpudummy.ram[0x1fe] = 0x33
+      cpudummy.ram[0x1fd] = status
+      cpudummy.registers.SP = 0xfc
+      cpudummy.fetch()
+      interrupts.RTI(cpudummy)
+
+      expect(+cpudummy.registers.STATUS).toBe(0b11001111)
+    })
+  })
 })
