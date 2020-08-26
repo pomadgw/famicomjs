@@ -1,4 +1,5 @@
 import opcodes from '../instructions'
+import { toUint8 } from '../utils'
 
 const branchingOperators = [
   'bcc',
@@ -85,15 +86,42 @@ export function labelLines(lines) {
     const label = /\s*(.+?):\s*(.+)?$/.exec(currentLine.trim())
 
     if (label) {
-      i += 1
-      if (i === lines.length && !label[2]) {
+      if (i + 1 === lines.length && !label[2]) {
         throw new Error('Label without associated instruction')
       }
 
-      offset++
-      result.push([i - offset, label[2]?.trim() ?? lines[i], label[1]])
+      if (!label[2]) {
+        i += 1
+      }
+
+      const instruction = label[2]?.trim() ?? lines[i]
+      let byteLength = 1
+      const operator = instruction.split(/\s+/)
+
+      if (operator[0].toLowerCase() === 'jmp' && !/\(.+?\)/.test(operator[1])) {
+        byteLength = 3
+      } else if (branchingOperators.includes(operator[0].toLowerCase())) {
+        byteLength = 2
+      } else {
+        byteLength = assembleLine(instruction).length
+      }
+
+      result.push([offset, label[2]?.trim() ?? lines[i], label[1]])
+      offset += byteLength
     } else {
-      result.push([i - offset, currentLine, undefined])
+      let byteLength = 1
+      const operator = currentLine.split(/\s+/)
+
+      if (operator[0].toLowerCase() === 'jmp' && !/\(.+?\)/.test(operator[1])) {
+        byteLength = 3
+      } else if (branchingOperators.includes(operator[0].toLowerCase())) {
+        byteLength = 2
+      } else {
+        byteLength = assembleLine(currentLine).length
+      }
+
+      result.push([offset, currentLine, undefined])
+      offset += byteLength
     }
   }
 
@@ -115,7 +143,7 @@ export function compileLabelToAddress(lines, pc = 0) {
     const [operator, params] = instruction.split(/\s+/)
     if (labels[params] != null) {
       if (branchingOperators.includes(operator.toLowerCase())) {
-        const relativeAddress = (labels[params] - lineNo) & 0xff
+        const relativeAddress = toUint8(labels[params] - lineNo - 2)
         instruction = `${operator} $${relativeAddress
           .toString(16)
           .padStart(2, '0')}`

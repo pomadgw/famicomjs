@@ -201,8 +201,9 @@ STA $1000
 LDA #$10
 STA $1000
 LABEL:
-DEC
+DEX
 LABEL2: JMP LABEL
+JMP LABEL2
       `
         .trim()
         .split('\n')
@@ -210,8 +211,9 @@ LABEL2: JMP LABEL
       expect(assembler.labelLines(lines)).toEqual([
         [0, 'LDA #$10', undefined],
         [2, 'STA $1000', undefined],
-        [5, 'DEC', 'LABEL'],
-        [6, 'JMP LABEL', 'LABEL2']
+        [5, 'DEX', 'LABEL'],
+        [6, 'JMP LABEL', 'LABEL2'],
+        [9, 'JMP LABEL2', undefined]
       ])
     })
 
@@ -258,8 +260,8 @@ LABEL:
       ).toEqual([
         [0, 'LDA #$10', undefined],
         [2, 'STA $1000', undefined],
-        [5, 'DEC', 'LABEL'],
-        [7, 'BEQ $fe', 'LABEL2']
+        [5, 'LDA #$10', 'LABEL'],
+        [7, 'BEQ $fc', 'LABEL2']
       ])
     })
   })
