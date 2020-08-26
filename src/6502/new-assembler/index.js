@@ -2,6 +2,14 @@ export function compileParam(string) {
   const result = /\(?(#)?(\$?)([\da-f]+)\)?(?:,([xy]))?\)?/.exec(
     string.toLowerCase()
   )
+
+  let params
+  let addressingMode = 'IMP'
+
+  if (!result || string.toLowerCase() === 'a') {
+    return { params: [], addressingMode }
+  }
+
   const useIndirect = /\(\$[\da-f]+\)/.exec(string.toLowerCase())
   const useInxInd = /\(\$[\da-f]+,x\)/.exec(string.toLowerCase())
   const useIndInx = /\(\$[\da-f]+\),y/.exec(string.toLowerCase())
@@ -10,8 +18,6 @@ export function compileParam(string) {
 
   const number = isHex ? parseInt(numberString, 16) : parseInt(numberString, 10)
 
-  let params
-  let addressingMode = 'IMP'
   const is8bitParam = numberString.length <= 2
 
   if (isImmediate || is8bitParam) {

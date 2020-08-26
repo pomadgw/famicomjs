@@ -10,6 +10,22 @@ describe('assembler', () => {
       )
     })
 
+    it('should compile (empty string) or "A" to correct format', () => {
+      expect(assembler.compileParam('')).toEqual(
+        expect.objectContaining({
+          params: [],
+          addressingMode: 'IMP'
+        })
+      )
+
+      expect(assembler.compileParam('A')).toEqual(
+        expect.objectContaining({
+          params: [],
+          addressingMode: 'IMP'
+        })
+      )
+    })
+
     it('should compile $xx,X to correct format', () => {
       expect(assembler.compileParam('$ff,X')).toEqual(
         expect.objectContaining({
