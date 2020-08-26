@@ -161,8 +161,7 @@ LDA #$10
 STA $1000
 LABEL:
 DEC
-LABEL2:
-JMP LABEL
+LABEL2: JMP LABEL
       `
         .trim()
         .split('\n')

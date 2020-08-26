@@ -82,16 +82,16 @@ export function labelLines(lines) {
 
   for (let i = 0; i < lines.length; i++) {
     const currentLine = lines[i]
-    const label = /\s*(.+?):$/.exec(currentLine.trim())
+    const label = /\s*(.+?):\s*(.+)?$/.exec(currentLine.trim())
 
     if (label) {
       i += 1
-      if (i === lines.length) {
+      if (i === lines.length && !label[2]) {
         throw new Error('Label without associated instruction')
       }
 
       offset++
-      result.push([i - offset, lines[i], label[1]])
+      result.push([i - offset, label[2]?.trim() ?? lines[i], label[1]])
     } else {
       result.push([i - offset, currentLine, undefined])
     }
