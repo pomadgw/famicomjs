@@ -22,7 +22,7 @@ describe('instructions: stack operations', () => {
       const cpu = new CPU(generateArray(0x200))
       cpu.fetch()
       const oldStackPointer = 0xfe
-      cpu.ram[oldStackPointer + 0x100] = 0xff
+      cpu.ram[oldStackPointer + 0x100 + 1] = 0xff
       cpu.registers.SP = oldStackPointer
 
       stack.PLA(cpu)
@@ -34,7 +34,7 @@ describe('instructions: stack operations', () => {
       const cpu = new CPU(generateArray(0x200))
       cpu.fetch()
       const oldStackPointer = 0xfd
-      cpu.ram[oldStackPointer + 0x100] = 0xff
+      cpu.ram[oldStackPointer + 0x100 + 1] = 0xff
       cpu.registers.SP = oldStackPointer
 
       stack.PLA(cpu)
@@ -49,9 +49,9 @@ describe('instructions: stack operations', () => {
     it('should set Z flag correct', () => {
       const cpu = new CPU(generateArray(0x200))
       cpu.fetch()
-      const oldStackPointer = 0xfd
-      cpu.ram[oldStackPointer + 0x100] = 0x00
-      cpu.ram[oldStackPointer + 0x100 + 1] = 0x01
+      const oldStackPointer = 0xfc
+      cpu.ram[oldStackPointer + 0x100 + 1] = 0x00
+      cpu.ram[oldStackPointer + 0x100 + 2] = 0x01
       cpu.registers.SP = oldStackPointer
 
       stack.PLA(cpu)
@@ -85,7 +85,7 @@ describe('instructions: stack operations', () => {
 
       const status = 0b11110001
       const oldStackPointer = 0xfe
-      cpu.ram[oldStackPointer + 0x100] = status
+      cpu.ram[oldStackPointer + 0x100 + 1] = status
       cpu.registers.SP = oldStackPointer
 
       stack.PLP(cpu)

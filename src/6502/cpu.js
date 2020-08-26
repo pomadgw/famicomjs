@@ -87,8 +87,8 @@ export default class CPU {
   }
 
   popStack() {
-    const temp = this.ram[this.registers.SP + 0x100]
     this.registers.SP++
+    const temp = this.ram[this.registers.SP + 0x100]
 
     return temp
   }

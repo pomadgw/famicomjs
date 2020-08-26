@@ -1,6 +1,8 @@
 import * as branch from './branch'
 import CPU from '../../cpu'
 
+const generateArray = (len) => [...new Array(len)].map((_) => 0)
+
 const definitions = [
   {
     instruction: 'BCC',
@@ -52,6 +54,42 @@ describe('instructions: branch instructions', () => {
       cpudummy.fetch({ absoluteAddress: 0x0100 })
       branch.JMP(cpudummy)
       expect(cpudummy.registers.PC).toBe(0x0100)
+    })
+  })
+
+  describe('JSR', () => {
+    it('should change PC register to specified value', () => {
+      const cpudummy = new CPU(generateArray(0x1000))
+      cpudummy.registers.PC = 0
+      cpudummy.fetch({ absoluteAddress: 0x0100 })
+      branch.JSR(cpudummy)
+      expect(cpudummy.registers.PC).toBe(0x0100)
+    })
+
+    it('should save previous PC to stack correctly', () => {
+      const cpudummy = new CPU(generateArray(0x1000))
+      cpudummy.registers.PC = 0x1234
+
+      cpudummy.fetch({ absoluteAddress: 0x0100 })
+      branch.JSR(cpudummy)
+
+      expect(cpudummy.ram[0x1ff]).toBe(0x12)
+      expect(cpudummy.ram[0x1fe]).toBe(0x33)
+    })
+  })
+
+  describe('RTS', () => {
+    it('should restore saved PC in stack back to PC register correctly', () => {
+      const cpudummy = new CPU(generateArray(0x1000))
+      cpudummy.registers.PC = 0x1000
+
+      cpudummy.ram[0x1ff] = 0x12
+      cpudummy.ram[0x1fe] = 0x33
+      cpudummy.registers.SP = 0xfd
+      cpudummy.fetch()
+      branch.RTS(cpudummy)
+
+      expect(cpudummy.registers.PC).toBe(0x1234)
     })
   })
 
