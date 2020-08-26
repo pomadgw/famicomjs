@@ -26,6 +26,7 @@ import { CMP, CPX, CPY } from './operations/comparison'
 import { BRK, RTI } from './operations/interrupts'
 import { LDA, LDX, LDY, STA, STX, STY } from './operations/memory'
 import { NOP } from './operations/nop'
+import { TAX, TAY, TXA, TYA } from './operations/register'
 import { PHA, PLA, PHP, PLP, TXS, TSX } from './operations/stack'
 
 const ABX = (cpu) => ABS(cpu, 'X')
@@ -867,7 +868,7 @@ export default {
   },
   0x8a: {
     name: 'TXA',
-    operator: NOP,
+    operator: TXA,
     addressing: IMP,
     cycles: 2
   },
@@ -951,7 +952,7 @@ export default {
   },
   0x98: {
     name: 'TYA',
-    operator: NOP,
+    operator: TYA,
     addressing: IMP,
     cycles: 2
   },
@@ -1047,7 +1048,7 @@ export default {
   },
   0xa8: {
     name: 'TAY',
-    operator: NOP,
+    operator: TAY,
     addressing: IMP,
     cycles: 2
   },
@@ -1059,7 +1060,7 @@ export default {
   },
   0xaa: {
     name: 'TAX',
-    operator: NOP,
+    operator: TAX,
     addressing: IMP,
     cycles: 2
   },
