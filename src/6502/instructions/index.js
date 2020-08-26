@@ -43,8 +43,8 @@ export default {
   0x00: {
     name: 'BRK',
     operator: BRK,
-    addressing: IMM,
-    addressingName: 'IMM',
+    addressing: IMP,
+    addressingName: 'IMP',
     cycles: 7
   },
   0x01: {

@@ -2,7 +2,7 @@
   {
     "name": "BRK",
     "operate": "brk",
-    "addr_mode": "IMM",
+    "addr_mode": "IMP",
     "cycles": 7
   },
   {
