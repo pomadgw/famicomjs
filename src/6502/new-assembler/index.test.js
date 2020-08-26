@@ -139,4 +139,40 @@ describe('assembler', () => {
       expect(assembler.assembleLine('BEQ $10')).toEqual([0xf0, 0x10])
     })
   })
+
+  describe('#labelLines', () => {
+    it('should add line number', () => {
+      const lines = `
+LDA #$10
+STA $1000
+      `
+        .trim()
+        .split('\n')
+
+      expect(assembler.labelLines(lines)).toEqual([
+        [0, 'LDA #$10', undefined],
+        [1, 'STA $1000', undefined]
+      ])
+    })
+
+    it('should annotate label correctly', () => {
+      const lines = `
+LDA #$10
+STA $1000
+LABEL:
+DEC
+LABEL2:
+INC
+      `
+        .trim()
+        .split('\n')
+
+      expect(assembler.labelLines(lines)).toEqual([
+        [0, 'LDA #$10', undefined],
+        [1, 'STA $1000', undefined],
+        [2, 'DEC', 'LABEL'],
+        [3, 'INC', 'LABEL2']
+      ])
+    })
+  })
 })

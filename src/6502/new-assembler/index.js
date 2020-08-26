@@ -75,3 +75,23 @@ export function assembleLine(string) {
 
   return [Number(opcode[0]), ...params]
 }
+
+export function labelLines(lines) {
+  const result = []
+  let offset = 0
+
+  for (let i = 0; i < lines.length; i++) {
+    const currentLine = lines[i]
+    const label = /\s*(.+?):$/.exec(currentLine.trim())
+
+    if (label) {
+      i += 1
+      offset++
+      result.push([i - offset, lines[i], label[1]])
+    } else {
+      result.push([i - offset, currentLine, undefined])
+    }
+  }
+
+  return result
+}
