@@ -2,7 +2,41 @@ import CPU from './cpu'
 import assemblerGenerator from './assembler/index'
 
 describe('CPU', () => {
-  const a6502 = assemblerGenerator({ memorySize: 0x2000, PC: 0 })
+  const a6502 = assemblerGenerator({ memorySize: 0x10000, PC: 0 })
+
+  describe('when reset', () => {
+    let cpu
+
+    beforeAll(() => {
+      cpu = new CPU(a6502`BRK`)
+      cpu.registers.A = 0x10
+      cpu.registers.X = 0x10
+      cpu.registers.Y = 0x10
+      cpu.registers.SP = 0xf0
+      cpu.ram[0xfffc] = 0x34
+      cpu.ram[0xfffd] = 0x12
+
+      cpu.reset()
+    })
+
+    it('should set stack pointer to 0xfd', () => {
+      expect(cpu.registers.SP).toBe(0xfd)
+    })
+
+    it('should reset register (A, X, Y) to zero', () => {
+      expect(cpu.registers.A).toBe(0)
+      expect(cpu.registers.X).toBe(0)
+      expect(cpu.registers.Y).toBe(0)
+    })
+
+    it('should reset status register', () => {
+      expect(+cpu.registers.STATUS).toBe(1 << 5)
+    })
+
+    it('should set PC register to address in 0xFFFC & 0xFFFD', () => {
+      expect(cpu.registers.PC).toBe(0x1234)
+    })
+  })
 
   it('should be able to execute correctly (zero page)', () => {
     // LDA $F0

@@ -37,6 +37,27 @@ export default class CPU {
     this.opcode = 0
   }
 
+  reset() {
+    this.registers.A = 0
+    this.registers.X = 0
+    this.registers.Y = 0
+    this.registers.SP = 0xfd
+
+    this.registers.STATUS.status = 0
+    this.registers.STATUS.U = true
+
+    const startPCAddress = 0xfffc
+    const loPC = this.ram[startPCAddress]
+    const hiPC = this.ram[startPCAddress + 1]
+    this.registers.PC = (hiPC << 8) | loPC
+
+    this.addresses.absoluteAddress = 0
+    this.addresses.relativeAddress = 0
+    this.fetch = 0
+
+    this.cycles = 0
+  }
+
   clock() {
     while (this.cycles > 0) this.cycles -= 1
     this.atomicClock()
