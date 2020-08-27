@@ -55,7 +55,37 @@ export default class CPU {
     this.addresses.relativeAddress = 0
     this.fetch = 0
 
-    this.cycles = 0
+    this.cycles = 8
+  }
+
+  interrupt(targetAddress) {
+    const { PC } = this.registers
+    this.pushStack((PC >> 8) & 0xff)
+    this.pushStack(PC & 0xff)
+
+    this.registers.STATUS.B = false
+    this.registers.STATUS.U = true
+    this.registers.STATUS.I = true
+
+    this.pushStack(+this.registers.STATUS)
+
+    this.addresses.absoluteAddress = targetAddress
+
+    const loPC = this.ram[targetAddress]
+    const hiPC = this.ram[targetAddress + 1]
+    this.registers.PC = (hiPC << 8) | loPC
+
+    this.cycles = 7
+  }
+
+  irq() {
+    if (this.registers.STATUS.I) {
+      this.interrupt(0xfffe)
+    }
+  }
+
+  nmi() {
+    this.interrupt(0xfffa)
   }
 
   clock() {

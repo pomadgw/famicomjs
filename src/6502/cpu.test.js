@@ -38,6 +38,64 @@ describe('CPU', () => {
     })
   })
 
+  describe('interrupt', () => {
+    let cpu
+
+    beforeEach(() => {
+      cpu = new CPU(a6502`BRK`)
+      cpu.ram[0xfffa] = 0x34
+      cpu.ram[0xfffb] = 0x12
+      cpu.ram[0xfffc] = 0x34
+      cpu.ram[0xfffd] = 0x00
+      cpu.ram[0xfffe] = 0x78
+      cpu.ram[0xffff] = 0x56
+      cpu.reset()
+    })
+
+    it('should save old PC to stack', () => {
+      const oldSP = cpu.registers.SP
+      cpu.interrupt(0xfffe)
+      expect(cpu.ram[0x100 + oldSP]).toBe(0x00)
+      expect(cpu.ram[0x100 + oldSP - 1]).toBe(0x34)
+    })
+
+    it('should save various flags accordingly', () => {
+      cpu.interrupt(0xfffe)
+      expect(cpu.registers.STATUS.B).toBe(false)
+      expect(cpu.registers.STATUS.U).toBe(true)
+      expect(cpu.registers.STATUS.I).toBe(true)
+    })
+
+    it('should save status register to stack', () => {
+      const oldSP = cpu.registers.SP
+      cpu.registers.STATUS.status = 0b11111111
+      cpu.interrupt(0xfffe)
+
+      expect(cpu.ram[0x100 + oldSP - 2]).toBe(0b11101111)
+    })
+
+    describe('nmi', () => {
+      it('should change PC to addressing in 0xFFFA & 0xFFFB', () => {
+        cpu.nmi()
+        expect(cpu.registers.PC).toBe(0x1234)
+      })
+    })
+
+    describe('irq', () => {
+      it('should change PC to addressing in 0xFFFE & 0xFFFF if flag I is set', () => {
+        cpu.registers.STATUS.I = true
+        cpu.irq()
+        expect(cpu.registers.PC).toBe(0x5678)
+      })
+
+      it('should not change PC if flag I is not set', () => {
+        cpu.registers.STATUS.I = false
+        cpu.irq()
+        expect(cpu.registers.PC).toBe(0x0034)
+      })
+    })
+  })
+
   it('should be able to execute correctly (zero page)', () => {
     // LDA $F0
     // operator: LDA, addressing mode: zero page
