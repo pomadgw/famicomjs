@@ -37,6 +37,57 @@ export default class CPU {
     this.opcode = 0
   }
 
+  reset() {
+    this.registers.A = 0
+    this.registers.X = 0
+    this.registers.Y = 0
+    this.registers.SP = 0xfd
+
+    this.registers.STATUS.status = 0
+    this.registers.STATUS.U = true
+
+    const startPCAddress = 0xfffc
+    const loPC = this.ram[startPCAddress]
+    const hiPC = this.ram[startPCAddress + 1]
+    this.registers.PC = (hiPC << 8) | loPC
+
+    this.addresses.absoluteAddress = 0
+    this.addresses.relativeAddress = 0
+    this.fetch = 0
+
+    this.cycles = 8
+  }
+
+  interrupt(targetAddress) {
+    const { PC } = this.registers
+    this.pushStack((PC >> 8) & 0xff)
+    this.pushStack(PC & 0xff)
+
+    this.registers.STATUS.B = false
+    this.registers.STATUS.U = true
+    this.registers.STATUS.I = true
+
+    this.pushStack(+this.registers.STATUS)
+
+    this.addresses.absoluteAddress = targetAddress
+
+    const loPC = this.ram[targetAddress]
+    const hiPC = this.ram[targetAddress + 1]
+    this.registers.PC = (hiPC << 8) | loPC
+
+    this.cycles = 7
+  }
+
+  irq() {
+    if (this.registers.STATUS.I) {
+      this.interrupt(0xfffe)
+    }
+  }
+
+  nmi() {
+    this.interrupt(0xfffa)
+  }
+
   clock() {
     while (this.cycles > 0) this.cycles -= 1
     this.atomicClock()
