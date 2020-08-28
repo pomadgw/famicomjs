@@ -1,5 +1,4 @@
 import opcodes from '../instructions'
-import { toUint8 } from '../utils'
 
 const branchingOperators = [
   'bcc',
@@ -140,7 +139,7 @@ export function compileLabelToAddress(lines, pc = 0) {
     const [operator, params] = instruction.split(/\s+/)
     if (labels[params] != null) {
       if (branchingOperators.includes(operator.toLowerCase())) {
-        const relativeAddress = toUint8(labels[params] - lineNo - 2)
+        const relativeAddress = new Uint8Array([labels[params] - lineNo - 2])[0]
         instruction = `${operator} $${relativeAddress
           .toString(16)
           .padStart(2, '0')}`

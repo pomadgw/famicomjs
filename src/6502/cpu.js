@@ -1,6 +1,5 @@
 import RegisterStatus from './register'
 import mapping from './instructions/index'
-import { toUint8, toUint16 } from './utils'
 
 export default class CPU {
   constructor(ram) {
@@ -8,18 +7,21 @@ export default class CPU {
 
     this.registers = new Proxy(
       {
-        A: 0,
-        X: 0,
-        Y: 0,
-        SP: 0xff,
-        PC: 0,
+        A: new Uint8Array([0]),
+        X: new Uint8Array([0]),
+        Y: new Uint8Array([0]),
+        SP: new Uint8Array([0xff]),
+        PC: new Uint16Array([0]),
         STATUS: RegisterStatus.create()
       },
       {
+        get(target, prop) {
+          if (prop === 'STATUS') return target[prop]
+          return target[prop][0]
+        },
         set(target, prop, value) {
           if (prop === 'STATUS') target[prop] = value
-          else if (prop === 'PC') target[prop] = toUint16(value)
-          else target[prop] = toUint8(value)
+          else target[prop][0] = value
           return true
         }
       }

@@ -11,7 +11,15 @@ export const FLAGS = {
 
 export default class RegisterStatus {
   constructor(status = 0) {
-    this.status = status
+    this._status = new Uint8Array([status])
+  }
+
+  get status() {
+    return this._status[0]
+  }
+
+  set status(value) {
+    this._status[0] = value
   }
 
   getStatus(flag) {
