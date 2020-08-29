@@ -9,18 +9,11 @@ const config = {
   input: './src/index.js',
   output: {
     dir: 'dist',
-    format: 'esm',
+    format: 'iife',
     entryFileNames: '[name].[hash].js',
     assetFileNames: '[name].[hash][extname]'
   },
-  plugins: [
-    babel({
-      babelHelpers: 'runtime'
-    }),
-    node_resolve(),
-    json()
-  ],
-  external: [/@babel\/runtime/]
+  plugins: [babel(), node_resolve(), json()]
 }
 
 if (process.env.NODE_ENV === 'production') {
