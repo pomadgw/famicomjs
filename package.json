@@ -7,6 +7,7 @@
   "scripts": {
     "clean:web": "shx rm -rf dist",
     "clean:bin": "shx rm -rf _bin",
+    "clean": "shx rm -rf _bin",
     "start": "nollup -c --environment NODE_ENV:development",
     "build:web": "npm run clean && rollup -c --environment NODE_ENV:production",
     "build:bin": "npm run clean:bin && rollup -c rollup.bin.config.js --environment NODE_ENV:production",
@@ -24,6 +25,7 @@
     "@rollup/plugin-commonjs": "^15.0.0",
     "@rollup/plugin-html": "^0.2.0",
     "@rollup/plugin-json": "^4.1.0",
+    "@snowpack/plugin-babel": "^2.1.0",
     "@types/jest": "^26.0.10",
     "babel-jest": "^26.3.0",
     "codecov": "^3.7.2",
@@ -47,7 +49,8 @@
     "rollup-plugin-static-files": "^0.1.0",
     "rollup-plugin-terser": "^7.0.0",
     "serve": "^11.3.2",
-    "shx": "^0.3.2"
+    "shx": "^0.3.2",
+    "snowpack": "^2.9.3"
   },
   "jest": {
     "verbose": true,
