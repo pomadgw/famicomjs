@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import node_resolve from 'rollup-plugin-node-resolve'
-import babel from '@rollup/plugin-babel'
+import { getBabelOutputPlugin } from '@rollup/plugin-babel'
 import json from '@rollup/plugin-json'
 import commonjs from '@rollup/plugin-commonjs'
 
@@ -12,8 +12,9 @@ const config = {
     entryFileNames: '[name].js'
   },
   plugins: [
-    babel({
-      babelHelpers: 'runtime'
+    getBabelOutputPlugin({
+      presets: ['@babel/preset-env'],
+      plugins: ['@babel/plugin-transform-runtime']
     }),
     commonjs(),
     node_resolve(),
