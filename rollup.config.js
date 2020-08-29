@@ -13,7 +13,14 @@ const config = {
     entryFileNames: '[name].[hash].js',
     assetFileNames: '[name].[hash][extname]'
   },
-  plugins: [babel(), node_resolve(), json()]
+  plugins: [
+    babel({
+      babelHelpers: 'runtime'
+    }),
+    node_resolve(),
+    json()
+  ],
+  external: [/@babel\/runtime/]
 }
 
 if (process.env.NODE_ENV === 'production') {
