@@ -1,8 +1,18 @@
 import CPU from './cpu'
+import Bus from '../bus/index'
 import assemblerGenerator from './assembler/index'
 
 describe('CPU', () => {
   const a6502 = assemblerGenerator({ memorySize: 0x10000, PC: 0 })
+
+  describe('when connected to bus', () => {
+    it('should be able to connect to bus', () => {
+      const cpu = new CPU(a6502`BRK`)
+      const bus = new Bus(cpu)
+
+      expect(cpu.bus).toBe(bus)
+    })
+  })
 
   describe('when reset', () => {
     let cpu
