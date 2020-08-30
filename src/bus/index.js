@@ -1,6 +1,7 @@
 export default class Bus {
-  constructor(cpu) {
+  constructor(cpu, ppu) {
     this.cpu = cpu
+    this.ppu = ppu
 
     this.cpu.connect(this)
 
@@ -11,7 +12,7 @@ export default class Bus {
     const cpuRAM = new Uint8Array(0x2000)
 
     const proxyRAM = new Proxy(cpuRAM, {
-      get(target, prop) {
+      get: (target, prop) => {
         const address = Number(prop)
         if (isNaN(address)) return target[prop]
 
@@ -20,10 +21,10 @@ export default class Bus {
         // eslint-disable-next-line no-constant-condition
         if (false) return 0
         else if (address < 0x2000) return target[address & 0x07ff]
-        else if (address < 0x4000) return 0 // here return content of PPU
+        else if (address < 0x4000) return this.ppu.cpuRead(address & 0x0007)
         return 0
       },
-      set(target, prop, value) {
+      set: (target, prop, value) => {
         const address = Number(prop)
         if (isNaN(address)) target[prop] = value
         // TODO:
@@ -32,7 +33,7 @@ export default class Bus {
         else if (false) return 0
         else if (address < 0x2000) target[prop & 0x07ff] = value
         else if (address < 0x4000) {
-          // here set content of PPU
+          this.ppu.cpuWrite(address & 0x0007, value)
         }
 
         return true
@@ -40,5 +41,6 @@ export default class Bus {
     })
 
     this.cpu.ram = proxyRAM
+    this.ram = proxyRAM
   }
 }
