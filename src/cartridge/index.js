@@ -1,6 +1,11 @@
 export default class Cartridge {
   // eslint-disable-next-line no-useless-constructor
-  constructor() {}
+  constructor() {
+    this.prgMemory = []
+    this.chrMemory = []
+  }
+
+  readFile(file) {}
 
   cpuRead(_addr) {
     return 0
