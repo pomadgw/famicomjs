@@ -10,3 +10,12 @@ coverage:
       CPU:
         paths:
           - src/6502
+      PPU:
+        paths:
+          - src/ppu
+      cartridge:
+        paths:
+          - src/cartridge
+      bus:
+        paths:
+          - src/bus
