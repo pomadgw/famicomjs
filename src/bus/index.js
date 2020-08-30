@@ -6,6 +6,8 @@ export default class Bus {
     this.cpu.connect(this)
 
     this.initVRAM()
+
+    this.globalSystemClockNumber = 0
   }
 
   initVRAM() {
@@ -43,4 +45,16 @@ export default class Bus {
     this.cpu.ram = proxyRAM
     this.ram = proxyRAM
   }
+
+  insertCartridge(cartridge) {
+    this.cartridge = cartridge
+    this.ppu.insertCartridge(cartridge)
+  }
+
+  reset() {
+    this.cpu.reset()
+    this.globalSystemClockNumber = 0
+  }
+
+  clock() {}
 }

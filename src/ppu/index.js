@@ -1,6 +1,15 @@
 export default class PPU {
   // eslint-disable-next-line no-useless-constructor
-  constructor() {}
+  constructor() {
+    this.tableName = [new Uint8Array(1024), new Uint8Array(1024)]
+    this.tablePalette = new Uint8Array(32)
+  }
+
+  insertCartridge(cartridge) {
+    this.cartridge = cartridge
+  }
+
+  clock() {}
 
   cpuRead(addr) {
     // eslint-disable-next-line prefer-const
