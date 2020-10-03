@@ -1,3 +1,5 @@
+import 'regenerator-runtime/runtime'
+
 import App from './ui/App.svelte'
 import CPU from './6502/cpu'
 

@@ -37,6 +37,12 @@ export default class CPU {
     this.isImplicit = false
     this.cycles = 0
     this.opcode = 0
+
+    this.bus = null
+  }
+
+  connect(bus) {
+    this.bus = bus
   }
 
   reset() {
