@@ -4,6 +4,7 @@ import static_files from 'rollup-plugin-static-files'
 import { terser } from 'rollup-plugin-terser'
 import babel from '@rollup/plugin-babel'
 import json from '@rollup/plugin-json'
+import svelte from 'rollup-plugin-svelte'
 
 const config = {
   input: './src/index.js',
@@ -13,7 +14,7 @@ const config = {
     entryFileNames: '[name].[hash].js',
     assetFileNames: '[name].[hash][extname]'
   },
-  plugins: [babel(), node_resolve(), json()]
+  plugins: [babel(), node_resolve(), json(), svelte()]
 }
 
 if (process.env.NODE_ENV === 'production') {
