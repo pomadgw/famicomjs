@@ -8,7 +8,7 @@
     "clean": "shx rm -rf dist",
     "start:web": "snowpack dev",
     "build:web": "snowpack build",
-    "build": "npm run clean && rollup -c build/rollup.config.js --environment NODE_ENV:production",
+    "build": "npm run clean && npm run build:web",
     "generate-opcodes": "node build-opcode.js && eslint --fix src/6502/instructions/index.js",
     "test": "jest --coverage"
   },
