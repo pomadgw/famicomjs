@@ -19,7 +19,35 @@ export default class Cartridge {
     })
     const view = new Uint8Array(data)
 
-    this.mapperId = ((view[7] >> 4) << 4) | (view[6] >> 4)
+    const mapper1 = view[6]
+    const mapper2 = view[7]
+
+    this.mapperId = ((mapper2 >> 4) << 4) | (mapper1 >> 4)
+    console.log(this.mapperId)
+
+    let seekPosition = 16
+
+    if ((mapper1 & 0x04) > 0) {
+      seekPosition += 512
+    }
+
+    const nFileType = 1
+
+    if (nFileType === 0) {
+    } else if (nFileType === 1) {
+      this.prgBankNumber = view[4]
+      this.chrBankNumber = view[5]
+      this.prgMemory = view.slice(
+        seekPosition,
+        seekPosition + this.prgBankNumber * 16384
+      )
+      seekPosition += this.prgBankNumber * 16384
+      this.chrMemory = view.slice(
+        seekPosition,
+        seekPosition + this.chrBankNumber * 8192
+      )
+    } else if (nFileType === 2) {
+    }
   }
 
   cpuRead(_addr) {
