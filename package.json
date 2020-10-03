@@ -7,9 +7,9 @@
   "scripts": {
     "clean:web": "shx rm -rf build",
     "clean:bin": "shx rm -rf _bin",
-    "clean": "shx rm -rf _bin",
+    "clean": "npm run clean:bin && npm run clean:web",
     "start": "nollup -c --environment NODE_ENV:development",
-    "build:web": "snowpack build",
+    "build:web": "npm run clean:web &&snowpack build",
     "build:bin": "npm run clean:bin && rollup -c build/rollup.bin.config.js --environment NODE_ENV:production",
     "build": "npm run build:web && npm run build:bin",
     "generate-opcodes": "node build-opcode.js && eslint --fix src/6502/instructions/index.js",
