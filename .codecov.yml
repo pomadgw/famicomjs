@@ -16,6 +16,9 @@ coverage:
       cartridge:
         paths:
           - src/cartridge
+      mappers:
+        paths:
+          - src/mappers
       bus:
         paths:
           - src/bus
