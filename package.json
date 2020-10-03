@@ -5,7 +5,7 @@
   "author": "Rahadian Yusuf <rahadian.y@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "clean": "shx rm -rf dist",
+    "clean": "shx rm -rf build",
     "start:web": "snowpack dev",
     "build:web": "snowpack build",
     "build": "npm run clean && npm run build:web",
