@@ -64,9 +64,16 @@ export default class PPU {
     // }
   }
 
-  ppuRead(_addr) {
+  ppuRead(addr) {
+    if (this.cartridge.ppuRead(addr)) {
+      // TODO: implement this later
+    }
     return 0
   }
 
-  ppuWrite(_addr, _value) {}
+  ppuWrite(addr, value) {
+    if (this.cartridge.ppuWrite(addr, value)) {
+      // TODO: implement this later
+    }
+  }
 }
