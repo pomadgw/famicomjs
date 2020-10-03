@@ -51,14 +51,18 @@ export default class Cartridge {
   }
 
   cpuRead(_addr) {
-    return 0
+    return false
   }
 
-  cpuWrite(_addr, _value) {}
+  cpuWrite(_addr, _value) {
+    return false
+  }
 
   ppuRead(_addr) {
-    return 0
+    return false
   }
 
-  ppuWrite(_addr, _value) {}
+  ppuWrite(_addr, _value) {
+    return false
+  }
 }
