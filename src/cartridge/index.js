@@ -1,3 +1,5 @@
+import mappers from '../mappers'
+
 export default class Cartridge {
   constructor() {
     this.prgMemory = []
@@ -48,21 +50,52 @@ export default class Cartridge {
       )
     } else if (nFileType === 2) {
     }
+
+    const MapperClass = mappers[this.mapperId]
+
+    if (MapperClass)
+      this.mapper = new MapperClass(this.prgBankNumber, this.chrBankNumber)
   }
 
-  cpuRead(_addr) {
-    return false
+  cpuRead(addr) {
+    const { status, mappedAddress } = this.mapper.cpuMapRead(addr)
+
+    if (status) {
+      return this.prgMemory[mappedAddress]
+    }
+
+    return null
   }
 
-  cpuWrite(_addr, _value) {
-    return false
+  cpuWrite(addr, value) {
+    const { status, mappedAddress } = this.mapper.cpuMapWrite(addr)
+
+    if (status) {
+      this.prgMemory[mappedAddress] = value
+      return true
+    }
+
+    return null
   }
 
-  ppuRead(_addr) {
-    return false
+  ppuRead(addr) {
+    const { status, mappedAddress } = this.mapper.ppuMapRead(addr)
+
+    if (status) {
+      return this.chrMemory[mappedAddress]
+    }
+
+    return null
   }
 
-  ppuWrite(_addr, _value) {
-    return false
+  ppuWrite(addr, value) {
+    const { status, mappedAddress } = this.mapper.ppuMapWrite(addr)
+
+    if (status) {
+      this.chrMemory[mappedAddress] = value
+      return true
+    }
+
+    return null
   }
 }
