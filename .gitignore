@@ -4,3 +4,4 @@ dist/
 coverage/
 _bin/
 yarn-error.log
+build/
