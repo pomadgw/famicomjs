@@ -9,4 +9,4 @@ This project is attempt to emulating Nintendo's famous video game console Family
 
 I want to learn on how to create emulation of other system. Also, we want to sharpen my ability and knowledge in coding a good practice JavaScript and software engineering in general.
 
-
+The code itself is based on [tutorial made by javidx9](https://www.youtube.com/playlist?list=PLrOv9FMX8xJHqMvSGB_9G9nZZ_4IgteYf) and the codes in this repository is partially port of his codes, which can be seen [here](https://github.com/OneLoneCoder/olcNES).
