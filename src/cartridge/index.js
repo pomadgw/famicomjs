@@ -25,7 +25,6 @@ export default class Cartridge {
     const mapper2 = view[7]
 
     this.mapperId = ((mapper2 >> 4) << 4) | (mapper1 >> 4)
-    console.log(this.mapperId)
 
     let seekPosition = 16
 
