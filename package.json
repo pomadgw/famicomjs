@@ -43,6 +43,7 @@
     "glob": "^7.1.6",
     "husky": ">=4",
     "jest": "^26.4.0",
+    "jest-canvas-mock": "^2.3.0",
     "lint-staged": ">=10",
     "nollup": "^0.13.5",
     "prettier": "^2.0.5",
@@ -59,6 +60,7 @@
   },
   "jest": {
     "verbose": true,
+    "setupFiles": ["jest-canvas-mock"],
     "collectCoverageFrom": [
       "src/**/*.js",
       "!src/index.js",
