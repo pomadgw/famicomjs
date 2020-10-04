@@ -61,7 +61,7 @@ export default class CPU {
 
     this.addresses.absoluteAddress = 0
     this.addresses.relativeAddress = 0
-    this.fetch = 0
+    this.fetched = 0
 
     this.cycles = 8
   }
@@ -96,13 +96,18 @@ export default class CPU {
     this.interrupt(0xfffa)
   }
 
+  get isComplete() {
+    return this.cycles === 0
+  }
+
   clock() {
-    while (this.cycles > 0) this.cycles -= 1
-    this.atomicClock()
+    do {
+      this.atomicClock()
+    } while (!this.isComplete)
   }
 
   atomicClock() {
-    if (this.cycles === 0) {
+    if (this.isComplete) {
       const opcode = this.readRAM(this.nextPC())
       this.opcode = opcode
       this.operation = mapping[opcode]
@@ -110,6 +115,8 @@ export default class CPU {
       this.cycles += this.fetch(this.operation.addressing(this))
       this.cycles += this.operation.operator(this)
     }
+
+    this.cycles -= 1
   }
 
   fetch({ absoluteAddress, value, relativeAddress, clocks } = { clocks: 0 }) {
