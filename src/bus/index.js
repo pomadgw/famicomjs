@@ -11,15 +11,22 @@ export default class Bus {
   }
 
   initVRAM() {
-    const cpuRAM = new Uint8Array(0x2000)
+    const cpuRAM = new Uint8Array(0x10000)
     const thisBus = this
 
     const proxyRAM = new Proxy(cpuRAM, {
       get: (target, prop) => {
         const address = Number(prop)
-        if (isNaN(address)) return target[prop]
+        if (isNaN(address)) {
+          if (typeof target[prop] === 'function') {
+            return target[prop].bind(target)
+          }
 
-        if (thisBus.cartridge.cpuRead(address)) return 0
+          return target[prop]
+        }
+
+        const checkFromCartridge = thisBus.cartridge.cpuRead(address)
+        if (checkFromCartridge) return checkFromCartridge
         else if (address < 0x2000) return target[address & 0x07ff]
         else if (address < 0x4000) return this.ppu.cpuRead(address & 0x0007)
         return 0

@@ -2,11 +2,14 @@ import Bus from './index'
 import CPU from '../6502/cpu'
 import PPU from '../ppu'
 
-const createDummyCartridge = (defaultValue = false) => ({
-  cpuRead: () => defaultValue,
-  cpuWrite: () => defaultValue,
-  ppuRead: () => defaultValue,
-  ppuWrite: () => defaultValue
+const createDummyCartridge = (
+  defaultReadValue = false,
+  defaultWriteValue = false
+) => ({
+  cpuRead: () => defaultReadValue,
+  cpuWrite: () => defaultWriteValue,
+  ppuRead: () => defaultReadValue,
+  ppuWrite: () => defaultWriteValue
 })
 
 describe('Bus', () => {
@@ -38,13 +41,14 @@ describe('Bus', () => {
       const cpu = new CPU([])
       const ppu = new PPU()
       const bus = new Bus(cpu, ppu)
-      bus.insertCartridge(createDummyCartridge(true))
+      const cart = createDummyCartridge(12, true)
+      cart.ppuRead = () => true
+      bus.insertCartridge(cart)
 
       jest.spyOn(ppu, 'cpuRead')
 
-      const data = bus.ram[0x2001]
-      expect(data).toBe(0)
-      expect(ppu.cpuRead).not.toHaveBeenCalled()
+      const data = bus.ram[0x0001]
+      expect(data).toBe(12)
     })
 
     it('should read data from PPU if address is 0x2000 - 0x3fff', () => {
@@ -70,6 +74,16 @@ describe('Bus', () => {
 
       bus.ram[0x2008] = 0x10
       expect(ppu.cpuWrite).toHaveBeenCalledWith(0, 0x10)
+    })
+
+    it('should run correct function with this context', () => {
+      const cpu = new CPU([])
+      const ppu = new PPU()
+      const bus = new Bus(cpu, ppu)
+      bus.insertCartridge(createDummyCartridge(false))
+
+      bus.ram[0x0000] = 0x10
+      expect(bus.ram.subarray(0, 1)[0]).toBe(0x10)
     })
   })
 })
