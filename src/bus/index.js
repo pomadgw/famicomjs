@@ -51,5 +51,13 @@ export default class Bus {
     this.globalSystemClockNumber = 0
   }
 
-  clock() {}
+  clock() {
+    this.ppu.clock()
+
+    if (this.globalSystemClockNumber % 3 === 0) {
+      this.cpu.atomicClock()
+    }
+
+    this.globalSystemClockNumber += 1
+  }
 }
