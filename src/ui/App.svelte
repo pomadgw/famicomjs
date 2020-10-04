@@ -1,5 +1,7 @@
 <script>
   import { onMount } from 'svelte'
+  import RAM from './RAM.svelte'
+
   import Cartridge from '../cartridge'
   import Bus from '../bus'
   import CPU from '../6502/cpu'
@@ -23,6 +25,7 @@
     const cart = new Cartridge()
     await cart.parse(file)
 
+    nes.cartridge = cart
     nes.insertCartridge(cart)
     nes.reset()
   }
@@ -104,3 +107,6 @@
 <button on:click={stepNES}>Execute Code Step-by-Step</button>
 <button on:click={renderSingleFrame}>Execute Code for Whole Frame</button>
 <button on:click={toggleEmulation}>Toggle Emulation: {emulationMode ? 'on' : 'off'}</button>
+{#if nes.cartridge}
+<RAM ram={nes.cpu.ram} offsetStart={0x8000} offsetEnd={0x80ff} />
+{/if}
