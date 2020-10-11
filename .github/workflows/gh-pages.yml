@@ -6,7 +6,7 @@ on:
       - release-gh-pages/**
 
 jobs:
-  build:
+  deploy:
     strategy:
       matrix:
         node-version: [14.x]
