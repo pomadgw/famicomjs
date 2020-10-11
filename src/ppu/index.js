@@ -115,13 +115,13 @@ export default class PPU {
     return this.screen
   }
 
-  getTableName(i) {
-    return this.screenTableName[i]
-  }
+  // getTableName(i) {
+  //   return this.screenTableName[i]
+  // }
 
-  getPatternTable(i) {
-    return this.screenPatternTable[i]
-  }
+  // getPatternTable(i) {
+  //   return this.screenPatternTable[i]
+  // }
 
   cpuRead(addr) {
     // eslint-disable-next-line prefer-const
