@@ -1,0 +1,1 @@
+import t from"../__snowpack__/env.js";import.meta.env=t;import"../web_modules/regenerator-runtime/runtime.js";import o from"./ui/App.js";var e=new o({target:document.body});export default e;import.meta.hot&&(import.meta.hot.accept(),import.meta.hot.dispose(function(){e.$destroy()}));

@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "regenerator-runtime/runtime": "./regenerator-runtime/runtime.js",
+    "svelte": "./svelte.js",
+    "svelte/internal": "./svelte/internal.js"
+  }
+}
