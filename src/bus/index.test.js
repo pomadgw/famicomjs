@@ -84,6 +84,24 @@ describe('Bus', () => {
 
       bus.ram[0x0000] = 0x10
       expect(bus.ram.subarray(0, 1)[0]).toBe(0x10)
+      expect(bus.ram.length).toBe(0x10000)
     })
+  })
+
+  it('should run clocks', () => {
+    const cpu = new CPU([])
+    const ppu = new PPU()
+    const bus = new Bus(cpu, ppu)
+    bus.insertCartridge(createDummyCartridge(false))
+
+    jest.spyOn(bus.ppu, 'clock')
+    jest.spyOn(bus.cpu, 'atomicClock')
+
+    bus.clock()
+    bus.clock()
+    bus.clock()
+
+    expect(bus.ppu.clock).toHaveBeenCalledTimes(3)
+    expect(bus.cpu.atomicClock).toHaveBeenCalledTimes(1)
   })
 })
