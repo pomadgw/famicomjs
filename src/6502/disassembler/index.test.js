@@ -47,4 +47,24 @@ describe('Disassember', () => {
       'BEQ $10'
     ])
   })
+
+  it('should show target address for branching/jump function', () => {
+    const data = assemble(`
+      LDA #$01
+      BRK
+      ASL $10
+      STA $10,X
+      STX $10,Y
+      BEQ $FF
+    `)
+
+    expect(disassemble(data, { binaryStart: 1 })).toEqual([
+      'LDA #$01', // 1, 2
+      'BRK', // 3
+      'ASL $10', // 4, 5
+      'STA $10,X', // 6, 7
+      'STX $10,Y', // 8, 9
+      'BEQ $FF // [$0009]' // A
+    ])
+  })
 })

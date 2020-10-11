@@ -8,7 +8,7 @@ function toHex(number, padding = 2) {
   return `$${number.toString(16).toUpperCase().padStart(padding, '0')}`
 }
 
-export default function disassemble(codes = []) {
+export default function disassemble(codes = [], { binaryStart } = {}) {
   const argParams = {
     ABS: {
       length: 2,
@@ -51,7 +51,16 @@ export default function disassemble(codes = []) {
     },
     REL: {
       length: 1,
-      stringify: (name, params) => `${name} ${toHex(params[0])}`
+      stringify: (name, params, line) => {
+        let result = `${name} ${toHex(params[0])}`
+
+        if (binaryStart) {
+          const offset = new Int8Array([params[0]])[0]
+          result = `${result} // [${toHex(line + offset, 4)}]`
+        }
+
+        return result
+      }
     },
     ZP0: {
       length: 1,
@@ -69,17 +78,25 @@ export default function disassemble(codes = []) {
 
   const result = []
   const copyOfCode = [...codes]
+  let line = binaryStart ?? 0
 
   while (copyOfCode.length > 0) {
+    const instructionLine = line
+
     const opcode = copyOfCode.shift()
+    line += 1
+
     const { addressingName, name } = opcodes[opcode]
     const params = []
 
     for (let i = 0; i < argParams[addressingName].length; i += 1) {
       params.push(copyOfCode.shift())
+      line += 1
     }
 
-    result.push(argParams[addressingName].stringify(name, params))
+    result.push(
+      `${argParams[addressingName].stringify(name, params, instructionLine)}`
+    )
   }
 
   return result
