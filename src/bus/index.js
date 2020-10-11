@@ -25,7 +25,7 @@ export default class Bus {
           return target[prop]
         }
 
-        const checkFromCartridge = thisBus.cartridge.cpuRead(address)
+        const checkFromCartridge = thisBus.cartridge?.cpuRead(address)
         if (checkFromCartridge) return checkFromCartridge
         else if (address < 0x2000) return target[address & 0x07ff]
         else if (address < 0x4000) return this.ppu.cpuRead(address & 0x0007)
@@ -34,7 +34,7 @@ export default class Bus {
       set: (target, prop, value) => {
         const address = Number(prop)
         if (isNaN(address)) target[prop] = value
-        else if (thisBus.cartridge.cpuWrite(address, value)) return true
+        else if (thisBus.cartridge?.cpuWrite(address, value)) return true
         else if (address < 0x2000) target[prop & 0x07ff] = value
         else if (address < 0x4000) {
           this.ppu.cpuWrite(address & 0x0007, value)

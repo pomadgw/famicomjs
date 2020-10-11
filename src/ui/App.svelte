@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte'
   import RAM from './RAM.svelte'
+  import Register from './Register.svelte'
 
   import Cartridge from '../cartridge'
   import Bus from '../bus'
@@ -15,6 +16,7 @@
   let startFrame
   let showRAM = true
   let offsetStart = 0x8000
+  let registers
 
   nes = new Bus(new CPU(), new PPU())
 
@@ -32,11 +34,13 @@
     nes.reset()
 
     offsetStart = nes.cpu.registers.PC
+    registers = nes.cpu.registers
   }
 
   function resetNES() {
     nes.reset()
     offsetStart = nes.cpu.registers.PC
+    registers = nes.cpu.registers
   }
 
   function stepNES() {
@@ -49,6 +53,7 @@
     } while (nes.cpu.isComplete)
 
     offsetStart = nes.cpu.registers.PC
+    registers = nes.cpu.registers
 
     render()
   }
@@ -76,6 +81,7 @@
     nes.ppu.isFrameComplete = false
 
     offsetStart = nes.cpu.registers.PC
+    registers = nes.cpu.registers
 
     render()
   }
@@ -93,6 +99,7 @@
         nes.ppu.isFrameComplete = false
 
         offsetStart = nes.cpu.registers.PC
+        registers = nes.cpu.registers
 
         render()
       }
@@ -129,15 +136,17 @@
       <button class="ml-2" on:click={toggleEmulation}>Toggle Emulation: {emulationMode ? 'on' : 'off'}</button>
     </div>
   </div>
-  <div class="ml-4 flex-1">
+  <div class="ml-4 flex-1 flex flex-col">
     <div>
       PC: <span class="font-mono">${offsetStart.toString(16).padStart(4, '0')}</span>
+    </div>
+    <div>
+      <Register registers={registers} />
     </div>
     {#if nes.cartridge && showRAM}
     <div class="mt-4">
       <RAM ram={nes.cpu.ram} offsetStart={offsetStart} offsetEnd={offsetStart + 0x30} />
     </div>
     {/if}
-
   </div>
 </div>
