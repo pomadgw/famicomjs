@@ -21,4 +21,42 @@ describe('PPU', () => {
     ppu.ppuWrite(1, 1)
     expect(ppu.cartridge.ppuWrite).toHaveBeenCalled()
   })
+
+  describe('when it clocks', () => {
+    it('should increase a cycle', () => {
+      ppu.cycle = 0
+      ppu.clock()
+
+      expect(ppu.cycle).toBe(1)
+    })
+
+    it('should update the screen', () => {
+      jest.spyOn(ppu.screen, 'setColor')
+
+      ppu.cycle = 0
+      ppu.clock()
+
+      expect(ppu.screen.setColor).toHaveBeenCalled()
+      expect(ppu.screen.setColor.mock.calls[0].slice(0, 2)).toEqual([-1, 0])
+    })
+
+    it('should reset cycle and increment scanline when reaching cycle 341', () => {
+      ppu.cycle = 341
+      ppu.scanline = 0
+      ppu.clock()
+
+      expect(ppu.cycle).toBe(0)
+      expect(ppu.scanline).toBe(1)
+    })
+
+    it('should reset scanline and set fram complete when reaching scanline 261', () => {
+      ppu.cycle = 341
+      ppu.scanline = 261
+      ppu.clock()
+
+      expect(ppu.cycle).toBe(0)
+      expect(ppu.scanline).toBe(-1)
+      expect(ppu.isFrameComplete).toBe(true)
+    })
+  })
 })

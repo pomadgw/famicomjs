@@ -4,6 +4,10 @@ module.exports = {
     src: '/dist'
   },
   plugins: [
+    [
+      '@snowpack/plugin-build-script',
+      { cmd: 'postcss', input: ['.css'], output: ['.css'] }
+    ],
     '@snowpack/plugin-babel',
     '@snowpack/plugin-svelte',
     [
