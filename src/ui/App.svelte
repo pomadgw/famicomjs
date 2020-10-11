@@ -109,7 +109,6 @@
   }
 
   $: if (emulationMode) {
-    console.log('!')
     requestAnimationFrame(runEmulation)
   }
 
