@@ -76,7 +76,7 @@ export default function disassemble(codes = [], { binaryStart } = {}) {
     }
   }
 
-  const result = []
+  const result = {}
   const copyOfCode = [...codes]
   let line = binaryStart ?? 0
 
@@ -94,8 +94,10 @@ export default function disassemble(codes = [], { binaryStart } = {}) {
       line += 1
     }
 
-    result.push(
-      `${argParams[addressingName].stringify(name, params, instructionLine)}`
+    result[toHex(instructionLine, 4)] = argParams[addressingName].stringify(
+      name,
+      params,
+      instructionLine
     )
   }
 
