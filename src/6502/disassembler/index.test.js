@@ -2,7 +2,7 @@ import disassemble from '.'
 import { assemble } from '../assembler'
 
 describe('Disassember', () => {
-  it('should disable a instruction', () => {
+  it('should disassemble a instruction', () => {
     let data = assemble(`
       LDA #$0F
     `)
