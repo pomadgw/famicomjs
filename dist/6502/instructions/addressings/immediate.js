@@ -1,1 +1,1 @@
-export default function t(e){return{absoluteAddress:e.nextPC(),clocks:0}}
+export default function e(t){return{absoluteAddress:t.nextPC(),clocks:0}}

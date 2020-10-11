@@ -1,1 +1,1 @@
-export default function f(r,e){var t=r.ram[r.nextPC()],s=r.ram[r.nextPC()],o=e?r.registers[e]:0,a=(s<<8|t)+o;return{absoluteAddress:a,clocks:e&&(a&65280)!==s<<8?1:0}}
+export default function r(t,e){var n=t.ram[t.nextPC()],s=t.ram[t.nextPC()],o=e?t.registers[e]:0,a=(s<<8|n)+o;return{absoluteAddress:a,clocks:e&&(a&65280)!==s<<8?1:0}}

@@ -1,1 +1,1 @@
-function t(n,r){return n.registers.STATUS[r]=!1,0}export var CLC=function(r){return t(r,"C")},CLD=function(r){return t(r,"D")},CLI=function(r){return t(r,"I")},CLV=function(r){return t(r,"V")};
+function r(n,t){return n.registers.STATUS[t]=!1,0}export var CLC=function(n){return r(n,"C")},CLD=function(n){return r(n,"D")},CLI=function(n){return r(n,"I")},CLV=function(n){return r(n,"V")};
