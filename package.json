@@ -33,6 +33,7 @@
     "@snowpack/plugin-optimize": "^0.2.3",
     "@snowpack/plugin-run-script": "^2.1.2",
     "@snowpack/plugin-svelte": "^2.0.4",
+    "@snowpack/plugin-webpack": "^2.0.15",
     "@testing-library/jest-dom": "^5.5.0",
     "@testing-library/svelte": "^3.0.0",
     "@types/jest": "^26.0.10",
