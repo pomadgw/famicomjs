@@ -172,7 +172,7 @@ export default function assembler(
   { memorySize, PC } = { memorySize: 0x600, PC: 0x600 }
 ) {
   return function compile(string) {
-    const ram = [...new Array(memorySize)].map((_) => 0)
+    const ram = new Uint8Array([...new Array(memorySize)].map((_) => 0))
 
     const compiled = assemble(string[0], PC)
 
