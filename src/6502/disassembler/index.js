@@ -56,7 +56,7 @@ export default function disassemble(codes = [], { binaryStart } = {}) {
 
         if (binaryStart) {
           const offset = new Int8Array([params[0]])[0]
-          result = `${result} // [${toHex(line + offset, 4)}]`
+          result = `${result} // [${toHex(line + offset + 2, 4)}]`
         }
 
         return result
@@ -77,7 +77,14 @@ export default function disassemble(codes = [], { binaryStart } = {}) {
   }
 
   const result = {}
-  const copyOfCode = [...codes]
+  const copyOfCode = []
+
+  // manually copy the code
+
+  for (let i = 0; i < codes.length; i++) {
+    copyOfCode.push(codes[i])
+  }
+
   let line = binaryStart ?? 0
 
   while (copyOfCode.length > 0) {
@@ -94,11 +101,15 @@ export default function disassemble(codes = [], { binaryStart } = {}) {
       line += 1
     }
 
-    result[toHex(instructionLine, 4)] = argParams[addressingName].stringify(
-      name,
-      params,
-      instructionLine
-    )
+    try {
+      result[toHex(instructionLine, 4)] = argParams[addressingName].stringify(
+        name,
+        params,
+        instructionLine
+      )
+    } catch (e) {
+      result[toHex(instructionLine, 4)] = `${name} ??`
+    }
   }
 
   return result

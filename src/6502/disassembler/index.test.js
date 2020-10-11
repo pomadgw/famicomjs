@@ -49,7 +49,7 @@ describe('Disassember', () => {
       ASL $10
       STA $10,X
       STX $10,Y
-      BEQ $FF
+      BEQ $FC
     `)
 
     expect(disassemble(data, { binaryStart: 1 })).toEqual({
@@ -58,7 +58,13 @@ describe('Disassember', () => {
       $0004: 'ASL $10',
       $0006: 'STA $10,X',
       $0008: 'STX $10,Y',
-      $000A: 'BEQ $FF // [$0009]'
+      $000A: 'BEQ $FC // [$0008]'
+    })
+  })
+
+  it('should show ?? for imcomplete instrcution', () => {
+    expect(disassemble([0xa0])).toEqual({
+      $0000: 'LDY ??'
     })
   })
 })
