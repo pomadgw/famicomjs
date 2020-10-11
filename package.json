@@ -30,6 +30,7 @@
     "@snowpack/app-scripts-svelte": "^1.8.5",
     "@snowpack/plugin-babel": "^2.1.0",
     "@snowpack/plugin-dotenv": "^2.0.1",
+    "@snowpack/plugin-optimize": "^0.2.3",
     "@snowpack/plugin-run-script": "^2.1.2",
     "@snowpack/plugin-svelte": "^2.0.4",
     "@testing-library/jest-dom": "^5.5.0",

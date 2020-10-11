@@ -17,6 +17,7 @@ module.exports = {
         watch: '$1 --watch',
         output: 'stream'
       }
-    ]
+    ],
+    ['@snowpack/plugin-optimize', {}]
   ]
 }
