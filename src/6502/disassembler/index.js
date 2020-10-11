@@ -15,20 +15,56 @@ export default function disassemble(codes = []) {
       stringify: (name, params) =>
         `${name} ${toHex(twoUint8ToUint16(...params), 4)}`
     },
-    ABX: { length: 2, stringify: (name, params) => '' },
-    ABY: { length: 2, stringify: (name, params) => '' },
+    ABX: {
+      length: 2,
+      stringify: (name, params) =>
+        `${name} ${toHex(twoUint8ToUint16(...params), 4)},X`
+    },
+    ABY: {
+      length: 2,
+      stringify: (name, params) =>
+        `${name} ${toHex(twoUint8ToUint16(...params), 4)},Y`
+    },
     IMM: {
       length: 1,
       stringify: (name, params) => `${name} #${toHex(params[0])}`
     },
-    IMP: { length: 0, stringify: (name, params) => '' },
-    IND: { length: 2, stringify: (name, params) => '' },
-    IZX: { length: 1, stringify: (name, params) => '' },
-    IZY: { length: 1, stringify: (name, params) => '' },
-    REL: { length: 1, stringify: (name, params) => '' },
-    ZP0: { length: 1, stringify: (name, params) => '' },
-    ZPX: { length: 1, stringify: (name, params) => '' },
-    ZPY: { length: 1, stringify: (name, params) => '' }
+    IMP: {
+      length: 0,
+      stringify: (name, params) => {
+        if (name === 'ASL') return 'ASL A'
+        return name
+      }
+    },
+    IND: {
+      length: 2,
+      stringify: (name, params) =>
+        `${name} (${toHex(twoUint8ToUint16(...params), 4)})`
+    },
+    IZX: {
+      length: 1,
+      stringify: (name, params) => `${name} (${toHex(params[0])},X)`
+    },
+    IZY: {
+      length: 1,
+      stringify: (name, params) => `${name} (${toHex(params[0])}),Y`
+    },
+    REL: {
+      length: 1,
+      stringify: (name, params) => `${name} ${toHex(params[0])}`
+    },
+    ZP0: {
+      length: 1,
+      stringify: (name, params) => `${name} ${toHex(params[0])}`
+    },
+    ZPX: {
+      length: 1,
+      stringify: (name, params) => `${name} ${toHex(params[0])},X`
+    },
+    ZPY: {
+      length: 1,
+      stringify: (name, params) => `${name} ${toHex(params[0])},Y`
+    }
   }
 
   const result = []
