@@ -5,10 +5,13 @@
   "author": "Rahadian Yusuf <rahadian.y@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "clean": "shx rm -rf build",
-    "start:web": "snowpack dev",
-    "build:web": "snowpack build",
-    "build": "npm run clean && npm run build:web",
+    "clean:web": "shx rm -rf build",
+    "clean:bin": "shx rm -rf _bin",
+    "clean": "npm run clean:bin && npm run clean:web",
+    "start": "nollup -c --environment NODE_ENV:development",
+    "build:web": "npm run clean:web && snowpack build",
+    "build:bin": "npm run clean:bin && rollup -c scripts/build/rollup.bin.config.js --environment NODE_ENV:production",
+    "build": "npm run build:web && npm run build:bin",
     "generate-opcodes": "node build-opcode.js && eslint --fix src/6502/instructions/index.js",
     "test": "jest --coverage"
   },
@@ -19,6 +22,7 @@
     "@babel/plugin-transform-runtime": "^7.11.0",
     "@babel/preset-env": "^7.11.0",
     "@rollup/plugin-babel": "^5.2.0",
+    "@rollup/plugin-commonjs": "^15.1.0",
     "@rollup/plugin-html": "^0.2.0",
     "@rollup/plugin-json": "^4.1.0",
     "@snowpack/app-scripts-svelte": "^1.8.5",
@@ -76,6 +80,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.11.2",
-    "regenerator-runtime": "^0.13.7"
+    "regenerator-runtime": "^0.13.7",
+    "yargs": "^15.4.1"
   }
 }
