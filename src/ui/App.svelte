@@ -11,12 +11,15 @@
   let nes
   let canvas
   let zoomCanvas
+  let paletteCanvas
+  let paletteCanvas2
   let emulationMode = false
   let ctx
   let startFrame
   let showRAM = true
   let offsetStart = 0x8000
   let registers
+  let selectedPalette = 0x00
 
   nes = new Bus(new CPU(), new PPU())
 
@@ -68,6 +71,8 @@
     zoomCtx.msImageSmoothingEnabled = false
 
     zoomCtx.drawImage(canvas, 0, 0, 256, 240, 0, 0, 512, 480)
+
+    drawPalette()
   }
 
   function renderSingleFrame() {
@@ -108,6 +113,22 @@
     }
   }
 
+  function drawPalette() {
+    const pCtx = paletteCanvas.getContext('2d')
+    const pCtx2 = paletteCanvas2.getContext('2d')
+    pCtx.imageSmoothingEnabled = false
+    pCtx.mozImageSmoothingEnabled = false
+    pCtx.webkitImageSmoothingEnabled = false
+    pCtx.msImageSmoothingEnabled = false
+    pCtx2.imageSmoothingEnabled = false
+    pCtx2.mozImageSmoothingEnabled = false
+    pCtx2.webkitImageSmoothingEnabled = false
+    pCtx2.msImageSmoothingEnabled = false
+
+    pCtx.putImageData(nes.ppu.getPatternTable(0, selectedPalette).imageData, 0, 0)
+    pCtx2.putImageData(nes.ppu.getPatternTable(0, selectedPalette).imageData, 0, 0)
+  }
+
   $: if (emulationMode) {
     requestAnimationFrame(runEmulation)
   }
@@ -123,6 +144,13 @@
       <canvas class="hidden" width="256" height="240" bind:this={canvas}></canvas>
       <div class="m-auto border-2 border-blue-400" style="width: 512px">
         <canvas width="512" height="480" bind:this={zoomCanvas}></canvas>
+      </div>
+      <div class="mt-4">
+        <div class="text-2xl">Palette</div>
+        <div class="flex">
+          <canvas class="m-auto border-2 border-blue-400" style="width: 256px" width="128" height="128" bind:this={paletteCanvas}></canvas>
+          <canvas class="ml-2 m-auto border-2 border-blue-400" style="width: 256px" width="128" height="128" bind:this={paletteCanvas2}></canvas>
+        </div>
       </div>
     </div>
     <div class="flex items-center mt-4">
