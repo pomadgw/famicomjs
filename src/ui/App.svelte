@@ -121,7 +121,9 @@
   <div class="flex flex-col flex-2">
     <div>
       <canvas class="hidden" width="256" height="240" bind:this={canvas}></canvas>
-      <canvas width="640" height="480" bind:this={zoomCanvas}></canvas>
+      <div class="m-auto border-2 border-blue-400" style="width: 512px">
+        <canvas width="512" height="480" bind:this={zoomCanvas}></canvas>
+      </div>
     </div>
     <div class="flex items-center mt-4">
       <input type="file" on:change={readFile} />
