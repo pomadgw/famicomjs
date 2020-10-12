@@ -74,6 +74,7 @@ export default class PPU {
   // eslint-disable-next-line no-useless-constructor
   constructor() {
     this.tableName = [new Uint8Array(1024), new Uint8Array(1024)]
+    this.tablePattern = [new Uint8Array(4096), new Uint8Array(4096)]
     this.tablePalette = new Uint8Array(32)
 
     this.screen = new Screen(256, 240)
@@ -212,7 +213,7 @@ export default class PPU {
     if (data !== null) {
       // TODO: implement this later
     } else if (addr < 0x2000) {
-      data = this.screenPatternTable[(addr & 0x1000) >> 12][addr & 0x0fff]
+      data = this.tablePattern[(addr & 0x1000) >> 12][addr & 0x0fff]
     } else if (addr < 0x3f00) {
     } else if (addr < 0x3fff) {
       addr = addr & 0x001f
@@ -233,7 +234,7 @@ export default class PPU {
     if (this.cartridge.ppuWrite(addr, value)) {
       // TODO: implement this later
     } else if (addr < 0x2000) {
-      this.screenPatternTable[(addr & 0x1000) >> 12][addr & 0x0fff] = value
+      this.tablePattern[(addr & 0x1000) >> 12][addr & 0x0fff] = value
     } else if (addr < 0x3f00) {
     } else if (addr < 0x3fff) {
       addr = addr & 0x001f
