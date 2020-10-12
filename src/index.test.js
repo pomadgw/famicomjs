@@ -28,13 +28,14 @@ test('NES test', async () => {
   const cartFile = await mockNES()
   await cart.parse(cartFile)
   nes.insertCartridge(cart)
+  nes.reset()
 
   nes.cpu.registers.PC = 0xc000
 
-  for (let i = 0; i < 3 * 10000; i++) {
+  for (let i = 0; i < 3 * 20000; i++) {
     nes.clock()
   }
 
-  expect(nes.ram[0x0002]).toBe(0)
-  // expect(nes.ram[0x0003]).toBe(0) // for implementing undefined opcodes
+  expect(nes.cpu.ram[0x0002]).toBe(0)
+  // expect(nes.cpu.ram[0x0003]).toBe(0) // for implementing undefined opcodes
 })
