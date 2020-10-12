@@ -5,7 +5,7 @@
 
   import Cartridge from '../cartridge'
   import Bus from '../bus'
-  import CPU from '../6502/cpu'
+  import CPU from '../6502'
   import PPU from '../ppu'
 
   let nes
