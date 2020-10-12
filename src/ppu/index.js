@@ -119,9 +119,38 @@ export default class PPU {
   //   return this.screenTableName[i]
   // }
 
-  // getPatternTable(i) {
-  //   return this.screenPatternTable[i]
-  // }
+  getPatternTable(i, palette = 0) {
+    for (let tileY = 0; tileY < 16; tileY++) {
+      for (let tileX = 0; tileX < 16; tileX++) {
+        const offset = tileY * 256 + tileX * 16
+
+        for (let row = 0; row < 8; row++) {
+          let tileLSB = this.ppuRead(i * 0x1000 + offset + row + 0)
+          let tileMSB = this.ppuRead(i * 0x1000 + offset + row + 8)
+
+          for (let col = 0; col < 8; col++) {
+            const pixel = (tileLSB & 0x01) + (tileMSB & 0x01)
+
+            tileLSB >>= 1
+            tileMSB >>= 1
+
+            this.screenPatternTable[i].setColor(
+              tileX * 8 + (7 - col),
+              tileY * 8 + row,
+              this.getColorFromPaletteRAM(palette, pixel)
+            )
+          }
+        }
+      }
+    }
+    return this.screenPatternTable[i]
+  }
+
+  getColorFromPaletteRAM(palette, pixel) {
+    const paletteId = this.ppuRead(0x3f00 + (palette << 2) + pixel)
+
+    return palScreen[paletteId]
+  }
 
   cpuRead(addr) {
     // eslint-disable-next-line prefer-const
@@ -177,15 +206,43 @@ export default class PPU {
   }
 
   ppuRead(addr) {
-    if (this.cartridge.ppuRead(addr)) {
+    addr = addr & 0x3fff
+    let data = this.cartridge.ppuRead(addr)
+
+    if (data !== null) {
       // TODO: implement this later
+    } else if (addr < 0x2000) {
+      data = this.screenPatternTable[(addr & 0x1000) >> 12][addr & 0x0fff]
+    } else if (addr < 0x3f00) {
+    } else if (addr < 0x3fff) {
+      addr = addr & 0x001f
+
+      if (addr >= 0x0010 && addr % 4 === 0) {
+        addr = addr & 0x000f
+      }
+
+      data = this.tablePalette[addr]
+    } else {
+      data = 0
     }
-    return 0
+
+    return data
   }
 
   ppuWrite(addr, value) {
     if (this.cartridge.ppuWrite(addr, value)) {
       // TODO: implement this later
+    } else if (addr < 0x2000) {
+      this.screenPatternTable[(addr & 0x1000) >> 12][addr & 0x0fff] = value
+    } else if (addr < 0x3f00) {
+    } else if (addr < 0x3fff) {
+      addr = addr & 0x001f
+
+      if (addr >= 0x0010 && addr % 4 === 0) {
+        addr = addr & 0x000f
+      }
+
+      this.tablePalette[addr] = value
     }
   }
 }
