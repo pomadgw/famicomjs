@@ -15,7 +15,8 @@
     "build": "npm run build:web && npm run build:bin",
     "generate-opcodes": "node build-opcode.js && eslint --fix src/6502/instructions/index.js",
     "test": "jest --coverage",
-    "download-nes-test": "wget -c http://nickmass.com/images/nestest.nes"
+    "download-nes-test": "wget -c http://nickmass.com/images/nestest.nes",
+    "remove-nes-test": "rm -fv nestest.nes"
   },
   "devDependencies": {
     "@babel/core": "^7.11.1",
