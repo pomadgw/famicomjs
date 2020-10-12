@@ -59,4 +59,16 @@ describe('PPU', () => {
       expect(ppu.isFrameComplete).toBe(true)
     })
   })
+
+  describe('#getPatternTable', () => {
+    it('should set color', () => {
+      ppu.insertCartridge(createDummyCartridge(1))
+
+      jest.spyOn(ppu.screenPatternTable[0], 'setColor')
+      ppu.getPatternTable(0)
+      expect(ppu.screenPatternTable[0].setColor).toHaveBeenCalledTimes(
+        16 * 16 * 8 * 8
+      )
+    })
+  })
 })
