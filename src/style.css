@@ -2,8 +2,12 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
+body {
+  @apply bg-gray-700 text-white;
+}
+
 button {
-  @apply px-2 py-1 bg-blue-200;
+  @apply px-2 py-1 bg-blue-200 text-black;
 }
 
 .flex-2 {
