@@ -21,7 +21,7 @@
   let registers
   let selectedPalette = 0x00
 
-  nes = new Bus(new CPU(), new PPU())
+  nes = new Bus(new CPU(), new PPU(), { onRender: render })
 
   function toggleEmulation() {
     emulationMode = !emulationMode
@@ -58,12 +58,12 @@
     offsetStart = nes.cpu.registers.PC
     registers = nes.cpu.registers
 
-    render()
+    render(nes.ppu.getScreen().imageData)
   }
 
-  function render() {
+  function render(imageData) {
     const zoomCtx = zoomCanvas.getContext('2d')
-    ctx.putImageData(nes.ppu.getScreen().imageData, 0, 0)
+    ctx.putImageData(imageData, 0, 0)
 
     zoomCtx.imageSmoothingEnabled = false
     zoomCtx.mozImageSmoothingEnabled = false
@@ -87,8 +87,6 @@
 
     offsetStart = nes.cpu.registers.PC
     registers = nes.cpu.registers
-
-    render()
   }
 
   function runEmulation(timestamp) {
@@ -105,8 +103,6 @@
 
         offsetStart = nes.cpu.registers.PC
         registers = nes.cpu.registers
-
-        render()
       }
 
       requestAnimationFrame(runEmulation)

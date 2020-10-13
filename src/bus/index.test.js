@@ -91,7 +91,8 @@ describe('Bus', () => {
   it('should run clocks', () => {
     const cpu = new CPU([])
     const ppu = new PPU()
-    const bus = new Bus(cpu, ppu)
+    const onRender = jest.fn()
+    const bus = new Bus(cpu, ppu, { onRender })
     bus.insertCartridge(createDummyCartridge(false))
 
     jest.spyOn(bus.ppu, 'clock')
@@ -99,9 +100,12 @@ describe('Bus', () => {
 
     bus.clock()
     bus.clock()
+
+    ppu.isFrameComplete = true
     bus.clock()
 
     expect(bus.ppu.clock).toHaveBeenCalledTimes(3)
     expect(bus.cpu.atomicClock).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledTimes(1)
   })
 })

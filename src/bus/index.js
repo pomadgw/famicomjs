@@ -1,5 +1,5 @@
 export default class Bus {
-  constructor(cpu, ppu) {
+  constructor(cpu, ppu, { onRender } = {}) {
     this.cpu = cpu
     this.ppu = ppu
 
@@ -8,6 +8,9 @@ export default class Bus {
     this.initVRAM()
 
     this.globalSystemClockNumber = 0
+
+    this._on = {}
+    this._on.render = onRender
   }
 
   initVRAM() {
@@ -66,5 +69,9 @@ export default class Bus {
     }
 
     this.globalSystemClockNumber += 1
+
+    if (this.ppu.isFrameComplete) {
+      this._on.render(this.ppu.getScreen().imageData)
+    }
   }
 }
