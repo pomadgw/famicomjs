@@ -125,6 +125,10 @@ export default class PPU {
       ],
       new Uint8Array([0])
     )
+
+    this.addressLatch = 0x00
+    this.ppuDataBuffer = 0x00
+    this.ppuAddress = 0x0000
   }
 
   insertCartridge(cartridge) {
@@ -192,57 +196,81 @@ export default class PPU {
     return palScreen[paletteId]
   }
 
-  cpuRead(addr) {
+  cpuRead(addr, readOnly = false) {
     // eslint-disable-next-line prefer-const
     let data = 0
 
     // TODO: implement this later
-    // switch (addr) {
-    //   case 0x0000: // Control
-    //     break
-    //   case 0x0001: // Mask
-    //     break
-    //   case 0x0002: // Status
-    //     break
-    //   case 0x0003: // OAM Address
-    //     break
-    //   case 0x0004: // OAM Data
-    //     break
-    //   case 0x0005: // Scroll
-    //     break
-    //   case 0x0006: // PPU Address
-    //     break
-    //   case 0x0007: // PPU Data
-    //     break
-    //   default:
-    //     break
-    // }
+    switch (addr) {
+      case 0x0000: // Control
+        break
+      case 0x0001: // Mask
+        break
+      case 0x0002: // Status
+        // TODO: remove whee correct implementation is don
+        this.statusReg.verticalBlank = 1
+
+        data = (this.statusReg.value & 0xe0) | (this.ppuDataBuffer & 0x1f)
+        if (!readOnly) {
+          this.statusReg.verticalBlank = 0
+          this.addressLatch = 0
+        }
+        break
+      case 0x0003: // OAM Address
+        break
+      case 0x0004: // OAM Data
+        break
+      case 0x0005: // Scroll
+        break
+      case 0x0006: // PPU Address
+        break
+      case 0x0007: // PPU Data
+        data = this.ppuDataBuffer
+        this.ppuDataBuffer = this.ppuRead(this.ppuAddress)
+
+        if (this.ppuAddress >= 0x3f00) {
+          data = this.ppuDataBuffer
+        }
+        break
+      default:
+        break
+    }
 
     return data
   }
 
-  cpuWrite(_addr, _value) {
+  cpuWrite(addr, value) {
     // TODO: implement this later
-    // switch (addr) {
-    //   case 0x0000: // Control
-    //     break
-    //   case 0x0001: // Mask
-    //     break
-    //   case 0x0002: // Status
-    //     break
-    //   case 0x0003: // OAM Address
-    //     break
-    //   case 0x0004: // OAM Data
-    //     break
-    //   case 0x0005: // Scroll
-    //     break
-    //   case 0x0006: // PPU Address
-    //     break
-    //   case 0x0007: // PPU Data
-    //     break
-    //   default:
-    //     break
-    // }
+    switch (addr) {
+      case 0x0000: // Control
+        this.statusReg.value = value
+        break
+      case 0x0001: // Mask
+        this.maskReg.value = value
+        break
+      case 0x0002: // Status
+        break
+      case 0x0003: // OAM Address
+        break
+      case 0x0004: // OAM Data
+        break
+      case 0x0005: // Scroll
+        break
+      case 0x0006: // PPU Address
+        if (this.addressLatch === 0) {
+          this.ppuAddress = (this.ppuAddress & 0x00ff) | (value << 8)
+          this.addressLatch = 1
+        } else {
+          this.ppuAddress = (this.ppuAddress & 0xff00) | value
+          this.addressLatch = 0
+        }
+        break
+      case 0x0007: // PPU Data
+        this.ppuWrite(this.ppuAddress, value)
+        break
+      default:
+        break
+    }
   }
 
   ppuRead(addr) {

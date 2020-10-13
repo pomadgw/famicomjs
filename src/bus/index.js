@@ -11,6 +11,8 @@ export default class Bus {
 
     this._on = {}
     this._on.render = onRender
+
+    this.isReadOnly = false
   }
 
   initVRAM() {
@@ -31,7 +33,8 @@ export default class Bus {
         const checkFromCartridge = thisBus.cartridge?.cpuRead(address)
         if (checkFromCartridge) return checkFromCartridge
         else if (address < 0x2000) return target[address & 0x07ff]
-        else if (address < 0x4000) return this.ppu.cpuRead(address & 0x0007)
+        else if (address < 0x4000)
+          return this.ppu.cpuRead(address & 0x0007, thisBus.isReadOnly)
         return 0
       },
       set: (target, prop, value) => {
@@ -54,9 +57,11 @@ export default class Bus {
   getRAMSnapshot() {
     const cpuRAM = new Uint8Array(0x10000)
 
+    this.isReadOnly = true
     for (let i = 0; i < 0x10000; i++) {
       cpuRAM[i] = this.ram[i]
     }
+    this.isReadOnly = false
 
     return cpuRAM
   }

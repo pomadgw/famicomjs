@@ -119,4 +119,67 @@ describe('PPU', () => {
       expect(ppu.ppuRead(0x3f1c)).toBe(0xf0)
     })
   })
+
+  describe('#cpuRead', () => {
+    it('should be able to read from ppu (with delay)', () => {
+      const oldFn = ppu.ppuRead
+      ppu.ppuRead = jest.fn(() => 0x10)
+
+      ppu.cpuWrite(0x0006, 0x11)
+      ppu.cpuWrite(0x0006, 0x10)
+
+      // the fetched data from ppu is buffered
+      let data = ppu.cpuRead(0x0007)
+      expect(data).toBe(0)
+      expect(ppu.ppuRead).toHaveBeenCalledWith(0x1110)
+
+      data = ppu.cpuRead(0x0007)
+      expect(data).toBe(0x10)
+      ppu.ppuRead = oldFn
+    })
+
+    it('should be able to read palette from ppu immediately', () => {
+      ppu.ppuRead = jest.fn(() => 0x10)
+      ppu.cpuWrite(0x0006, 0x3f)
+      ppu.cpuWrite(0x0006, 0x00)
+      const data = ppu.cpuRead(0x0007)
+
+      expect(data).not.toBe(0)
+      expect(data).toBe(0x10)
+    })
+
+    it('should be able to read status', () => {
+      const data = 0xf4
+      const expected = data & 0xe0
+      ppu.statusReg.value = data
+      ppu.addressLatch = 1
+
+      const fetched = ppu.cpuRead(0x0002)
+      expect(fetched & 0xe0).toBe(expected)
+      expect(ppu.statusReg.verticalBlank).toBe(0)
+      expect(ppu.addressLatch).toBe(0)
+    })
+  })
+
+  describe('#cpuWrite', () => {
+    it('should be able to write to control register', () => {
+      ppu.cpuWrite(0x0000, 0x10)
+      expect(ppu.statusReg.value).toBe(0x10)
+    })
+
+    it('should be able to write to mask register', () => {
+      ppu.cpuWrite(0x0001, 0x10)
+      expect(ppu.maskReg.value).toBe(0x10)
+    })
+
+    it('should be able to write to ppu', () => {
+      jest.spyOn(ppu, 'ppuWrite')
+      ppu.cpuWrite(0x0006, 0x11)
+      ppu.cpuWrite(0x0006, 0x10)
+      expect(ppu.ppuAddress).toBe(0x1110)
+
+      ppu.cpuWrite(0x0007, 0x1f)
+      expect(ppu.ppuWrite).toHaveBeenCalledWith(0x1110, 0x1f)
+    })
+  })
 })
