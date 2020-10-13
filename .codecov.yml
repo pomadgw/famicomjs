@@ -13,6 +13,7 @@ coverage:
       PPU:
         paths:
           - src/ppu
+        threshold: 8%
       cartridge:
         paths:
           - src/cartridge
