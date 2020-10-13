@@ -129,7 +129,10 @@ export default class CPU {
   }
 
   readRAM(address) {
-    return this.ram[address]
+    this.ram.isReadOnly = true
+    const data = this.ram[address]
+    this.ram.isReadOnly = false
+    return data
   }
 
   nextPC() {

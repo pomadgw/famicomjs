@@ -132,6 +132,7 @@ describe('PPU', () => {
       let data = ppu.cpuRead(0x0007)
       expect(data).toBe(0)
       expect(ppu.ppuRead).toHaveBeenCalledWith(0x1110)
+      expect(ppu.ppuAddress).toBe(0x1111)
 
       data = ppu.cpuRead(0x0007)
       expect(data).toBe(0x10)
@@ -180,6 +181,7 @@ describe('PPU', () => {
 
       ppu.cpuWrite(0x0007, 0x1f)
       expect(ppu.ppuWrite).toHaveBeenCalledWith(0x1110, 0x1f)
+      expect(ppu.ppuAddress).toBe(0x1111)
     })
   })
 })

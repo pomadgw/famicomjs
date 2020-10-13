@@ -196,7 +196,7 @@ export default class PPU {
     return palScreen[paletteId]
   }
 
-  cpuRead(addr, readOnly = false) {
+  cpuRead(addr, isReadOnly = false) {
     // eslint-disable-next-line prefer-const
     let data = 0
 
@@ -211,7 +211,7 @@ export default class PPU {
         this.statusReg.verticalBlank = 1
 
         data = (this.statusReg.value & 0xe0) | (this.ppuDataBuffer & 0x1f)
-        if (!readOnly) {
+        if (!isReadOnly) {
           this.statusReg.verticalBlank = 0
           this.addressLatch = 0
         }
@@ -231,6 +231,8 @@ export default class PPU {
         if (this.ppuAddress >= 0x3f00) {
           data = this.ppuDataBuffer
         }
+
+        if (!isReadOnly) this.ppuAddress += 1
         break
       default:
         break
@@ -267,6 +269,7 @@ export default class PPU {
         break
       case 0x0007: // PPU Data
         this.ppuWrite(this.ppuAddress, value)
+        this.ppuAddress += 1
         break
       default:
         break
