@@ -61,7 +61,7 @@ describe('Bus', () => {
 
       const data = bus.ram[0x2001]
       expect(data).toBe(0)
-      expect(ppu.cpuRead).toHaveBeenCalledWith(1)
+      expect(ppu.cpuRead).toHaveBeenCalledWith(1, false)
     })
 
     it('should write data to PPU if address is 0x2000 - 0x3fff', () => {
