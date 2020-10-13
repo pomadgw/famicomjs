@@ -1,4 +1,5 @@
 import Screen from '../utils/screen'
+import bitfield from '../utils/bitfield'
 
 export const palScreen = [
   { r: 84, g: 84, b: 84 },
@@ -86,6 +87,44 @@ export default class PPU {
 
     this.scanline = 0
     this.cycle = 0
+
+    this.statusReg = bitfield(
+      [
+        ['_unused', 5],
+        ['spriteOverflow', 1],
+        ['spriteZeroHit', 1],
+        ['verticalBlank', 1]
+      ],
+      new Uint8Array([0])
+    )
+
+    this.maskReg = bitfield(
+      [
+        ['grayscale', 1],
+        ['renderBgLeft', 1],
+        ['renderSpritesLeft', 1],
+        ['renderBg', 1],
+        ['renderSprites', 1],
+        ['enhanceRed', 1],
+        ['enhanceGreen', 1],
+        ['enhanceBlue', 1]
+      ],
+      new Uint8Array([0])
+    )
+
+    this.controlReg = bitfield(
+      [
+        ['nametableX', 1],
+        ['nametableY', 1],
+        ['incrementMode', 1],
+        ['patternSprite', 1],
+        ['patternBg', 1],
+        ['spriteSize', 1],
+        ['slaveMode', 1], // unused
+        ['enablenmi', 1]
+      ],
+      new Uint8Array([0])
+    )
   }
 
   insertCartridge(cartridge) {
