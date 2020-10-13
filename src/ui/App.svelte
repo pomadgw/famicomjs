@@ -134,7 +134,7 @@
     pCtx2.msImageSmoothingEnabled = false
 
     pCtx.putImageData(nes.ppu.getPatternTable(0, selectedPalette).imageData, 0, 0)
-    pCtx2.putImageData(nes.ppu.getPatternTable(0, selectedPalette).imageData, 0, 0)
+    pCtx2.putImageData(nes.ppu.getPatternTable(1, selectedPalette).imageData, 0, 0)
   }
 
   function updateOffset({ detail: { value } }) {
