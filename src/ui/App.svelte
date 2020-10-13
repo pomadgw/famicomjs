@@ -145,6 +145,12 @@
     requestAnimationFrame(runEmulation)
   }
 
+  $: if (selectedPalette > 7) {
+    selectedPalette = selectedPalette % 7
+  } else if (selectedPalette < 0) {
+    selectedPalette = 7
+  }
+
   onMount(() => {
     ctx = canvas.getContext('2d')
   })
@@ -158,7 +164,7 @@
         <canvas width="512" height="480" bind:this={zoomCanvas}></canvas>
       </div>
       <div class="mt-4">
-        <div class="text-2xl">Palette</div>
+        <div class="text-2xl">Palette <input class="text-black" type="number" bind:value={selectedPalette} min=0 max=7 /></div>
         <div class="flex">
           <canvas class="m-auto border-2 border-blue-400" style="width: 256px" width="128" height="128" bind:this={paletteCanvas}></canvas>
           <canvas class="ml-2 m-auto border-2 border-blue-400" style="width: 256px" width="128" height="128" bind:this={paletteCanvas2}></canvas>
