@@ -42,5 +42,8 @@ describe('bitfield', () => {
     expect(field.data3).toBe(0x1d)
     expect(field.data4).toBe(0x03)
     expect(field.value).toBe((0x03 << 13) | (0x1d << 8) | (0x01 << 4) | 0x07)
+
+    field.data4 = 0x00
+    expect(field.data4).toBe(0x00)
   })
 })
