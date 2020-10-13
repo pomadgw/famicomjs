@@ -51,6 +51,16 @@ export default class Bus {
     this.ram = proxyRAM
   }
 
+  getRAMSnapshot() {
+    const cpuRAM = new Uint8Array(0x10000)
+
+    for (let i = 0; i < 0x10000; i++) {
+      cpuRAM[i] = this.ram[i]
+    }
+
+    return cpuRAM
+  }
+
   insertCartridge(cartridge) {
     this.cartridge = cartridge
     this.ppu.insertCartridge(cartridge)

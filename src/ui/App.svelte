@@ -3,6 +3,7 @@
   import RAM from './RAM.svelte'
   import Register from './Register.svelte'
 
+  import disassember, { argParamsGenerator } from '../6502/disassembler'
   import Cartridge from '../cartridge'
   import Bus from '../bus'
   import CPU from '../6502'
@@ -18,13 +19,20 @@
   let startFrame
   let showRAM = true
   let offsetStart = 0x8000
+  let nesPC = 0x8000
   let registers
   let selectedPalette = 0x00
+
+  let disassembled
 
   nes = new Bus(new CPU(), new PPU(), { onRender: render })
 
   function toggleEmulation() {
     emulationMode = !emulationMode
+  }
+
+  function disassembleRAM() {
+    disassembled = disassember(nes.getRAMSnapshot(), { binaryStart: 0 })
   }
 
   async function readFile(event) {
@@ -37,12 +45,16 @@
     nes.reset()
 
     offsetStart = nes.cpu.registers.PC
+    nesPC = nes.cpu.registers.PC
     registers = nes.cpu.registers
+
+    disassembleRAM()
   }
 
   function resetNES() {
     nes.reset()
     offsetStart = nes.cpu.registers.PC
+    nesPC = nes.cpu.registers.PC
     registers = nes.cpu.registers
   }
 
@@ -55,7 +67,7 @@
       nes.clock()
     } while (nes.cpu.isComplete)
 
-    offsetStart = nes.cpu.registers.PC
+    nesPC = nes.cpu.registers.PC
     registers = nes.cpu.registers
 
     render(nes.ppu.getScreen().imageData)
@@ -85,7 +97,7 @@
     } while (nes.cpu.isComplete)
     nes.ppu.isFrameComplete = false
 
-    offsetStart = nes.cpu.registers.PC
+    nesPC = nes.cpu.registers.PC
     registers = nes.cpu.registers
   }
 
@@ -101,7 +113,7 @@
         } while (!nes.ppu.isFrameComplete)
         nes.ppu.isFrameComplete = false
 
-        offsetStart = nes.cpu.registers.PC
+        nesPC = nes.cpu.registers.PC
         registers = nes.cpu.registers
       }
 
@@ -123,6 +135,10 @@
 
     pCtx.putImageData(nes.ppu.getPatternTable(0, selectedPalette).imageData, 0, 0)
     pCtx2.putImageData(nes.ppu.getPatternTable(0, selectedPalette).imageData, 0, 0)
+  }
+
+  function updateOffset({ detail: { value } }) {
+    offsetStart = value.offsetStart
   }
 
   $: if (emulationMode) {
@@ -163,14 +179,14 @@
   </div>
   <div class="ml-4 flex-1 flex flex-col">
     <div>
-      PC: <span class="font-mono">${offsetStart.toString(16).padStart(4, '0')}</span>
+      PC: <span class="font-mono">${nesPC.toString(16).padStart(4, '0')}</span>
     </div>
     <div>
       <Register registers={registers} />
     </div>
     {#if nes.cartridge && showRAM}
     <div class="mt-4">
-      <RAM ram={nes.cpu.ram} offsetStart={offsetStart} offsetEnd={offsetStart + 0x30} />
+      <RAM ram={disassembled} offsetStart={offsetStart} length={0x10} pc={nesPC} on:change={updateOffset} />
     </div>
     {/if}
   </div>

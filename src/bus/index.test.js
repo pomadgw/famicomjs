@@ -86,6 +86,18 @@ describe('Bus', () => {
       expect(bus.ram.subarray(0, 1)[0]).toBe(0x10)
       expect(bus.ram.length).toBe(0x10000)
     })
+
+    it('should get snapshot', () => {
+      const cpu = new CPU([])
+      const ppu = new PPU()
+      const bus = new Bus(cpu, ppu)
+      bus.insertCartridge(createDummyCartridge(false))
+
+      bus.ram[0x0008] = 0x10
+      const snapshot = bus.getRAMSnapshot()
+      expect(snapshot.length).toBe(0x10000)
+      expect(snapshot[0x0008]).toBe(0x10)
+    })
   })
 
   it('should run clocks', () => {
