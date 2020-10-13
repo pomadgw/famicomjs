@@ -2,7 +2,7 @@ function loadToRegister(cpu, register) {
   const content = cpu.fetched
 
   cpu.registers[register] = content
-  cpu.registers.STATUS.N = content > 0x80
+  cpu.registers.STATUS.N = content >= 0x80
   cpu.registers.STATUS.Z = content === 0
 
   return 0
