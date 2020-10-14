@@ -57,12 +57,13 @@ export default class Bus {
 
   getRAMSnapshot() {
     const cpuRAM = new Uint8Array(0x10000)
-
+    const oldFlagValue = this.ram.isReadOnly
     this.ram.isReadOnly = true
+
     for (let i = 0x0000; i < 0x10000; i++) {
       cpuRAM[i] = this.ram[i]
     }
-    this.ram.isReadOnly = false
+    this.ram.isReadOnly = oldFlagValue
 
     return cpuRAM
   }
