@@ -2,6 +2,7 @@
   import { onMount } from 'svelte'
   import RAM from './RAM.svelte'
   import Register from './Register.svelte'
+  import toHex from '../util/tohex'
 
   import disassember, { argParamsGenerator } from '../6502/disassembler'
   import Cartridge from '../cartridge'
@@ -185,7 +186,7 @@
   </div>
   <div class="ml-4 flex-1 flex flex-col">
     <div>
-      PC: <span class="font-mono">${nesPC.toString(16).padStart(4, '0')}</span>
+      PC: <span class="font-mono">${toHex(nesPC, { withPrefix: true, length: 4 })}</span>
     </div>
     <div>
       <Register registers={registers} />
