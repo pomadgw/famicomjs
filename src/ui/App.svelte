@@ -207,7 +207,7 @@
   </div>
   <div class="ml-4 flex-1 flex flex-col">
     <div>
-      PC: <span class="font-mono">${toHex(nesPC, { withPrefix: true, length: 4 })}</span>
+      PC: <span class="font-mono">{toHex(nesPC, { withPrefix: true, length: 4 })}</span>
     </div>
     <div>
       <Register registers={registers} />
