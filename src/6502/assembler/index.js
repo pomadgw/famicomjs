@@ -1,4 +1,5 @@
 import opcodes from '../instructions'
+import toHex from '../../utils/tohex'
 
 const branchingOperators = [
   'bcc',
@@ -140,14 +141,12 @@ export function compileLabelToAddress(lines, pc = 0) {
     if (labels[params] != null) {
       if (branchingOperators.includes(operator.toLowerCase())) {
         const relativeAddress = new Uint8Array([labels[params] - lineNo - 2])[0]
-        instruction = `${operator} $${relativeAddress
-          .toString(16)
-          .padStart(2, '0')}`
+        instruction = `${operator} $${toHex(relativeAddress).toLowerCase()}`
       } else {
         const absoluteAddress = pc + labels[params]
-        instruction = `${operator} $${absoluteAddress
-          .toString(16)
-          .padStart(4, '0')}`
+        instruction = `${operator} $${toHex(absoluteAddress, {
+          length: 4
+        }).toLowerCase()}`
       }
     }
     result.push([lineNo, instruction, label])

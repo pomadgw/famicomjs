@@ -2,6 +2,7 @@
   import { onMount } from 'svelte'
   import RAM from './RAM.svelte'
   import Register from './Register.svelte'
+  import toHex from '../util/tohex'
 
   import Cartridge from '../cartridge'
   import Bus from '../bus'
@@ -139,7 +140,7 @@
   </div>
   <div class="ml-4 flex-1 flex flex-col">
     <div>
-      PC: <span class="font-mono">${offsetStart.toString(16).padStart(4, '0')}</span>
+      PC: <span class="font-mono">${toHex(offsetStart, { withPrefix: true, length: 4 })}</span>
     </div>
     <div>
       <Register registers={registers} />
