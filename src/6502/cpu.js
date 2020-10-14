@@ -133,9 +133,8 @@ export default class CPU {
   }
 
   readRAM(address) {
-    this.ram.isReadOnly = true
-    const data = this.ram[address]
     this.ram.isReadOnly = false
+    const data = this.ram[address]
     return data
   }
 

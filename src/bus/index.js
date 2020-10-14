@@ -18,11 +18,10 @@ export default class Bus {
   initVRAM() {
     const cpuRAM = new Uint8Array(0x10000)
     const thisBus = this
-    let isReadOnly = false
+    cpuRAM.isReadOnly = false
 
     const proxyRAM = new Proxy(cpuRAM, {
       get: (target, prop) => {
-        if (prop === 'isReadOnly') return isReadOnly
         const address = Number(prop)
         if (isNaN(address)) {
           if (typeof target[prop] === 'function') {
@@ -36,15 +35,10 @@ export default class Bus {
         if (checkFromCartridge) return checkFromCartridge
         else if (address < 0x2000) return target[address & 0x07ff]
         else if (address < 0x4000)
-          return this.ppu.cpuRead(address & 0x0007, isReadOnly)
+          return this.ppu.cpuRead(address & 0x0007, target.isReadOnly)
         return 0
       },
       set: (target, prop, value) => {
-        if (prop === 'isReadOnly') {
-          isReadOnly = value
-          return true
-        }
-
         const address = Number(prop)
         if (isNaN(address)) target[prop] = value
         else if (thisBus.cartridge?.cpuWrite(address, value)) return true
