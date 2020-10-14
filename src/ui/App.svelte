@@ -152,6 +152,13 @@
     selectedPalette = 7
   }
 
+  $: paletteColors = (() => {
+    if (!nes.cartridge) return []
+    const toRgb = ({ r, g, b }) => `#${toHex(r)}${toHex(g)}${toHex(b)}`
+
+    return [...Array(8).keys()].map(i => toRgb(nes.ppu.getColorFromPaletteRAM(selectedPalette, i)))
+  })()
+
   onMount(() => {
     ctx = canvas.getContext('2d')
   })
@@ -165,15 +172,22 @@
         <canvas width="512" height="480" bind:this={zoomCanvas}></canvas>
       </div>
       <div class="mt-4">
-        <div class="form-inline">
+        <div>
           <div class="form-group row">
             <label for="palettenumber" class="col-sm-2 col-form-label">Palette</label>
-            <div class="col-sm-10">
+            <div class="col-sm-8">
               <input name="palettenumber" class="text-black form-control" type="number" bind:value={selectedPalette} min=0 max=7 />
+            </div>
+            <div class="col-sm-2 flex">
+              <!-- <div class="w-full"> -->
+                {#each paletteColors as color}
+                <div class="flex-1" style={`background-color: ${color}`}></div>
+                {/each}
+              <!-- </div> -->
             </div>
           </div>
         </div>
-        <div class="flex">
+        <div class="flex mt-4">
           <canvas class="m-auto border-2 border-blue-400" style="width: 256px" width="128" height="128" bind:this={paletteCanvas}></canvas>
           <canvas class="ml-2 m-auto border-2 border-blue-400" style="width: 256px" width="128" height="128" bind:this={paletteCanvas2}></canvas>
         </div>
