@@ -6,6 +6,13 @@ module.exports = {
     jest: true
   },
   extends: ['standard', 'plugin:prettier/recommended'],
+  plugins: ['svelte3'],
+  overrides: [
+    {
+      files: ['*.svelte'],
+      processor: 'svelte3/svelte3'
+    }
+  ],
   parserOptions: {
     ecmaVersion: 11,
     sourceType: 'module',
