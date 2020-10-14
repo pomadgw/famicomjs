@@ -15,7 +15,7 @@ describe('instructions: comparison', () => {
         cpu.ram[1] = 0x10
         cpu.registers[targetRegister] = 0x20
 
-        cpu.fetch({ absoluteAddress: 0x0001 })
+        cpu.fetchAddress({ absoluteAddress: 0x0001 })
 
         comparison[instruction](cpu)
 
@@ -26,7 +26,7 @@ describe('instructions: comparison', () => {
         cpu.ram[1] = 0x20
         cpu.registers[targetRegister] = 0x20
 
-        cpu.fetch({ absoluteAddress: 0x0001 })
+        cpu.fetchAddress({ absoluteAddress: 0x0001 })
 
         comparison[instruction](cpu)
 
@@ -37,7 +37,7 @@ describe('instructions: comparison', () => {
         cpu.ram[1] = 0x30
         cpu.registers[targetRegister] = 0x20
 
-        cpu.fetch({ absoluteAddress: 0x0001 })
+        cpu.fetchAddress({ absoluteAddress: 0x0001 })
 
         comparison[instruction](cpu)
 
