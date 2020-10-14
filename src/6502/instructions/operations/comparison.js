@@ -1,4 +1,5 @@
 function compare(cpu, register) {
+  cpu.fetch()
   const temp = cpu.registers[register] - cpu.fetched
 
   cpu.registers.STATUS.C = temp >= 0

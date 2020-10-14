@@ -1,4 +1,6 @@
 export function ADC(cpu) {
+  cpu.fetch()
+
   const carryBit = cpu.registers.STATUS.C ? 1 : 0
   let temp = cpu.registers.A + cpu.fetched + carryBit
 
@@ -23,6 +25,8 @@ export function ADC(cpu) {
 }
 
 export function SBC(cpu) {
+  cpu.fetch()
+
   const fetched = (cpu.fetched ^ 0xff) & 0xff
   const carryBit = cpu.registers.STATUS.C ? 1 : 0
   let temp = cpu.registers.A + fetched + carryBit
@@ -48,6 +52,8 @@ export function SBC(cpu) {
 }
 
 export function DEC(cpu) {
+  cpu.fetch()
+
   const fetched = cpu.fetched
 
   const result = fetched - 1
@@ -77,6 +83,8 @@ export const DEX = (cpu) => decreaseRegisterValue(cpu, 'X')
 export const DEY = (cpu) => decreaseRegisterValue(cpu, 'Y')
 
 export function INC(cpu) {
+  cpu.fetch()
+
   const fetched = cpu.fetched
 
   const result = (fetched + 1) & 0xff

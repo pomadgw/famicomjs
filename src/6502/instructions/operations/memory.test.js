@@ -18,7 +18,7 @@ describe('instructions: memory-related instructions', () => {
 
       it(`should load from specified memory to ${targetRegister} register`, () => {
         cpu.ram[0x100] = 0x0f
-        cpu.fetch({ absoluteAddress: 0x100 })
+        cpu.fetchAddress({ absoluteAddress: 0x100 })
 
         const cycle = memory[instruction](cpu)
         expect(getTargetRegisterValue(cpu)).toBe(0x0f)
@@ -29,7 +29,7 @@ describe('instructions: memory-related instructions', () => {
 
       it('should trigger N flag if resulting accumulator value is negative', () => {
         cpu.ram[0x100] = 0xff
-        cpu.fetch({ absoluteAddress: 0x100 })
+        cpu.fetchAddress({ absoluteAddress: 0x100 })
 
         const cycle = memory[instruction](cpu)
         expect(getTargetRegisterValue(cpu)).toBe(0xff)
@@ -52,7 +52,7 @@ describe('instructions: memory-related instructions', () => {
 
       it('should trigger Z flag if resulting accumulator value is zero', () => {
         cpu.ram[0x100] = 0x00
-        cpu.fetch({ absoluteAddress: 0x100 })
+        cpu.fetchAddress({ absoluteAddress: 0x100 })
 
         const cycle = memory[instruction](cpu)
         expect(getTargetRegisterValue(cpu)).toBe(0x00)
@@ -74,7 +74,7 @@ describe('instructions: memory-related instructions', () => {
       it(`should save content of ${targetRegister} register to specified memory location`, () => {
         const cpu = new CPU([0, 0, 0])
         setTargetRegisterValue(cpu, 0x12)
-        cpu.fetch({ absoluteAddress: 0x01 })
+        cpu.fetchAddress({ absoluteAddress: 0x01 })
 
         memory[instruction](cpu)
 

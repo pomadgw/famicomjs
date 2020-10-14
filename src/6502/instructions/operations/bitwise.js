@@ -1,6 +1,7 @@
 import { FLAGS } from '../../register'
 
 export function ORA(cpu) {
+  cpu.fetch()
   const result = cpu.registers.A | cpu.fetched
   cpu.registers.A = result
   cpu.registers.STATUS.Z = result === 0
@@ -10,6 +11,7 @@ export function ORA(cpu) {
 }
 
 export function AND(cpu) {
+  cpu.fetch()
   const result = cpu.registers.A & cpu.fetched
   cpu.registers.A = result
   cpu.registers.STATUS.Z = result === 0
@@ -19,6 +21,7 @@ export function AND(cpu) {
 }
 
 export function EOR(cpu) {
+  cpu.fetch()
   const result = cpu.registers.A ^ cpu.fetched
   cpu.registers.A = result
   cpu.registers.STATUS.Z = result === 0
@@ -28,6 +31,7 @@ export function EOR(cpu) {
 }
 
 export function ASL(cpu) {
+  cpu.fetch()
   const temp = cpu.fetched << 1
 
   cpu.registers.STATUS.C = (temp & 0xff00) > 0
@@ -44,6 +48,7 @@ export function ASL(cpu) {
 }
 
 export function BIT(cpu) {
+  cpu.fetch()
   const temp = cpu.fetched & cpu.registers.A
   cpu.registers.STATUS.Z = temp === 0
 
@@ -54,6 +59,7 @@ export function BIT(cpu) {
 }
 
 export function LSR(cpu) {
+  cpu.fetch()
   cpu.registers.STATUS.C = (cpu.fetched & 0x0001) === 1
 
   const result = (cpu.fetched >> 1) & 0xff
@@ -71,6 +77,7 @@ export function LSR(cpu) {
 }
 
 export function ROL(cpu) {
+  cpu.fetch()
   const carryBit = cpu.registers.STATUS.C ? 1 : 0
   const result = ((cpu.fetched << 1) + carryBit) & 0xff
 
@@ -88,6 +95,7 @@ export function ROL(cpu) {
 }
 
 export function ROR(cpu) {
+  cpu.fetch()
   const carryBit = cpu.registers.STATUS.C ? 1 : 0
   let result = (cpu.fetched >> 1) | (carryBit << 7)
   result = result & 0xff
