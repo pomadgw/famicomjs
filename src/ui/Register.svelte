@@ -1,5 +1,7 @@
 <script>
   import { afterUpdate } from 'svelte'
+  import toHex from '../util/tohex'
+
   export let registers
 
   let flags = ['N', 'V', 'U', 'B', 'D', 'I', 'Z', 'C']
@@ -28,18 +30,18 @@ Register:
   </tr>
   <tr>
     <td>A</td>
-    <td class="font-mono">${(registers?.A ?? 0).toString(16).padStart(2, '0').toUpperCase()}</td>
+    <td class="font-mono">${toHex(registers?.A ?? 0)}</td>
   </tr>
   <tr>
     <td>X</td>
-    <td class="font-mono">${(registers?.X ?? 0).toString(16).padStart(2, '0').toUpperCase()}</td>
+    <td class="font-mono">${toHex(registers?.X ?? 0)}</td>
   </tr>
   <tr>
     <td>Y</td>
-    <td class="font-mono">${(registers?.Y ?? 0).toString(16).padStart(2, '0').toUpperCase()}</td>
+    <td class="font-mono">${toHex(registers?.Y ?? 0)}</td>
   </tr>
   <tr>
     <td>SP</td>
-    <td class="font-mono">${(registers?.SP ?? 0).toString(16).padStart(2, '0').toUpperCase()}</td>
+    <td class="font-mono">${toHex(registers?.SP ?? 0)}</td>
   </tr>
 </table>

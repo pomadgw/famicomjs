@@ -1,11 +1,12 @@
 import opcodes from '../instructions'
+import toHexOriginal from '../../utils/tohex'
 
 function twoUint8ToUint16(low, high) {
   return (high << 8) | low
 }
 
-function toHex(number, padding = 2) {
-  return `$${number.toString(16).toUpperCase().padStart(padding, '0')}`
+function toHex(number, length = 2) {
+  return toHexOriginal(number, { length, withPrefix: true })
 }
 
 export const argParamsGenerator = (binaryStart) => ({
