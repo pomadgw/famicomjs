@@ -129,6 +129,8 @@ export default class PPU {
     this.addressLatch = 0x00
     this.ppuDataBuffer = 0x00
     this.ppuAddress = 0x0000
+
+    this.nmi = false
   }
 
   insertCartridge(cartridge) {
@@ -136,6 +138,14 @@ export default class PPU {
   }
 
   clock() {
+    if (this.scanline === 241 && this.cycle === 1) {
+      this.statusReg.verticalBlank = 1
+
+      if (this.controlReg.enablenmi === 1) {
+        this.nmi = true
+      }
+    }
+
     this.screen.setColor(
       this.cycle - 1,
       this.scanline,

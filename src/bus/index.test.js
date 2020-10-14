@@ -120,4 +120,21 @@ describe('Bus', () => {
     expect(bus.cpu.atomicClock).toHaveBeenCalledTimes(1)
     expect(onRender).toHaveBeenCalledTimes(1)
   })
+
+  it('should run nmi interrupt if ppu nmi is enabled', () => {
+    const cpu = new CPU([])
+    const ppu = new PPU()
+    const onRender = jest.fn()
+    const bus = new Bus(cpu, ppu, { onRender })
+    bus.insertCartridge(createDummyCartridge(false))
+
+    jest.spyOn(bus.cpu, 'nmi')
+
+    ppu.nmi = true
+
+    bus.clock()
+
+    expect(bus.ppu.nmi).toBe(false)
+    expect(bus.cpu.nmi).toHaveBeenCalled()
+  })
 })

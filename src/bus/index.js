@@ -85,6 +85,11 @@ export default class Bus {
       this.cpu.atomicClock()
     }
 
+    if (this.ppu.nmi) {
+      this.ppu.nmi = false
+      this.cpu.nmi()
+    }
+
     this.globalSystemClockNumber += 1
 
     if (this.ppu.isFrameComplete) {

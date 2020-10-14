@@ -58,6 +58,31 @@ describe('PPU', () => {
       expect(ppu.scanline).toBe(-1)
       expect(ppu.isFrameComplete).toBe(true)
     })
+
+    it('should set vertical blank at cycle 1, scanline 241', () => {
+      ppu.cycle = 1
+      ppu.scanline = 241
+      ppu.clock()
+
+      expect(ppu.statusReg.verticalBlank).toBe(1)
+    })
+
+    it('should set nmi at cycle 1, scanline 241 if nmi control is set', () => {
+      ppu.cycle = 1
+      ppu.scanline = 241
+      ppu.controlReg.enablenmi = 1
+      ppu.clock()
+
+      expect(ppu.nmi).toBe(true)
+
+      ppu.cycle = 1
+      ppu.scanline = 241
+      ppu.controlReg.enablenmi = 0
+      ppu.nmi = false
+      ppu.clock()
+
+      expect(ppu.nmi).toBe(false)
+    })
   })
 
   describe('#getPatternTable', () => {
