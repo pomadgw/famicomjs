@@ -1,6 +1,6 @@
 <script>
   import { afterUpdate } from 'svelte'
-  import toHex from '../util/tohex'
+  import toHex from '../utils/tohex'
 
   export let registers
 

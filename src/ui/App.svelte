@@ -2,7 +2,7 @@
   import { onMount } from 'svelte'
   import RAM from './RAM.svelte'
   import Register from './Register.svelte'
-  import toHex from '../util/tohex'
+  import toHex from '../utils/tohex'
 
   import disassember, { argParamsGenerator } from '../6502/disassembler'
   import Cartridge from '../cartridge'
