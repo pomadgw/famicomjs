@@ -51,7 +51,7 @@ describe('instructions: branch instructions', () => {
     it('should change PC register to specified value', () => {
       const cpudummy = new CPU([0x02, 0, 0, 0])
       cpudummy.registers.PC = 0
-      cpudummy.fetch({ absoluteAddress: 0x0100 })
+      cpudummy.fetchAddress({ absoluteAddress: 0x0100 })
       branch.JMP(cpudummy)
       expect(cpudummy.registers.PC).toBe(0x0100)
     })
@@ -61,7 +61,7 @@ describe('instructions: branch instructions', () => {
     it('should change PC register to specified value', () => {
       const cpudummy = new CPU(generateArray(0x1000))
       cpudummy.registers.PC = 0
-      cpudummy.fetch({ absoluteAddress: 0x0100 })
+      cpudummy.fetchAddress({ absoluteAddress: 0x0100 })
       branch.JSR(cpudummy)
       expect(cpudummy.registers.PC).toBe(0x0100)
     })
@@ -70,7 +70,7 @@ describe('instructions: branch instructions', () => {
       const cpudummy = new CPU(generateArray(0x1000))
       cpudummy.registers.PC = 0x1234
 
-      cpudummy.fetch({ absoluteAddress: 0x0100 })
+      cpudummy.fetchAddress({ absoluteAddress: 0x0100 })
       branch.JSR(cpudummy)
 
       expect(cpudummy.ram[0x1ff]).toBe(0x12)
@@ -86,7 +86,7 @@ describe('instructions: branch instructions', () => {
       cpudummy.ram[0x1ff] = 0x12
       cpudummy.ram[0x1fe] = 0x33
       cpudummy.registers.SP = 0xfd
-      cpudummy.fetch()
+      cpudummy.fetchAddress()
       branch.RTS(cpudummy)
 
       expect(cpudummy.registers.PC).toBe(0x1234)
@@ -101,7 +101,7 @@ describe('instructions: branch instructions', () => {
         const cpudummy = new CPU([0x02, 0, 0, 0])
         cpudummy.registers.PC = 0
         cpudummy.registers.STATUS[flagToTest] = jumpIfFlagIs
-        cpudummy.fetch({ relativeAddress: 2 })
+        cpudummy.fetchAddress({ relativeAddress: 2 })
         branch[instruction](cpudummy)
 
         expect(cpudummy.registers.PC).toBe(0x02)
@@ -114,7 +114,7 @@ describe('instructions: branch instructions', () => {
         const cpudummy = new CPU([0x02, 0, 0, 0])
         cpudummy.registers.PC = 0
         cpudummy.registers.STATUS[flagToTest] = !jumpIfFlagIs
-        cpudummy.fetch({ relativeAddress: 2 })
+        cpudummy.fetchAddress({ relativeAddress: 2 })
         branch[instruction](cpudummy)
 
         expect(cpudummy.registers.PC).toBe(0x00)
@@ -124,7 +124,7 @@ describe('instructions: branch instructions', () => {
         const cpudummy = new CPU([0x02, 0, 0, 0])
         cpudummy.registers.PC = 0x10ff
         cpudummy.registers.STATUS[flagToTest] = jumpIfFlagIs
-        cpudummy.fetch({ relativeAddress: 1 })
+        cpudummy.fetchAddress({ relativeAddress: 1 })
         branch[instruction](cpudummy)
 
         expect(cpudummy.registers.PC).toBe(0x1100)

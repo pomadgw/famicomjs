@@ -1,4 +1,5 @@
 function loadToRegister(cpu, register) {
+  cpu.fetch()
   const content = cpu.fetched
 
   cpu.registers[register] = content
