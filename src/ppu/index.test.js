@@ -59,12 +59,21 @@ describe('PPU', () => {
       expect(ppu.isFrameComplete).toBe(true)
     })
 
-    it('should set vertical blank at cycle 1, scanline 241', () => {
+    it('should set vertical blank to 1 at cycle 1, scanline 241', () => {
       ppu.cycle = 1
       ppu.scanline = 241
       ppu.clock()
 
       expect(ppu.statusReg.verticalBlank).toBe(1)
+    })
+
+    it('should set vertical blank to 0 at cycle 1, scanline -1', () => {
+      ppu.statusReg.verticalBlank = 1
+      ppu.cycle = 1
+      ppu.scanline = -1
+      ppu.clock()
+
+      expect(ppu.statusReg.verticalBlank).toBe(0)
     })
 
     it('should set nmi at cycle 1, scanline 241 if nmi control is set', () => {

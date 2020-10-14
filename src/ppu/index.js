@@ -138,6 +138,10 @@ export default class PPU {
   }
 
   clock() {
+    if (this.scanline === -1 && this.cycle === 1) {
+      this.statusReg.verticalBlank = 0
+    }
+
     if (this.scanline === 241 && this.cycle === 1) {
       this.statusReg.verticalBlank = 1
 
@@ -217,9 +221,6 @@ export default class PPU {
       case 0x0001: // Mask
         break
       case 0x0002: // Status
-        // TODO: remove whee correct implementation is don
-        this.statusReg.verticalBlank = 1
-
         data = (this.statusReg.value & 0xe0) | (this.ppuDataBuffer & 0x1f)
         if (!isReadOnly) {
           this.statusReg.verticalBlank = 0
