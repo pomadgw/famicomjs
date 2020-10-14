@@ -10,6 +10,7 @@
   export let offsetEnd
   export let length
   export let pc
+  export let followPC = true
 
   const toHex = num => `$${num.toString(16).toUpperCase().padStart(4, '0')}`
   const fromHex = num => parseInt(num.replace('$', ''), 16)
@@ -20,6 +21,11 @@
   $: realOffsetStart = entries.map(e => e[0]).indexOf(toHex(offsetStart))
 
   $: content = (() => {
+    if (followPC) {
+      const pcStart = entries.map(e => e[0]).indexOf(toHex(pc))
+      const halfLength = Math.floor(length / 2)
+      return Object.entries(ram).slice(pcStart - halfLength, pcStart + halfLength)
+    }
     return Object.entries(ram).slice(realOffsetStart, realOffsetStart + length)
   })()
 

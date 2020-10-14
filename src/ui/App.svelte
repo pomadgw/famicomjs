@@ -165,7 +165,14 @@
         <canvas width="512" height="480" bind:this={zoomCanvas}></canvas>
       </div>
       <div class="mt-4">
-        <div class="text-2xl">Palette <input class="text-black" type="number" bind:value={selectedPalette} min=0 max=7 /></div>
+        <div class="form-inline">
+          <div class="form-group row">
+            <label for="palettenumber" class="col-sm-2 col-form-label">Palette</label>
+            <div class="col-sm-10">
+              <input name="palettenumber" class="text-black form-control" type="number" bind:value={selectedPalette} min=0 max=7 />
+            </div>
+          </div>
+        </div>
         <div class="flex">
           <canvas class="m-auto border-2 border-blue-400" style="width: 256px" width="128" height="128" bind:this={paletteCanvas}></canvas>
           <canvas class="ml-2 m-auto border-2 border-blue-400" style="width: 256px" width="128" height="128" bind:this={paletteCanvas2}></canvas>
