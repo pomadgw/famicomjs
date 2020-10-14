@@ -47,7 +47,7 @@
 </script>
 
 <div>
-  <table class="font-mono table-fixed">
+  <table class="font-mono table-fixed w-full">
   <tr>
     <td class="text-center" colspan="2">
       <button class="block w-full" on:click={up}>Up</button>
