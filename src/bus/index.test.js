@@ -29,7 +29,7 @@ describe('Bus', () => {
       const cpu = new CPU([])
       const ppu = new PPU()
       const bus = new Bus(cpu, ppu)
-      bus.insertCartridge(createDummyCartridge(false))
+      bus.insertCartridge(createDummyCartridge(null))
 
       bus.ram[0x0001] = 0x12
       expect(bus.ram[0x0801]).toBe(0x12)
@@ -55,7 +55,7 @@ describe('Bus', () => {
       const cpu = new CPU([])
       const ppu = new PPU()
       const bus = new Bus(cpu, ppu)
-      bus.insertCartridge(createDummyCartridge(false))
+      bus.insertCartridge(createDummyCartridge(null))
 
       jest.spyOn(ppu, 'cpuRead')
 
@@ -68,7 +68,7 @@ describe('Bus', () => {
       const cpu = new CPU([])
       const ppu = new PPU()
       const bus = new Bus(cpu, ppu)
-      bus.insertCartridge(createDummyCartridge(false))
+      bus.insertCartridge(createDummyCartridge(null))
 
       jest.spyOn(ppu, 'cpuWrite')
 
@@ -80,7 +80,7 @@ describe('Bus', () => {
       const cpu = new CPU([])
       const ppu = new PPU()
       const bus = new Bus(cpu, ppu)
-      bus.insertCartridge(createDummyCartridge(false))
+      bus.insertCartridge(createDummyCartridge(null))
 
       bus.ram[0x0000] = 0x10
       expect(bus.ram.subarray(0, 1)[0]).toBe(0x10)
@@ -91,7 +91,7 @@ describe('Bus', () => {
       const cpu = new CPU([])
       const ppu = new PPU()
       const bus = new Bus(cpu, ppu)
-      bus.insertCartridge(createDummyCartridge(false))
+      bus.insertCartridge(createDummyCartridge(null))
 
       bus.ram[0x0008] = 0x10
       const snapshot = bus.getRAMSnapshot()
@@ -105,7 +105,7 @@ describe('Bus', () => {
     const ppu = new PPU()
     const onRender = jest.fn()
     const bus = new Bus(cpu, ppu, { onRender })
-    bus.insertCartridge(createDummyCartridge(false))
+    bus.insertCartridge(createDummyCartridge(null))
 
     jest.spyOn(bus.ppu, 'clock')
     jest.spyOn(bus.cpu, 'atomicClock')
@@ -126,7 +126,7 @@ describe('Bus', () => {
     const ppu = new PPU()
     const onRender = jest.fn()
     const bus = new Bus(cpu, ppu, { onRender })
-    bus.insertCartridge(createDummyCartridge(false))
+    bus.insertCartridge(createDummyCartridge(null))
 
     jest.spyOn(bus.cpu, 'nmi')
 

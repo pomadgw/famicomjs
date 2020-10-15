@@ -22,8 +22,9 @@ export default class Bus {
 
     const proxyRAM = new Proxy(cpuRAM, {
       get: (target, prop) => {
-        const address = Number(prop)
-        if (isNaN(address)) {
+        const isPropSymbol = typeof prop === 'symbol'
+        const address = isPropSymbol ? prop : Number(prop)
+        if (isPropSymbol || isNaN(address)) {
           if (typeof target[prop] === 'function') {
             return target[prop].bind(target)
           }
@@ -32,15 +33,16 @@ export default class Bus {
         }
 
         const checkFromCartridge = thisBus.cartridge?.cpuRead(address)
-        if (checkFromCartridge) return checkFromCartridge
+        if (checkFromCartridge !== null) return checkFromCartridge
         else if (address < 0x2000) return target[address & 0x07ff]
         else if (address < 0x4000)
           return this.ppu.cpuRead(address & 0x0007, target.isReadOnly)
         return 0
       },
       set: (target, prop, value) => {
-        const address = Number(prop)
-        if (isNaN(address)) target[prop] = value
+        const isPropSymbol = typeof prop === 'symbol'
+        const address = isPropSymbol ? prop : Number(prop)
+        if (isPropSymbol || isNaN(address)) target[prop] = value
         else if (thisBus.cartridge?.cpuWrite(address, value)) return true
         else if (address < 0x2000) target[prop & 0x07ff] = value
         else if (address < 0x4000) {
