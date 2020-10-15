@@ -1,3 +1,4 @@
+import MIRROR_MODE from './mirror-mode'
 import Screen from '../utils/screen'
 import bitfield from '../utils/bitfield'
 
@@ -296,6 +297,28 @@ export default class PPU {
     } else if (addr < 0x2000) {
       data = this.tablePattern[(addr & 0x1000) >> 12][addr & 0x0fff]
     } else if (addr < 0x3f00) {
+      addr = addr & 0x0fff
+      if (this.cartridge.mirrorMode === MIRROR_MODE.VERTICAL) {
+        if (addr < 0x0400) {
+          data = this.tableName[0][addr & 0x03ff]
+        } else if (addr < 0x0800) {
+          data = this.tableName[1][addr & 0x03ff]
+        } else if (addr < 0x0c00) {
+          data = this.tableName[0][addr & 0x03ff]
+        } else {
+          data = this.tableName[1][addr & 0x03ff]
+        }
+      } else if (this.cartridge.mirrorMode === MIRROR_MODE.HORIZONTAL) {
+        if (addr < 0x0400) {
+          data = this.tableName[0][addr & 0x03ff]
+        } else if (addr < 0x0800) {
+          data = this.tableName[0][addr & 0x03ff]
+        } else if (addr < 0x0c00) {
+          data = this.tableName[1][addr & 0x03ff]
+        } else {
+          data = this.tableName[1][addr & 0x03ff]
+        }
+      }
     } else if (addr < 0x3fff) {
       addr = addr & 0x001f
 
@@ -317,6 +340,28 @@ export default class PPU {
     } else if (addr < 0x2000) {
       this.tablePattern[(addr & 0x1000) >> 12][addr & 0x0fff] = value
     } else if (addr < 0x3f00) {
+      addr = addr & 0x0fff
+      if (this.cartridge.mirrorMode === MIRROR_MODE.VERTICAL) {
+        if (addr < 0x0400) {
+          this.tableName[0][addr & 0x03ff] = value
+        } else if (addr < 0x0800) {
+          this.tableName[1][addr & 0x03ff] = value
+        } else if (addr < 0x0c00) {
+          this.tableName[0][addr & 0x03ff] = value
+        } else {
+          this.tableName[1][addr & 0x03ff] = value
+        }
+      } else if (this.cartridge.mirrorMode === MIRROR_MODE.HORIZONTAL) {
+        if (addr < 0x0400) {
+          this.tableName[0][addr & 0x03ff] = value
+        } else if (addr < 0x0800) {
+          this.tableName[0][addr & 0x03ff] = value
+        } else if (addr < 0x0c00) {
+          this.tableName[1][addr & 0x03ff] = value
+        } else {
+          this.tableName[1][addr & 0x03ff] = value
+        }
+      }
     } else if (addr < 0x3fff) {
       addr = addr & 0x001f
 

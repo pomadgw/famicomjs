@@ -1,4 +1,5 @@
 import mappers from '../mappers'
+import MIRROR_MODE from '../ppu/mirror-mode'
 
 export default class Cartridge {
   constructor() {
@@ -25,6 +26,8 @@ export default class Cartridge {
     const mapper2 = view[7]
 
     this.mapperId = ((mapper2 >> 4) << 4) | (mapper1 >> 4)
+    this.mirrorMode =
+      (mapper1 & 0x01) > 0 ? MIRROR_MODE.VERTICAL : MIRROR_MODE.HORIZONTAL
 
     let seekPosition = 16
 

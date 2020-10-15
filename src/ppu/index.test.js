@@ -128,6 +128,30 @@ describe('PPU', () => {
       expect(ppu.ppuRead(0x3f18)).toBe(0xfe)
       expect(ppu.ppuRead(0x3f1c)).toBe(0xf0)
     })
+
+    it('should get correct data from table name (vertical mirror mode)', () => {
+      ppu.cartridge.mirrorMode = 1
+      ppu.tableName[0][0x0001] = 0x1f
+      ppu.tableName[1][0x0001] = 0x0f
+
+      expect(ppu.ppuRead(0x2001)).toBe(0x1f)
+      expect(ppu.ppuRead(0x2801)).toBe(0x1f)
+
+      expect(ppu.ppuRead(0x2401)).toBe(0x0f)
+      expect(ppu.ppuRead(0x2c01)).toBe(0x0f)
+    })
+
+    it('should get correct data from table name (horizontal mirror mode)', () => {
+      ppu.cartridge.mirrorMode = 0
+      ppu.tableName[0][0x0001] = 0x1f
+      ppu.tableName[1][0x0001] = 0x0f
+
+      expect(ppu.ppuRead(0x2001)).toBe(0x1f)
+      expect(ppu.ppuRead(0x2401)).toBe(0x1f)
+
+      expect(ppu.ppuRead(0x2801)).toBe(0x0f)
+      expect(ppu.ppuRead(0x2c01)).toBe(0x0f)
+    })
   })
 
   describe('#ppuWrite', () => {
@@ -151,6 +175,30 @@ describe('PPU', () => {
       expect(ppu.ppuRead(0x3f14)).toBe(0xfd)
       expect(ppu.ppuRead(0x3f18)).toBe(0xfe)
       expect(ppu.ppuRead(0x3f1c)).toBe(0xf0)
+    })
+
+    it('should set correct data to table name (vertical mirror mode)', () => {
+      ppu.cartridge.mirrorMode = 1
+      ppu.ppuWrite(0x2001, 0x01)
+      ppu.ppuWrite(0x2401, 0x03)
+
+      expect(ppu.ppuRead(0x2001)).toBe(0x01)
+      expect(ppu.ppuRead(0x2801)).toBe(0x01)
+
+      expect(ppu.tableName[1][0x0001]).toBe(0x03)
+      expect(ppu.ppuRead(0x2c01)).toBe(0x03)
+    })
+
+    it('should set correct data to table name (horizontal mirror mode)', () => {
+      ppu.cartridge.mirrorMode = 0
+      ppu.ppuWrite(0x2001, 0x01)
+      ppu.ppuWrite(0x2801, 0x03)
+
+      expect(ppu.ppuRead(0x2001)).toBe(0x01)
+      expect(ppu.ppuRead(0x2401)).toBe(0x01)
+
+      expect(ppu.ppuRead(0x2801)).toBe(0x03)
+      expect(ppu.ppuRead(0x2c01)).toBe(0x03)
     })
   })
 
