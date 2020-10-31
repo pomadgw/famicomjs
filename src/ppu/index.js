@@ -280,6 +280,8 @@ export default class PPU {
     switch (addr) {
       case 0x0000: // Control
         this.controlReg.value = value
+        this.tramAddress.nametableX = this.controlReg.nametableX
+        this.tramAddress.nametableY = this.controlReg.nametableY
         break
       case 0x0001: // Mask
         this.maskReg.value = value
@@ -295,11 +297,12 @@ export default class PPU {
         break
       case 0x0006: // PPU Address
         if (this.addressLatch === 0) {
-          this.vramAddress.value =
-            (this.vramAddress.value & 0x00ff) | (value << 8)
+          this.tramAddress.value =
+            (this.tramAddress.value & 0x00ff) | (value << 8)
           this.addressLatch = 1
         } else {
-          this.vramAddress.value = (this.vramAddress.value & 0xff00) | value
+          this.tramAddress.value = (this.tramAddress.value & 0xff00) | value
+          this.vramAddress.value = this.tramAddress.value
           this.addressLatch = 0
         }
         break

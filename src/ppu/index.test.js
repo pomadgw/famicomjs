@@ -245,9 +245,17 @@ describe('PPU', () => {
   })
 
   describe('#cpuWrite', () => {
-    it('should be able to write to control register', () => {
-      ppu.cpuWrite(0x0000, 0x10)
-      expect(ppu.controlReg.value).toBe(0x10)
+    describe('control register', () => {
+      it('should be able to write to control register', () => {
+        ppu.cpuWrite(0x0000, 0x10)
+        expect(ppu.controlReg.value).toBe(0x10)
+      })
+
+      it('should be able to set nametables', () => {
+        ppu.cpuWrite(0x0000, 0x03)
+        expect(ppu.tramAddress.nametableX).toBe(0x1)
+        expect(ppu.tramAddress.nametableY).toBe(0x1)
+      })
     })
 
     it('should be able to write to mask register', () => {
@@ -264,7 +272,7 @@ describe('PPU', () => {
       jest.spyOn(ppu, 'ppuWrite')
       ppu.cpuWrite(0x0006, 0x11)
       ppu.cpuWrite(0x0006, 0x10)
-      expect(ppu.vramAddress.value).toBe(0x1110)
+      expect(ppu.tramAddress.value).toBe(0x1110)
 
       ppu.cpuWrite(0x0007, 0x1f)
       expect(ppu.ppuWrite).toHaveBeenCalledWith(0x1110, 0x1f)
