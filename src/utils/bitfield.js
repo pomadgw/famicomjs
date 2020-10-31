@@ -28,7 +28,13 @@ export default function bitfield(structure, arrayedNumber) {
         return (arrayedNumber[0] >> posStart) & ((1 << size) - 1)
       },
       set(value) {
-        const reset = ~(0xff << posStart)
+        let resetBits = 0
+        for (let i = 0; i < size; i++) {
+          resetBits |= 1 << i
+        }
+
+        const reset = ~(resetBits << posStart)
+
         value = value & ((1 << size) - 1)
         value = value << posStart
         arrayedNumber[0] = (arrayedNumber[0] & reset) | value

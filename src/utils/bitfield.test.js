@@ -34,16 +34,34 @@ describe('bitfield', () => {
     expect(field.data).toBe(0)
 
     field.data = 0x07
-    field.data2 = 0x01
+    field.data2 = 0x00
     field.data3 = 0x1d
     field.data4 = 0x03
     expect(field.data).toBe(0x07)
-    expect(field.data2).toBe(0x01)
+    expect(field.data2).toBe(0x00)
     expect(field.data3).toBe(0x1d)
     expect(field.data4).toBe(0x03)
-    expect(field.value).toBe((0x03 << 13) | (0x1d << 8) | (0x01 << 4) | 0x07)
+    expect(field.value).toBe((0x03 << 13) | (0x1d << 8) | (0x00 << 4) | 0x07)
 
     field.data4 = 0x00
     expect(field.data4).toBe(0x00)
+
+    const loopy = bitfield(
+      [
+        ['coarseX', 5],
+        ['coarseY', 5],
+        ['nametableX', 1],
+        ['nametableY', 1],
+        ['fineY', 3],
+        ['unused', 1]
+      ],
+      new Uint16Array([0])
+    )
+
+    loopy.value = 0
+    loopy.coarseX = 0x17 >> 3
+    loopy.fineY = 7
+    loopy.coarseY = 0x17 >> 3
+    expect(loopy.fineY).toBe(7)
   })
 })
