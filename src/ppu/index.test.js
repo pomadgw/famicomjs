@@ -260,7 +260,7 @@ describe('PPU', () => {
       expect(ppu.statusReg.value).toBe(0x10)
     })
 
-    it('should be able to write to ppu', () => {
+    it('should be able to write to ppu (increment mode = 0)', () => {
       jest.spyOn(ppu, 'ppuWrite')
       ppu.cpuWrite(0x0006, 0x11)
       ppu.cpuWrite(0x0006, 0x10)
@@ -269,6 +269,18 @@ describe('PPU', () => {
       ppu.cpuWrite(0x0007, 0x1f)
       expect(ppu.ppuWrite).toHaveBeenCalledWith(0x1110, 0x1f)
       expect(ppu.ppuAddress).toBe(0x1111)
+    })
+
+    it('should be able to write to ppu (increment mode = 1)', () => {
+      jest.spyOn(ppu, 'ppuWrite')
+      ppu.controlReg.incrementMode = 1
+      ppu.cpuWrite(0x0006, 0x11)
+      ppu.cpuWrite(0x0006, 0x10)
+      expect(ppu.ppuAddress).toBe(0x1110)
+
+      ppu.cpuWrite(0x0007, 0x1f)
+      expect(ppu.ppuWrite).toHaveBeenCalledWith(0x1110, 0x1f)
+      expect(ppu.ppuAddress).toBe(0x1110 + 0x20)
     })
   })
 })
