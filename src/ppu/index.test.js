@@ -214,7 +214,7 @@ describe('PPU', () => {
       let data = ppu.cpuRead(0x0007)
       expect(data).toBe(0)
       expect(ppu.ppuRead).toHaveBeenCalledWith(0x1110)
-      expect(ppu.ppuAddress).toBe(0x1111)
+      expect(ppu.vramAddress.value).toBe(0x1111)
 
       data = ppu.cpuRead(0x0007)
       expect(data).toBe(0x10)
@@ -264,11 +264,11 @@ describe('PPU', () => {
       jest.spyOn(ppu, 'ppuWrite')
       ppu.cpuWrite(0x0006, 0x11)
       ppu.cpuWrite(0x0006, 0x10)
-      expect(ppu.ppuAddress).toBe(0x1110)
+      expect(ppu.vramAddress.value).toBe(0x1110)
 
       ppu.cpuWrite(0x0007, 0x1f)
       expect(ppu.ppuWrite).toHaveBeenCalledWith(0x1110, 0x1f)
-      expect(ppu.ppuAddress).toBe(0x1111)
+      expect(ppu.vramAddress.value).toBe(0x1111)
     })
 
     it('should be able to write to ppu (increment mode = 1)', () => {
@@ -276,11 +276,11 @@ describe('PPU', () => {
       ppu.controlReg.incrementMode = 1
       ppu.cpuWrite(0x0006, 0x11)
       ppu.cpuWrite(0x0006, 0x10)
-      expect(ppu.ppuAddress).toBe(0x1110)
+      expect(ppu.vramAddress.value).toBe(0x1110)
 
       ppu.cpuWrite(0x0007, 0x1f)
       expect(ppu.ppuWrite).toHaveBeenCalledWith(0x1110, 0x1f)
-      expect(ppu.ppuAddress).toBe(0x1110 + 0x20)
+      expect(ppu.vramAddress.value).toBe(0x1110 + 0x20)
     })
   })
 })

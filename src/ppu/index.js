@@ -131,6 +131,24 @@ export default class PPU {
     this.ppuDataBuffer = 0x00
     this.ppuAddress = 0x0000
 
+    const loopyRegister = () =>
+      bitfield(
+        [
+          ['coarseX', 5],
+          ['coarseY', 5],
+          ['nametableX', 1],
+          ['nametableY', 1],
+          ['fineY', 3],
+          ['unused', 1]
+        ],
+        new Uint16Array([0])
+      )
+
+    this.vramAddress = loopyRegister()
+    this.tramAddress = loopyRegister()
+
+    this.fineX = 0
+
     this.nmi = false
   }
 
@@ -242,13 +260,13 @@ export default class PPU {
         break
       case 0x0007: // PPU Data
         data = this.ppuDataBuffer
-        this.ppuDataBuffer = this.ppuRead(this.ppuAddress)
+        this.ppuDataBuffer = this.ppuRead(this.vramAddress.value)
 
-        if (this.ppuAddress >= 0x3f00) {
+        if (this.vramAddress.value >= 0x3f00) {
           data = this.ppuDataBuffer
         }
 
-        if (!isReadOnly) this.ppuAddress += this.incrementValue
+        if (!isReadOnly) this.vramAddress.value += this.incrementValue
         break
       default:
         break
@@ -277,16 +295,17 @@ export default class PPU {
         break
       case 0x0006: // PPU Address
         if (this.addressLatch === 0) {
-          this.ppuAddress = (this.ppuAddress & 0x00ff) | (value << 8)
+          this.vramAddress.value =
+            (this.vramAddress.value & 0x00ff) | (value << 8)
           this.addressLatch = 1
         } else {
-          this.ppuAddress = (this.ppuAddress & 0xff00) | value
+          this.vramAddress.value = (this.vramAddress.value & 0xff00) | value
           this.addressLatch = 0
         }
         break
       case 0x0007: // PPU Data
-        this.ppuWrite(this.ppuAddress, value)
-        this.ppuAddress += this.incrementValue
+        this.ppuWrite(this.vramAddress.value, value)
+        this.vramAddress.value += this.incrementValue
         break
       default:
         break
