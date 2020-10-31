@@ -134,6 +134,10 @@ export default class PPU {
     this.nmi = false
   }
 
+  get incrementValue() {
+    return this.controlReg.incrementMode === 1 ? 32 : 1
+  }
+
   insertCartridge(cartridge) {
     this.cartridge = cartridge
   }
@@ -244,7 +248,7 @@ export default class PPU {
           data = this.ppuDataBuffer
         }
 
-        if (!isReadOnly) this.ppuAddress += 1
+        if (!isReadOnly) this.ppuAddress += this.incrementValue
         break
       default:
         break
@@ -281,7 +285,7 @@ export default class PPU {
         break
       case 0x0007: // PPU Data
         this.ppuWrite(this.ppuAddress, value)
-        this.ppuAddress += 1
+        this.ppuAddress += this.incrementValue
         break
       default:
         break
