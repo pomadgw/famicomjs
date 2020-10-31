@@ -247,12 +247,17 @@ describe('PPU', () => {
   describe('#cpuWrite', () => {
     it('should be able to write to control register', () => {
       ppu.cpuWrite(0x0000, 0x10)
-      expect(ppu.statusReg.value).toBe(0x10)
+      expect(ppu.controlReg.value).toBe(0x10)
     })
 
     it('should be able to write to mask register', () => {
       ppu.cpuWrite(0x0001, 0x10)
       expect(ppu.maskReg.value).toBe(0x10)
+    })
+
+    it('should be able to write to status register', () => {
+      ppu.cpuWrite(0x0002, 0x10)
+      expect(ppu.statusReg.value).toBe(0x10)
     })
 
     it('should be able to write to ppu', () => {

@@ -261,12 +261,13 @@ export default class PPU {
     // TODO: implement this later
     switch (addr) {
       case 0x0000: // Control
-        this.statusReg.value = value
+        this.controlReg.value = value
         break
       case 0x0001: // Mask
         this.maskReg.value = value
         break
       case 0x0002: // Status
+        this.statusReg.value = value
         break
       case 0x0003: // OAM Address
         break
