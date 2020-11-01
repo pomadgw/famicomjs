@@ -23,6 +23,7 @@
   let nesPC = 0x8000
   let registers
   let selectedPalette = 0x00
+  let selectedTable = new Uint8Array(1024)
 
   let disassembled
 
@@ -86,6 +87,11 @@
     zoomCtx.drawImage(canvas, 0, 0, 256, 240, 0, 0, 512, 480)
 
     drawPalette()
+    drawTableName()
+  }
+
+  function drawTableName() {
+    selectedTable = nes.ppu.tableName[0]
   }
 
   function renderSingleFrame() {
@@ -171,6 +177,17 @@
       <div class="m-auto border-2 border-blue-400" style="width: 512px">
         <canvas width="512" height="480" bind:this={zoomCanvas}></canvas>
       </div>
+      <!-- <table class="font-mono">
+        {#each Array(30) as _, y}
+        <tr>
+          {#each Array(32) as _, x}
+            <td>
+              {(selectedTable[y * 32 + x]).toString(16).padStart(2, '0')}
+            </td>
+          {/each}
+        </tr>
+        {/each }
+      </table> -->
       <div class="mt-4">
         <div>
           <div class="form-group row">

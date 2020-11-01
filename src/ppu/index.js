@@ -294,6 +294,15 @@ export default class PPU {
       case 0x0004: // OAM Data
         break
       case 0x0005: // Scroll
+        if (this.addressLatch === 0) {
+          this.fineX = value & 0x07
+          this.tramAddress.coarseX = value >> 3
+          this.addressLatch = 1
+        } else {
+          this.tramAddress.fineY = value & 0x07
+          this.tramAddress.coarseY = value >> 3
+          this.addressLatch = 0
+        }
         break
       case 0x0006: // PPU Address
         if (this.addressLatch === 0) {

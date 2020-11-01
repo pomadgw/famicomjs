@@ -268,6 +268,18 @@ describe('PPU', () => {
       expect(ppu.statusReg.value).toBe(0x10)
     })
 
+    it('should be able to write to scroll-related registers', () => {
+      ppu.addressLatch = 0
+      ppu.cpuWrite(0x0005, 0x17)
+      expect(ppu.fineX).toBe(0x17 & 0x07)
+      expect(ppu.tramAddress.coarseX).toBe(0x17 >> 3)
+      console.log(ppu.tramAddress.value)
+      ppu.cpuWrite(0x0005, 0x17)
+      console.log(ppu.tramAddress.value)
+      expect(ppu.tramAddress.fineY).toBe(0x17 & 0x07)
+      expect(ppu.tramAddress.coarseY).toBe(0x17 >> 3)
+    })
+
     it('should be able to write to ppu (increment mode = 0)', () => {
       jest.spyOn(ppu, 'ppuWrite')
       ppu.cpuWrite(0x0006, 0x11)
