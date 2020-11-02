@@ -92,6 +92,19 @@ describe('PPU', () => {
 
       expect(ppu.nmi).toBe(false)
     })
+
+    describe('within visible range', () => {
+      it('should set bg tile propertied', () => {
+        ppu.cycle = 9
+        ppu.scanline = 1
+        ppu.vramAddress.value = 0x01ff
+        ppu.ppuRead = jest.fn().mockReturnValue(0x1f)
+
+        ppu.clock()
+        expect(ppu.ppuRead).toHaveBeenCalledWith(0x21ff)
+        expect(ppu.bgNextTile.id).toBe(0x1f)
+      })
+    })
   })
 
   describe('#getPatternTable', () => {

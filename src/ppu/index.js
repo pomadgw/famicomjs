@@ -150,6 +150,74 @@ export default class PPU {
     this.fineX = 0
 
     this.nmi = false
+
+    this.bgNextTile = {
+      id: 0,
+      attrib: 0,
+      lsb: 0,
+      msb: 0
+    }
+
+    const rootThis = this
+
+    this.bgShifter = {
+      pattern: {
+        lo: 0,
+        hi: 0
+      },
+      attrib: {
+        lo: 0,
+        hi: 0
+      },
+      reset() {
+        this.pattern = {
+          lo: 0,
+          hi: 0
+        }
+
+        this.attrib = {
+          lo: 0,
+          hi: 0
+        }
+      },
+      loadBgShifter() {
+        this.pattern.lo = (this.pattern.lo & 0xff00) | rootThis.bgNextTile.lsb
+        this.pattern.hi = (this.pattern.hi & 0xff00) | rootThis.bgNextTile.msb
+
+        this.attrib.lo =
+          (this.attrib.lo & 0xff00) |
+          ((rootThis.bgNextTile.attrib & 0x01) > 0 ? 0xff : 0)
+        this.attrib.hi =
+          (this.attrib.hi & 0xff00) |
+          ((rootThis.bgNextTile.attrib & 0x02) > 0 ? 0xff : 0)
+      },
+      updateShifter() {
+        if (rootThis.maskReg.renderBg === 1) {
+          this.pattern.lo <<= 1
+          this.pattern.hi <<= 1
+          this.attrib.lo <<= 1
+          this.attrib.hi <<= 1
+        }
+      },
+      yieldBgPixel() {
+        const bitmux = 0x8000 >> rootThis.fineX
+
+        const [p0Pixel, p1Pixel] = [
+          (this.pattern.lo & bitmux) > 0 ? 1 : 0,
+          (this.pattern.hi & bitmux) > 0 ? 1 : 0
+        ]
+
+        const [bgPal0, bgPal1] = [
+          (this.attrib.lo & bitmux) > 0 ? 1 : 0,
+          (this.attrib.hi & bitmux) > 0 ? 1 : 0
+        ]
+
+        return {
+          bgPixel: (p1Pixel << 1) | p0Pixel,
+          bgPalette: (bgPal1 << 1) | bgPal0
+        }
+      }
+    }
   }
 
   get incrementValue() {
@@ -161,8 +229,133 @@ export default class PPU {
   }
 
   clock() {
-    if (this.scanline === -1 && this.cycle === 1) {
-      this.statusReg.verticalBlank = 0
+    const isRenderSomthing =
+      this.maskReg.renderBg === 1 || this.maskReg.renderSprites === 1
+    const incrementScrollX = () => {
+      if (isRenderSomthing) {
+        if (this.vramAddress.coarseX === 31) {
+          this.vramAddress.coarseX = 0
+          this.vramAddress.nametableX = ~this.vramAddress.nametableX
+        } else {
+          this.vramAddress.coarseX++
+        }
+      }
+    }
+
+    const incrementScrollY = () => {
+      if (isRenderSomthing) {
+        if (this.vramAddress.fineY < 7) {
+          this.vramAddress.fineY++
+        } else {
+          this.vramAddress.fineY = 0
+          if (this.vramAddress.coarseY === 29) {
+            this.vramAddress.coarseY = 0
+            this.vramAddress.nametableY = ~this.vramAddress.nametableY
+          } else if (this.vramAddress.coarseY === 31) {
+            this.vramAddress.coarseY = 0
+          } else {
+            this.vramAddress.coarseY++
+          }
+        }
+      }
+    }
+
+    const transferAddressX = () => {
+      if (isRenderSomthing) {
+        this.vramAddress.nametableX = this.tramAddress.nametableX
+        this.vramAddress.coarseX = this.tramAddress.coarseX
+      }
+    }
+
+    const transferAddressY = () => {
+      if (isRenderSomthing) {
+        this.vramAddress.fineY = this.tramAddress.fineY
+        this.vramAddress.nametableY = this.tramAddress.nametableY
+        this.vramAddress.coarseY = this.tramAddress.coarseY
+      }
+    }
+
+    if (this.scanline >= -1 && this.scanline < 240) {
+      if (this.scanline === -1 && this.cycle === 1) {
+        this.statusReg.verticalBlank = 0
+      }
+
+      if (
+        (this.cycle > 1 && this.cycle < 258) ||
+        (this.cycle > 320 && this.cycle < 338)
+      ) {
+        this.bgShifter.updateShifter()
+
+        switch ((this.cycle - 1) % 8) {
+          case 0:
+            this.bgShifter.loadBgShifter()
+            this.bgNextTile.id = this.ppuRead(
+              0x2000 | (this.vramAddress.value & 0x0fff)
+            )
+            break
+          case 2:
+            this.bgNextTile.attrib = this.ppuRead(
+              0x23c0 |
+                (this.vramAddress.nametableY << 11) |
+                (this.vramAddress.nametableX << 10) |
+                ((this.vramAddress.coarseY >> 2) << 3) |
+                (this.vramAddress.coarseX >> 2)
+            )
+            if ((this.vramAddress.coarseY & 0x02) > 0) {
+              this.bgNextTile.attrib >>= 4
+            }
+            if ((this.vramAddress.coarseX & 0x02) > 0) {
+              this.bgNextTile.attrib >>= 2
+            }
+            this.bgNextTile.attrib &= 0x03
+            break
+          case 4:
+            this.bgNextTile.lsb = this.ppuRead(
+              (this.controlReg.patternBg << 12) +
+                (this.bgNextTile.id << 4) +
+                this.vramAddress.fineY +
+                0
+            )
+            break
+          case 6:
+            this.bgNextTile.msb = this.ppuRead(
+              (this.controlReg.patternBg << 12) +
+                (this.bgNextTile.id << 4) +
+                this.vramAddress.fineY +
+                8
+            )
+            break
+          case 7:
+            incrementScrollX()
+            break
+          default:
+            break
+        }
+      }
+
+      if (this.cycle === 256) {
+        incrementScrollY()
+      }
+
+      if (this.cycle === 257) {
+        this.bgShifter.loadBgShifter()
+        transferAddressX()
+      }
+
+      if (this.cycle === 338 || this.cycle === 340) {
+        this.bgNextTile.id = this.ppuRead(
+          0x2000 | (this.vramAddress.value & 0x0fff)
+        )
+      }
+
+      if (this.scanline === -1 && this.cycle >= 280 && this.cycle < 305) {
+        transferAddressY()
+      }
+    }
+
+    if (this.scanline === 240) {
+      // Nothing is real...new
+      // nothing happens here
     }
 
     if (this.scanline === 241 && this.cycle === 1) {
@@ -173,10 +366,12 @@ export default class PPU {
       }
     }
 
+    const { bgPixel, bgPalette } = this.bgShifter.yieldBgPixel()
+
     this.screen.setColor(
       this.cycle - 1,
       this.scanline,
-      palScreen[Math.random() > 0.5 ? 0x3f : 0x30]
+      this.getColorFromPaletteRAM(bgPalette, bgPixel)
     )
 
     this.cycle += 1
