@@ -35,6 +35,19 @@ describe('instructions: memory-related instructions', () => {
         expect(getTargetRegisterValue(cpu)).toBe(0xff)
         expect(cpu.registers.STATUS.N).toBe(true)
         expect(cycle).toBe(0)
+
+        cpu.ram[0x100] = 0x01
+        cpu.fetch({ absoluteAddress: 0x100 })
+
+        memory[instruction](cpu)
+        expect(getTargetRegisterValue(cpu)).toBe(0x01)
+        expect(cpu.registers.STATUS.N).toBe(false)
+
+        cpu.ram[0x100] = 0x80
+        cpu.fetch({ absoluteAddress: 0x100 })
+
+        memory[instruction](cpu)
+        expect(cpu.registers.STATUS.N).toBe(true)
       })
 
       it('should trigger Z flag if resulting accumulator value is zero', () => {

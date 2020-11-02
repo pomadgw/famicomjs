@@ -29,7 +29,7 @@ describe('Bus', () => {
       const cpu = new CPU([])
       const ppu = new PPU()
       const bus = new Bus(cpu, ppu)
-      bus.insertCartridge(createDummyCartridge(false))
+      bus.insertCartridge(createDummyCartridge(null))
 
       bus.ram[0x0001] = 0x12
       expect(bus.ram[0x0801]).toBe(0x12)
@@ -55,20 +55,20 @@ describe('Bus', () => {
       const cpu = new CPU([])
       const ppu = new PPU()
       const bus = new Bus(cpu, ppu)
-      bus.insertCartridge(createDummyCartridge(false))
+      bus.insertCartridge(createDummyCartridge(null))
 
       jest.spyOn(ppu, 'cpuRead')
 
       const data = bus.ram[0x2001]
       expect(data).toBe(0)
-      expect(ppu.cpuRead).toHaveBeenCalledWith(1)
+      expect(ppu.cpuRead).toHaveBeenCalledWith(1, false)
     })
 
     it('should write data to PPU if address is 0x2000 - 0x3fff', () => {
       const cpu = new CPU([])
       const ppu = new PPU()
       const bus = new Bus(cpu, ppu)
-      bus.insertCartridge(createDummyCartridge(false))
+      bus.insertCartridge(createDummyCartridge(null))
 
       jest.spyOn(ppu, 'cpuWrite')
 
@@ -80,28 +80,61 @@ describe('Bus', () => {
       const cpu = new CPU([])
       const ppu = new PPU()
       const bus = new Bus(cpu, ppu)
-      bus.insertCartridge(createDummyCartridge(false))
+      bus.insertCartridge(createDummyCartridge(null))
 
       bus.ram[0x0000] = 0x10
       expect(bus.ram.subarray(0, 1)[0]).toBe(0x10)
       expect(bus.ram.length).toBe(0x10000)
+    })
+
+    it('should get snapshot', () => {
+      const cpu = new CPU([])
+      const ppu = new PPU()
+      const bus = new Bus(cpu, ppu)
+      bus.insertCartridge(createDummyCartridge(null))
+
+      bus.ram[0x0008] = 0x10
+      const snapshot = bus.getRAMSnapshot()
+      expect(snapshot.length).toBe(0x10000)
+      expect(snapshot[0x0008]).toBe(0x10)
     })
   })
 
   it('should run clocks', () => {
     const cpu = new CPU([])
     const ppu = new PPU()
-    const bus = new Bus(cpu, ppu)
-    bus.insertCartridge(createDummyCartridge(false))
+    const onRender = jest.fn()
+    const bus = new Bus(cpu, ppu, { onRender })
+    bus.insertCartridge(createDummyCartridge(null))
 
     jest.spyOn(bus.ppu, 'clock')
     jest.spyOn(bus.cpu, 'atomicClock')
 
     bus.clock()
     bus.clock()
+
+    ppu.isFrameComplete = true
     bus.clock()
 
     expect(bus.ppu.clock).toHaveBeenCalledTimes(3)
     expect(bus.cpu.atomicClock).toHaveBeenCalledTimes(1)
+    expect(onRender).toHaveBeenCalledTimes(1)
+  })
+
+  it('should run nmi interrupt if ppu nmi is enabled', () => {
+    const cpu = new CPU([])
+    const ppu = new PPU()
+    const onRender = jest.fn()
+    const bus = new Bus(cpu, ppu, { onRender })
+    bus.insertCartridge(createDummyCartridge(null))
+
+    jest.spyOn(bus.cpu, 'nmi')
+
+    ppu.nmi = true
+
+    bus.clock()
+
+    expect(bus.ppu.nmi).toBe(false)
+    expect(bus.cpu.nmi).toHaveBeenCalled()
   })
 })
