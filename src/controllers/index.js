@@ -14,6 +14,18 @@ export default class Controller {
     this.buttonStatus = 0
     this.buttonStatusToSend = 0
     this.strobe = false
+
+    if (buttons) {
+      document.addEventListener('keydown', (e) => {
+        const buttonValue = buttons[e.code]
+        this.setButtonState(buttonValue, true)
+      })
+
+      document.addEventListener('keyup', (e) => {
+        const buttonValue = buttons[e.code]
+        this.setButtonState(buttonValue, false)
+      })
+    }
   }
 
   write(value) {

@@ -50,4 +50,27 @@ describe('controller', () => {
     // end with all 1
     expect(c.read()).toBe(1)
   })
+
+  it('shoulde set button given a keydown', () => {
+    const c = new Controller({
+      KeyA: 'A'
+    })
+    c.strobe = 1
+
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        code: 'KeyA'
+      })
+    )
+
+    expect(c.buttonStatus).toBe(0b00000001)
+
+    document.dispatchEvent(
+      new KeyboardEvent('keyup', {
+        code: 'KeyA'
+      })
+    )
+
+    expect(c.buttonStatus).toBe(0b00000000)
+  })
 })
