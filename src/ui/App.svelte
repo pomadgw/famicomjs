@@ -211,7 +211,7 @@
       </div>
     </div>
     <div class="flex items-center mt-4">
-      <input type="file" on:change={readFile} />
+      <input type="file" accept=".nes" on:change={readFile} />
       <label>
         <input type="checkbox" bind:checked={showRAM} />
         Show RAM content
