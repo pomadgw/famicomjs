@@ -64,4 +64,19 @@ describe('bitfield', () => {
     loopy.coarseY = 0x17 >> 3
     expect(loopy.fineY).toBe(7)
   })
+
+  it('should be able to change a bitfield as a boolean', () => {
+    const field = bitfield(
+      [
+        ['data', 1],
+        ['data2', 4]
+      ],
+      new Uint8Array([0])
+    )
+
+    expect(field.bData).toBe(false)
+    field.bData = true
+    expect(field.bData).toBe(true)
+    expect(field.data).toBe(1)
+  })
 })

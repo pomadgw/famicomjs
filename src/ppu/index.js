@@ -192,7 +192,7 @@ export default class PPU {
           ((rootThis.bgNextTile.attrib & 0x02) > 0 ? 0xff : 0)
       },
       updateShifter() {
-        if (rootThis.maskReg.renderBg === 1) {
+        if (rootThis.maskReg.bRenderBg) {
           this.pattern.lo <<= 1
           this.pattern.hi <<= 1
           this.attrib.lo <<= 1
@@ -200,6 +200,11 @@ export default class PPU {
         }
       },
       yieldBgPixel() {
+        if (!rootThis.maskReg.bRenderBg)
+          return {
+            bgPixel: 0,
+            bgPalette: 0
+          }
         const bitmux = 0x8000 >> rootThis.fineX
 
         const [p0Pixel, p1Pixel] = [
@@ -259,7 +264,7 @@ export default class PPU {
 
   clock() {
     const isRenderSomthing =
-      this.maskReg.renderBg === 1 || this.maskReg.renderSprites === 1
+      this.maskReg.bRenderBg || this.maskReg.bRenderSprites
     const incrementScrollX = () => {
       if (isRenderSomthing) {
         if (this.vramAddress.coarseX === 31) {

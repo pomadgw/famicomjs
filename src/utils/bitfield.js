@@ -1,3 +1,5 @@
+import camelCase from 'lodash.camelcase'
+
 export default function bitfield(structure, arrayedNumber) {
   const result = {}
   const totalSize = structure.map((e) => e[1]).reduce((a, b) => a + b, 0)
@@ -36,6 +38,18 @@ export default function bitfield(structure, arrayedNumber) {
         arrayedNumber[0] = (arrayedNumber[0] & reset) | value
       }
     })
+
+    if (size === 1) {
+      Object.defineProperty(result, camelCase(`b ${field}`), {
+        get() {
+          return result[field] === 1
+        },
+        set(value) {
+          if (value) result[field] = 1
+          else result[field] = 0
+        }
+      })
+    }
 
     pos += size
   })
