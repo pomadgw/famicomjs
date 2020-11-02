@@ -77,6 +77,7 @@ export default class Bus {
 
   reset() {
     this.cpu.reset()
+    this.ppu.reset()
     this.globalSystemClockNumber = 0
   }
 

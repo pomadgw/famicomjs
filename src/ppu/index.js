@@ -228,6 +228,35 @@ export default class PPU {
     this.cartridge = cartridge
   }
 
+  reset() {
+    this.isFrameComplete = false
+
+    this.scanline = 0
+    this.cycle = 0
+
+    this.addressLatch = 0x00
+    this.ppuDataBuffer = 0x00
+    this.ppuAddress = 0x0000
+
+    this.statusReg.value = 0
+    this.controlReg.value = 0
+    this.maskReg.value = 0
+    this.vramAddress.value = 0
+    this.tramAddress.value = 0
+
+    this.bgShifter.reset()
+    this.fineX = 0
+
+    this.nmi = false
+
+    this.bgNextTile = {
+      id: 0,
+      attrib: 0,
+      lsb: 0,
+      msb: 0
+    }
+  }
+
   clock() {
     const isRenderSomthing =
       this.maskReg.renderBg === 1 || this.maskReg.renderSprites === 1
