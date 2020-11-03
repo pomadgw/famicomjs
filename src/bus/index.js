@@ -103,11 +103,11 @@ export default class Bus {
   }
 
   clock() {
-    this.ppu.clock()
-
     if (this.globalSystemClockNumber % 3 === 0) {
       this.cpu.atomicClock()
     }
+
+    this.ppu.clock()
 
     if (this.ppu.nmi) {
       this.ppu.nmi = false

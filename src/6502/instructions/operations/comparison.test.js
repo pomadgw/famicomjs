@@ -42,6 +42,16 @@ describe('instructions: comparison', () => {
         comparison[instruction](cpu)
 
         expect(cpu.registers.STATUS.N).toBe(true)
+
+        cpu.registers.STATUS.N = false
+        cpu.ram[1] = 0x00
+        cpu.registers[targetRegister] = 0x80
+
+        cpu.fetchAddress({ absoluteAddress: 0x0001 })
+
+        comparison[instruction](cpu)
+
+        expect(cpu.registers.STATUS.N).toBe(true)
       })
     })
   }

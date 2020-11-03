@@ -6,3 +6,4 @@ _bin/
 yarn-error.log
 build/
 nestest.nes
+nestest.log

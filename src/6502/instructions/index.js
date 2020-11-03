@@ -27,6 +27,7 @@ import { BRK, RTI } from './operations/interrupts'
 import { LDA, LDX, LDY, STA, STX, STY } from './operations/memory'
 import { NOP } from './operations/nop'
 import { TAX, TAY, TXA, TYA } from './operations/register'
+import { SEC, SED, SEI } from './operations/set'
 import { PHA, PLA, PHP, PLP, TXS, TSX } from './operations/stack'
 
 const ABX = (cpu) => ABS(cpu, 'X')
@@ -434,7 +435,7 @@ export default {
   },
   0x38: {
     name: 'SEC',
-    operator: XXX,
+    operator: SEC,
     addressing: IMP,
     addressingName: 'IMP',
     cycles: 2
@@ -882,7 +883,7 @@ export default {
   },
   0x78: {
     name: 'SEI',
-    operator: XXX,
+    operator: SEI,
     addressing: IMP,
     addressingName: 'IMP',
     cycles: 2
@@ -1778,7 +1779,7 @@ export default {
   },
   0xf8: {
     name: 'SED',
-    operator: XXX,
+    operator: SED,
     addressing: IMP,
     addressingName: 'IMP',
     cycles: 2

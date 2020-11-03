@@ -4,7 +4,7 @@ function compare(cpu, register) {
 
   cpu.registers.STATUS.C = temp >= 0
   cpu.registers.STATUS.Z = temp === 0
-  cpu.registers.STATUS.N = temp < 0
+  cpu.registers.STATUS.N = temp < 0 || temp >= 0x80
 
   return 1
 }

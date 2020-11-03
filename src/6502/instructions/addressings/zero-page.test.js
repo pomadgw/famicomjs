@@ -24,5 +24,12 @@ describe('addressing mode: zero page', () => {
       absoluteAddress: 0x11,
       clocks: 0
     })
+
+    CPUDummy = new CPU(ram)
+    CPUDummy.registers.Y = 0xf1
+    expect(zeroPage(CPUDummy, 'Y')).toEqual({
+      absoluteAddress: 0x00,
+      clocks: 0
+    })
   })
 })
