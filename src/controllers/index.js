@@ -12,8 +12,9 @@ export const Button = {
 export default class Controller {
   constructor(buttons) {
     this.buttonStatus = 0
-    this.buttonStatusToSend = 0
+    // this.buttonStatusToSend = 0
     this.strobe = false
+    this.cursor = 0
 
     if (buttons) {
       document.addEventListener('keydown', (e) => {
@@ -29,32 +30,38 @@ export default class Controller {
   }
 
   write(value) {
-    this.strobe = (value & 1) > 0
+    this.strobe = (value & 1) !== 0
+
+    if (this.strobe) {
+      this.cursor = 0
+    }
   }
 
   read() {
     if (this.strobe) {
       return this.buttonStatus & 1
-    } else if (this.buttonStatusToSend === 0) {
-      return 1
+    } else if (this.cursor >= 8) {
+      return 0
     } else {
-      const value = this.buttonStatusToSend & 1
-      this.buttonStatusToSend >>= 1
+      const value = this.buttonStatusToSend
+      this.cursor += 1
       return value
     }
+  }
+
+  get buttonStatusToSend() {
+    return (this.buttonStatus >> this.cursor) & 1
   }
 
   setButtonState(buttonType, value) {
     const buttonValue = Button[buttonType]
 
+    if (!buttonValue) return
+
+    this.buttonStatus &= ~buttonValue
+
     if (value) {
       this.buttonStatus |= buttonValue
-    } else {
-      this.buttonStatus &= ~buttonValue
-    }
-
-    if (this.strobe) {
-      this.buttonStatusToSend = this.buttonStatus
     }
   }
 }
