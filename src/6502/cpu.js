@@ -139,7 +139,7 @@ export default class CPU {
     { absoluteAddress, value, relativeAddress, clocks } = { clocks: 0 }
   ) {
     this.isImplicit = value != null
-    this.addresses.absoluteAddress = absoluteAddress
+    this.addresses.absoluteAddress = absoluteAddress & 0xffff
     this.addresses.relativeAddress = relativeAddress
     if (this.isImplicit) this.fetched = value
 
