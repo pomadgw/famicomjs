@@ -27,7 +27,7 @@ async function mockNES({
 }
 
 test('NES test', async () => {
-  const nes = new Bus(new CPU(), new PPU())
+  const nes = new Bus(new CPU(), new PPU(), { onRender: () => {} })
   const cart = new Cartridge()
   const cartFile = await mockNES()
   await cart.parse(cartFile)
@@ -45,7 +45,7 @@ test('NES test', async () => {
   const map = []
 
   let prevCycle
-  for (let i = 0; i < 3 * 27000; i++) {
+  for (let i = 0; i < 3 * 30000; i++) {
     logValue = ''
     nes.clock()
     const prevPC = nes.cpu.debugCurrentOps.pc
@@ -72,7 +72,7 @@ test('NES test', async () => {
     logValue += `  A:${toHex(nes.cpu.registers.A)}`
     logValue += ` X:${toHex(nes.cpu.registers.X)}`
     logValue += ` Y:${toHex(nes.cpu.registers.Y)}`
-    logValue += ` P:${toHex(+nes.cpu.registers.STATUS)}`
+    logValue += ` P:${(+nes.cpu.registers.STATUS).toString(2).padStart(8, '0')}`
     logValue += ` SP:${toHex(nes.cpu.registers.SP)}`
     logValue += ` PPU:${nes.ppu.scanline.toString().padStart(3, ' ')}`
     logValue += `,${(nes.ppu.cycle - 1).toString().padStart(3, ' ')}`
