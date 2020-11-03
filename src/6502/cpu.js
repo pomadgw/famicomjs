@@ -39,6 +39,10 @@ export default class CPU {
     this.opcode = 0
 
     this.bus = null
+
+    this.debugCycles = -1
+    this.debugCurrentOps = []
+    this.debugCurrentOps.pc = this.registers.PC
   }
 
   connect(bus) {
@@ -58,6 +62,7 @@ export default class CPU {
     const loPC = this.ram[startPCAddress]
     const hiPC = this.ram[startPCAddress + 1]
     this.registers.PC = (hiPC << 8) | loPC
+    this.debugCurrentOps.pc = this.registers.PC
 
     this.addresses.absoluteAddress = 0
     this.addresses.relativeAddress = 0
@@ -107,18 +112,26 @@ export default class CPU {
   }
 
   atomicClock() {
+    this.cycles -= 1
+    this.debugCycles += 1
+
     if (this.isComplete) {
       this.fetched = null
-
       const opcode = this.readRAM(this.nextPC())
       this.opcode = opcode
       this.operation = mapping[opcode]
+
+      this.debugCurrentOps = [
+        opcode,
+        this.readRAM(this.registers.PC + 0),
+        this.readRAM(this.registers.PC + 1)
+      ]
+      this.debugCurrentOps.pc = this.registers.PC - 1
+
       this.cycles = this.operation.cycles
       this.cycles += this.fetchAddress(this.operation.addressing(this))
       this.cycles += this.operation.operator(this)
     }
-
-    this.cycles -= 1
   }
 
   fetchAddress(
