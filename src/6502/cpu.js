@@ -112,7 +112,6 @@ export default class CPU {
   }
 
   atomicClock() {
-    this.cycles -= 1
     this.debugCycles += 1
 
     if (this.isComplete) {
@@ -132,6 +131,8 @@ export default class CPU {
       this.cycles += this.fetchAddress(this.operation.addressing(this))
       this.cycles += this.operation.operator(this)
     }
+
+    this.cycles -= 1
   }
 
   fetchAddress(
