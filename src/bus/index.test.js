@@ -76,6 +76,43 @@ describe('Bus', () => {
       expect(ppu.cpuWrite).toHaveBeenCalledWith(0, 0x10)
     })
 
+    it('should read data to controller if address is 0x4016 or 0x4017', () => {
+      const cpu = new CPU([])
+      const ppu = new PPU()
+      const bus = new Bus(cpu, ppu)
+      bus.insertCartridge(createDummyCartridge(null))
+
+      bus.controllers[0].strobe = 0
+      bus.controllers[0].buttonStatus = 0x01
+      bus.controllers[1].strobe = 0
+      bus.controllers[1].buttonStatus = 0x0f
+
+      jest.spyOn(bus.controllers[0], 'read')
+      jest.spyOn(bus.controllers[1], 'read')
+
+      let data = bus.ram[0x4016]
+      expect(data).toBe(1)
+      expect(bus.controllers[0].read).toHaveBeenCalled()
+      data = bus.ram[0x4017]
+      expect(data).toBe(1)
+      expect(bus.controllers[1].read).toHaveBeenCalled()
+    })
+
+    it('should write data to controller if address is 0x4016 or 0x4017', () => {
+      const cpu = new CPU([])
+      const ppu = new PPU()
+      const bus = new Bus(cpu, ppu)
+      bus.insertCartridge(createDummyCartridge(null))
+
+      jest.spyOn(bus.controllers[0], 'write')
+      jest.spyOn(bus.controllers[1], 'write')
+
+      bus.ram[0x4016] = 0x01
+      expect(bus.controllers[0].write).toHaveBeenCalledWith(0x01)
+      bus.ram[0x4017] = 0x11
+      expect(bus.controllers[1].write).toHaveBeenCalledWith(0x11)
+    })
+
     it('should run correct function with this context', () => {
       const cpu = new CPU([])
       const ppu = new PPU()

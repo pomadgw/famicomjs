@@ -1,3 +1,5 @@
+import Controller from '../controllers'
+
 export default class Bus {
   constructor(cpu, ppu, { onRender } = {}) {
     this.cpu = cpu
@@ -11,6 +13,20 @@ export default class Bus {
 
     this._on = {}
     this._on.render = onRender
+
+    this.controllers = [
+      new Controller({
+        KeyA: 'A',
+        KeyS: 'B',
+        KeyZ: 'Select',
+        KeyX: 'Start',
+        ArrowUp: 'Up',
+        ArrowDown: 'Down',
+        ArrowLeft: 'Left',
+        ArrowRight: 'Right'
+      }),
+      new Controller()
+    ]
 
     this.isReadOnly = false
   }
@@ -37,6 +53,9 @@ export default class Bus {
         else if (address < 0x2000) return target[address & 0x07ff]
         else if (address < 0x4000)
           return this.ppu.cpuRead(address & 0x0007, target.isReadOnly)
+        else if (address === 0x4016 || address === 0x4017) {
+          return this.controllers[address & 0x1].read()
+        }
         return 0
       },
       set: (target, prop, value) => {
@@ -47,6 +66,8 @@ export default class Bus {
         else if (address < 0x2000) target[prop & 0x07ff] = value
         else if (address < 0x4000) {
           this.ppu.cpuWrite(address & 0x0007, value)
+        } else if (address === 0x4016 || address === 0x4017) {
+          this.controllers[address & 0x1].write(value)
         }
 
         return true
