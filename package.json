@@ -16,7 +16,10 @@
     "generate-opcodes": "node build-opcode.js && eslint --fix src/6502/instructions/index.js",
     "test": "jest --coverage",
     "download-nes-test": "wget -c http://nickmass.com/images/nestest.nes",
-    "remove-nes-test": "rm -fv nestest.nes"
+    "remove-nes-test": "rm -fv nestest.nes",
+    "asbuild:untouched": "asc assembly/index.ts --target debug",
+    "asbuild:optimized": "asc assembly/index.ts --target release",
+    "asbuild": "npm run asbuild:untouched && npm run asbuild:optimized"
   },
   "devDependencies": {
     "@babel/core": "^7.11.1",
@@ -38,6 +41,7 @@
     "@testing-library/jest-dom": "^5.5.0",
     "@testing-library/svelte": "^3.0.0",
     "@types/jest": "^26.0.10",
+    "assemblyscript": "^0.17.1",
     "autoprefixer": "^10.0.1",
     "babel-jest": "^26.3.0",
     "codecov": "^3.7.2",
@@ -92,6 +96,7 @@
     "*.js": "eslint --cache --fix"
   },
   "dependencies": {
+    "@assemblyscript/loader": "^0.17.1",
     "@babel/runtime": "^7.11.2",
     "lodash.camelcase": "^4.3.0",
     "regenerator-runtime": "^0.13.7",
