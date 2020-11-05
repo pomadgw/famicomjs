@@ -4,6 +4,7 @@ import mapping from './instructions/index'
 export default class CPU {
   constructor(ram) {
     this.ram = new Uint8Array(ram)
+    this.isDebug = false
 
     this.registers = new Proxy(
       {
@@ -41,12 +42,28 @@ export default class CPU {
     this.bus = null
 
     this.debugCycles = -1
-    this.debugCurrentOps = []
-    this.debugCurrentOps.pc = this.registers.PC
+    this.setDebugData()
   }
 
   connect(bus) {
     this.bus = bus
+  }
+
+  setDebugData() {
+    this.debugCycles = -1
+    this.debugData = {
+      /**
+       * Format:
+       * {
+       *   pc: 0x0000,
+       *   instructions: [0x00, 0x11],
+       *   cycle: 0,
+       * }
+       */
+      opcodes: [],
+      pointer: -1,
+      pc: this.registers.PC
+    }
   }
 
   reset() {
@@ -55,20 +72,19 @@ export default class CPU {
     this.registers.Y = 0
     this.registers.SP = 0xfd
 
-    this.registers.STATUS.status = 0
-    this.registers.STATUS.U = true
+    this.registers.STATUS.status = 0x24
 
     const startPCAddress = 0xfffc
     const loPC = this.ram[startPCAddress]
     const hiPC = this.ram[startPCAddress + 1]
     this.registers.PC = (hiPC << 8) | loPC
-    this.debugCurrentOps.pc = this.registers.PC
 
     this.addresses.absoluteAddress = 0
     this.addresses.relativeAddress = 0
     this.fetched = 0
 
     this.cycles = 8
+    this.setDebugData()
   }
 
   interrupt(targetAddress) {
@@ -105,6 +121,11 @@ export default class CPU {
     return this.cycles === 0
   }
 
+  get debugLastInstruction() {
+    if (this.debugData.pointer === -1) return undefined
+    return this.debugData.opcodes[this.debugData.pointer]
+  }
+
   clock() {
     do {
       this.atomicClock()
@@ -112,26 +133,31 @@ export default class CPU {
   }
 
   atomicClock() {
-    this.debugCycles += 1
-
     if (this.isComplete) {
       this.fetched = null
+
+      this.debugData.opcodes.push({
+        pc: this.registers.PC,
+        instructions: [],
+        A: this.registers.A,
+        X: this.registers.X,
+        Y: this.registers.Y,
+        P: +this.registers.STATUS,
+        SP: this.registers.SP,
+        cycles: this.debugCycles
+      })
+      this.debugData.pointer++
+
       const opcode = this.readRAM(this.nextPC())
       this.opcode = opcode
       this.operation = mapping[opcode]
-
-      this.debugCurrentOps = [
-        opcode,
-        this.readRAM(this.registers.PC + 0),
-        this.readRAM(this.registers.PC + 1)
-      ]
-      this.debugCurrentOps.pc = this.registers.PC - 1
 
       this.cycles = this.operation.cycles
       this.cycles += this.fetchAddress(this.operation.addressing(this))
       this.cycles += this.operation.operator(this)
     }
 
+    this.debugCycles += 1
     this.cycles -= 1
   }
 
@@ -159,12 +185,24 @@ export default class CPU {
   }
 
   nextPC() {
+    if (this.isDebug && this.debugData.pointer > -1) {
+      const oldStatus = this.ram.isReadOnly
+      this.ram.isReadOnly = true
+      this.debugLastInstruction.instructions.push(this.ram[this.registers.PC])
+
+      this.ram.isReadOnly = oldStatus
+    }
+
     return this.registers.PC++
   }
 
   pushStack(value) {
     this.ram[this.registers.SP + 0x100] = value
     this.registers.SP--
+
+    if (this.debugLastInstruction?.valueToWrite != null) {
+      delete this.debugLastInstruction.valueToWrite
+    }
   }
 
   popStack() {

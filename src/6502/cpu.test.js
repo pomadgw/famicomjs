@@ -40,7 +40,7 @@ describe('CPU', () => {
     })
 
     it('should reset status register', () => {
-      expect(+cpu.registers.STATUS).toBe(1 << 5)
+      expect(+cpu.registers.STATUS).toBe(0x24)
     })
 
     it('should set PC register to address in 0xFFFC & 0xFFFD', () => {
