@@ -3,10 +3,9 @@ import { resolve } from 'path'
 import Cartridge from './cartridge'
 import Bus from './bus'
 import CPU from './6502'
-import opcodes from './6502/instructions'
 import PPU from './ppu'
 
-import disassember, { argParamsGenerator } from './6502/disassembler'
+import disassember from './6502/disassembler'
 import toHex from './utils/tohex'
 
 const nesTestFile = resolve(__dirname, '../nestest.nes')
@@ -33,71 +32,51 @@ test('NES test', async () => {
   await cart.parse(cartFile)
   nes.insertCartridge(cart)
   nes.reset()
+  nes.cpu.isDebug = true
 
   nes.cpu.registers.PC = 0xc000
-  nes.cpu.debugCurrentOps.pc = 0xc000
-  nes.cpu.registers.STATUS.status = 0x24
-
-  const argsParam = argParamsGenerator(0xc000)
 
   const logTestFilename = resolve(__dirname, '../nestest.log')
   let logValue = ''
-  const map = []
-
-  let prevCycle
-  for (let i = 0; i < 3 * 30000; i++) {
-    logValue = ''
+  for (let i = 0; i < 3 * 39860; i++) {
     nes.clock()
-    const prevPC = nes.cpu.debugCurrentOps.pc
-    prevCycle = nes.cpu.debugCycles
+  }
 
-    const disassembled = disassember(nes.cpu.debugCurrentOps, {
-      binaryStart: prevPC
+  nes.cpu.debugData.opcodes.forEach((e) => {
+    const disassembled = disassember(e.instructions, {
+      binaryStart: e.pc,
+      showOnlyTargetAddress: true
     })
+    e.asm = Object.values(disassembled)[0] ?? '-'
 
-    logValue += toHex(prevPC, { length: 4 })
-
-    const argLength = argsParam[opcodes[nes.cpu.opcode].addressingName].length
-    const disassembledInstruction = (
-      disassembled[`$${toHex(prevPC, { length: 4 })}`] ?? '-'
-    ).padEnd(30, ' ')
-
-    // if (nes.cpu.isComplete) {
-    logValue += `  ${nes.cpu.debugCurrentOps
-      .slice(0, argLength + 1)
-      .map(toHex)
-      .join(' ')
-      .padEnd(8, ' ')}`
-    logValue += `  ${disassembledInstruction}`
-    logValue += `  A:${toHex(nes.cpu.registers.A)}`
-    logValue += ` X:${toHex(nes.cpu.registers.X)}`
-    logValue += ` Y:${toHex(nes.cpu.registers.Y)}`
-    logValue += ` P:${(+nes.cpu.registers.STATUS).toString(2).padStart(8, '0')}`
-    logValue += ` SP:${toHex(nes.cpu.registers.SP)}`
-    logValue += ` PPU:${nes.ppu.scanline.toString().padStart(3, ' ')}`
-    logValue += `,${(nes.ppu.cycle - 1).toString().padStart(3, ' ')}`
-    logValue += ` CYC:${prevCycle}`
-    logValue += '\n'
-    map.push([prevPC, disassembledInstruction, logValue])
-    // }
-  }
-
-  const logValue2 = []
-
-  let prevPC
-  for (let i = 0; i < map.length; i++) {
-    const curr = map[i]
-    if (curr[1].trim() === '-') {
-      continue
+    if (e.valueToWrite != null) {
+      e.asm += ` = ${toHex(e.valueToWrite)}`
     }
-    if (!prevPC || prevPC !== curr[0]) {
-      logValue2.push(curr[2])
-    }
+  })
 
-    prevPC = curr[0]
-  }
+  logValue = nes.cpu.debugData.opcodes
+    .map((e) => {
+      let pattern = ''
 
-  logValue = logValue2.join('')
+      pattern += toHex(e.pc, { length: 4 })
+      pattern += `  ${e.instructions
+        .map((num) => toHex(num))
+        .join(' ')
+        .padEnd(8, ' ')}`
+      pattern += `  ${e.asm.padEnd(32, ' ')}`
+      pattern += `  A:${toHex(e.A)}`
+      pattern += ` X:${toHex(e.X)}`
+      pattern += ` Y:${toHex(e.Y)}`
+      pattern += ` P:${toHex(e.P)}`
+      pattern += ` SP:${toHex(e.SP)}`
+      pattern += ` PPU:${e.ppu.scanline
+        .toString()
+        .padStart(3, ' ')},${e.ppu.cycle.toString().padStart(3, ' ')}`
+      pattern += ` CYC: ${e.cycles}`
+
+      return pattern
+    })
+    .join('\n')
 
   fs.writeFileSync(logTestFilename, logValue)
 
