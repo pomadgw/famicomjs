@@ -70,6 +70,11 @@ export default class Bus {
           this.controllers[address & 0x1].write(value)
         }
 
+        if (!isPropSymbol && !isNaN(address) && this.cpu.debugLastInstruction) {
+          this.cpu.debugLastInstruction.valueToWrite = value
+          this.cpu.debugLastInstruction.addressToWrite = Number(prop)
+        }
+
         return true
       }
     })
@@ -105,6 +110,16 @@ export default class Bus {
   clock() {
     if (this.globalSystemClockNumber % 3 === 0) {
       this.cpu.atomicClock()
+
+      if (
+        this.cpu.debugData.pointer > -1 &&
+        !this.cpu.debugData.opcodes[this.cpu.debugData.pointer].ppu
+      ) {
+        this.cpu.debugData.opcodes[this.cpu.debugData.pointer].ppu = {
+          scanline: this.ppu.scanline,
+          cycle: this.ppu.cycle
+        }
+      }
     }
 
     this.ppu.clock()
