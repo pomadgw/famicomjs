@@ -60,6 +60,17 @@ describe('Disassember', () => {
       $0008: 'STX $10,Y',
       $000A: 'BEQ $FC // [$0008]'
     })
+
+    expect(
+      disassemble(data, { binaryStart: 1, showOnlyTargetAddress: true })
+    ).toEqual({
+      $0001: 'LDA #$01',
+      $0003: 'BRK',
+      $0004: 'ASL $10',
+      $0006: 'STA $10,X',
+      $0008: 'STX $10,Y',
+      $000A: 'BEQ $0008'
+    })
   })
 
   it('should show ?? for imcomplete instrcution', () => {

@@ -9,7 +9,7 @@ function toHex(number, length = 2) {
   return toHexOriginal(number, { length, withPrefix: true })
 }
 
-export const argParamsGenerator = (binaryStart) => ({
+export const argParamsGenerator = (binaryStart, showOnlyTargetAddress) => ({
   ABS: {
     length: 2,
     stringify: (name, params) =>
@@ -56,7 +56,9 @@ export const argParamsGenerator = (binaryStart) => ({
 
       if (binaryStart) {
         const offset = new Int8Array([params[0]])[0]
-        result = `${result} // [${toHex(line + offset + 2, 4)}]`
+        if (showOnlyTargetAddress)
+          result = `${name} ${toHex(line + offset + 2, 4)}`
+        else result = `${result} // [${toHex(line + offset + 2, 4)}]`
       }
 
       return result
@@ -76,8 +78,11 @@ export const argParamsGenerator = (binaryStart) => ({
   }
 })
 
-export default function disassemble(codes = [], { binaryStart } = {}) {
-  const argParams = argParamsGenerator(binaryStart)
+export default function disassemble(
+  codes = [],
+  { binaryStart, showOnlyTargetAddress } = {}
+) {
+  const argParams = argParamsGenerator(binaryStart, showOnlyTargetAddress)
 
   const result = {}
   const copyOfCode = []
