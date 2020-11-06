@@ -22,11 +22,13 @@
     "asbuild": "npm run asbuild:untouched && npm run asbuild:optimized"
   },
   "devDependencies": {
+    "@as-pect/cli": "^4.0.0",
     "@babel/core": "^7.11.1",
     "@babel/eslint-parser": "^7.11.4",
     "@babel/generator": "^7.11.4",
     "@babel/plugin-transform-runtime": "^7.11.0",
     "@babel/preset-env": "^7.11.0",
+    "@babel/preset-typescript": "^7.12.1",
     "@rollup/plugin-babel": "^5.2.0",
     "@rollup/plugin-commonjs": "^15.1.0",
     "@rollup/plugin-html": "^0.2.0",
