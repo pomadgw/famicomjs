@@ -17,8 +17,8 @@
     "test": "jest --coverage",
     "download-nes-test": "wget -c http://nickmass.com/images/nestest.nes",
     "remove-nes-test": "rm -fv nestest.nes",
-    "asbuild:untouched": "asc src/assembly/index.ts --target debug",
-    "asbuild:optimized": "asc src/assembly/index.ts --target release",
+    "asbuild:untouched": "asc -b wasm/nes-debug.wasm src/assembly/index.ts --target debug",
+    "asbuild:optimized": "asc -b wasm/nes.wasm src/assembly/index.ts --target release",
     "asbuild": "npm run asbuild:untouched && npm run asbuild:optimized"
   },
   "devDependencies": {
@@ -65,6 +65,7 @@
     "jest-canvas-mock": "^2.3.0",
     "lint-staged": ">=10",
     "nollup": "^0.13.5",
+    "onchange": "^7.1.0",
     "postcss": "^8.1.1",
     "postcss-cli": "^8.1.0",
     "prettier": "^2.0.5",

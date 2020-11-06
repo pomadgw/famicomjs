@@ -3,7 +3,8 @@ const webpack = require('webpack')
 module.exports = {
   mount: {
     public: '/',
-    src: '/dist'
+    src: '/dist',
+    wasm: '/wasm'
   },
   plugins: [
     [
@@ -17,6 +18,14 @@ module.exports = {
       {
         cmd: 'svelte-check --output human',
         watch: '$1 --watch',
+        output: 'stream'
+      }
+    ],
+    [
+      '@snowpack/plugin-run-script',
+      {
+        cmd: 'yarn asbuild:optimized',
+        watch: 'onchange "src/assembly/**/*.ts" -- yarn asbuild:optimized',
         output: 'stream'
       }
     ],

@@ -1,5 +1,6 @@
 node_modules/
 dist/
+wasm/
 .eslintcache
 coverage/
 _bin/
