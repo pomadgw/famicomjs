@@ -81,4 +81,22 @@ export default class CPU {
   impMode(): void {
     this.fetchedData = this.A
   }
+
+  zp0Mode(): void {
+    const address = this.read(this.nextPC())
+
+    this.absoluteAddress = address
+  }
+
+  zpxMode(): void {
+    const address = this.read(this.nextPC())
+
+    this.absoluteAddress = (address + this.X) & 0xff
+  }
+
+  zpyMode(): void {
+    const address = this.read(this.nextPC())
+
+    this.absoluteAddress = (address + this.Y) & 0xff
+  }
 }
