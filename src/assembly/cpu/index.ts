@@ -1,11 +1,12 @@
 import Bus from '../bus'
+import RegisterStatus from './register'
 
 export default class CPU {
   private bus: Bus
   public A: u8
   public X: u8
   public Y: u8
-  public STATUS: u8
+  public STATUS: RegisterStatus
   public SP: u8
   public PC: u16
   public absoluteAddress: u16
@@ -13,7 +14,10 @@ export default class CPU {
 
   constructor(bus: Bus) {
     this.bus = bus
+    this.STATUS = new RegisterStatus(0)
+
     this.reset()
+
     this.absoluteAddress = 0
     this.clocks = 0
   }
@@ -24,7 +28,7 @@ export default class CPU {
     this.Y = 0
     this.SP = 0xfd
     this.PC = 0
-    this.STATUS = 0x24
+    this.STATUS = new RegisterStatus(0x24)
   }
 
   read(address: u16): u8 {
