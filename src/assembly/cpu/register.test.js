@@ -1,6 +1,6 @@
 import RegisterStatus, { Flags } from './register'
 
-describe('RegisterStatus', () => {
+describe('6502 CPU (wasm): RegisterStatus', () => {
   describe('#valueOf', () => {
     it('should return correct value', () => {
       const status = new RegisterStatus(0b00000001)

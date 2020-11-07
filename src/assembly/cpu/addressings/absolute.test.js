@@ -1,7 +1,7 @@
 import Bus from '../../bus'
 import CPU from '../../cpu'
 
-describe('addressing mode: absolute', () => {
+describe('6502 CPU (wasm): addressing mode: absolute', () => {
   it('should return correct value for absolute address', () => {
     const bus = new Bus()
     const CPUDummy = new CPU(bus)
