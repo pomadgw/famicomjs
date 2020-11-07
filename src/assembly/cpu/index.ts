@@ -12,6 +12,8 @@ export default class CPU {
   public absoluteAddress: u16
   public clocks: usize
 
+  public fetchedData: u8
+
   constructor(bus: Bus) {
     this.bus = bus
     this.STATUS = new RegisterStatus(0)
@@ -28,6 +30,7 @@ export default class CPU {
     this.Y = 0
     this.SP = 0xfd
     this.PC = 0
+    this.fetchedData = 0
     this.STATUS = new RegisterStatus(0x24)
   }
 
@@ -73,5 +76,9 @@ export default class CPU {
 
   immMode(): void {
     this.absoluteAddress = this.nextPC()
+  }
+
+  impMode(): void {
+    this.fetchedData = this.A
   }
 }
