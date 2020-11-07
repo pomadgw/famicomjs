@@ -87,6 +87,7 @@
     ],
     "collectCoverageFrom": [
       "src/**/*.js",
+      "src/**/*.ts",
       "!src/index.js",
       "!src/6502/assembler.js",
       "!src/6502/instructions/index.js"
