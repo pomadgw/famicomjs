@@ -5,9 +5,10 @@
   "author": "Rahadian Yusuf <rahadian.y@gmail.com>",
   "license": "MIT",
   "scripts": {
+    "clean:wasm": "shx rm -rf wasm",
     "clean:web": "shx rm -rf build",
     "clean:bin": "shx rm -rf _bin",
-    "clean": "npm run clean:bin && npm run clean:web",
+    "clean": "npm run clean:wasm && npm run clean:bin && npm run clean:web",
     "start:web": "snowpack dev",
     "start": "npm run start:web",
     "build:web": "npm run clean:web && snowpack build",
