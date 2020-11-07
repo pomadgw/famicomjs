@@ -15,14 +15,14 @@ describe('6502 CPU (wasm): addressing mode: absolute', () => {
     bus.ram = new Uint8Array([0x00, 0x0f, 0])
 
     bus.cpu.X = 0x01
-    bus.cpu.absXMode()
+    bus.cpu.abxMode()
     expect(bus.cpu).toEqual(
       expect.objectContaining({ absoluteAddress: 0x0f01, clocks: 0 })
     )
 
     bus.cpu.PC = 0
     bus.cpu.Y = 0x02
-    bus.cpu.absYMode()
+    bus.cpu.abyMode()
     expect(bus.cpu).toEqual(
       expect.objectContaining({ absoluteAddress: 0x0f02, clocks: 0 })
     )
@@ -33,13 +33,13 @@ describe('6502 CPU (wasm): addressing mode: absolute', () => {
     bus.ram = new Uint8Array([0xff, 0x0f, 0])
 
     bus.cpu.X = 0x01
-    bus.cpu.absXMode()
+    bus.cpu.abxMode()
     expect(bus.cpu.clocks).toEqual(1)
 
     bus.cpu.PC = 0
     bus.cpu.clocks = 0
     bus.cpu.Y = 0x02
-    bus.cpu.absYMode()
+    bus.cpu.abyMode()
     expect(bus.cpu.clocks).toEqual(1)
   })
 })

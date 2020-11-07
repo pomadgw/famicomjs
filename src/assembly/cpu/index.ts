@@ -52,7 +52,7 @@ export default class CPU {
     this.clocks += 0
   }
 
-  absXMode(): void {
+  abxMode(): void {
     const lo = this.read(this.nextPC())
     const hi = this.read(this.nextPC())
 
@@ -63,7 +63,7 @@ export default class CPU {
     this.clocks += (absoluteAddress & 0xff00) !== hi << 8 ? 1 : 0
   }
 
-  absYMode(): void {
+  abyMode(): void {
     const lo = this.read(this.nextPC())
     const hi = this.read(this.nextPC())
 
