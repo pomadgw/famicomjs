@@ -2,6 +2,11 @@
 import CPU from './cpu'
 import Bus from './bus'
 
+export {
+  Bus,
+  CPU
+}
+
 export default function createNES(): Bus {
   const bus = new Bus()
   const cpu = new CPU(bus)
