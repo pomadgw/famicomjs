@@ -70,4 +70,8 @@ export default class CPU {
     this.absoluteAddress = absoluteAddress
     this.clocks += (absoluteAddress & 0xff00) !== hi << 8 ? 1 : 0
   }
+
+  immMode(): void {
+    this.absoluteAddress = this.nextPC()
+  }
 }
