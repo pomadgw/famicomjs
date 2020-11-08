@@ -10,6 +10,7 @@ export default class CPU {
   public SP: u8
   public PC: u16
   public absoluteAddress: u16
+  public relativeAddress: i16
   public clocks: usize
 
   public fetchedData: u8
@@ -21,6 +22,7 @@ export default class CPU {
     this.reset()
 
     this.absoluteAddress = 0
+    this.relativeAddress = 0
     this.clocks = 0
   }
 
@@ -98,5 +100,13 @@ export default class CPU {
     const address = this.read(this.nextPC())
 
     this.absoluteAddress = (address + this.Y) & 0xff
+  }
+
+  rel(): void {
+    let offset: i16 = this.read(this.nextPC())
+
+    if (offset > 0x7f) offset -= (0x100 as i16)
+
+    this.relativeAddress = offset
   }
 }
