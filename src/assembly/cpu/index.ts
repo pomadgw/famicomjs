@@ -123,4 +123,23 @@ export default class CPU {
 
     this.absoluteAddress = (actualHi << 8) | actualLo
   }
+
+  inxMode(): void {
+    const tableAddress = this.read(this.nextPC())
+    const lo: u16 = this.read((tableAddress + this.X) & 0xff)
+    const hi: u16 = this.read((tableAddress + this.X + 1) & 0xff)
+
+    this.absoluteAddress = (hi << 8) | lo
+  }
+
+  inyMode(): void {
+    const tableAddress = this.read(this.nextPC())
+
+    const lo: u16 = this.read(tableAddress & 0xff)
+    const hi: u16 = this.read((tableAddress + 1) & 0xff)
+
+    this.absoluteAddress = (((hi << 8) | lo) + this.Y) & 0xffff
+
+    this.clocks += (this.absoluteAddress & 0xff00) !== hi << 8 ? 1 : 0
+  }
 }
