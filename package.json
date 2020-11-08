@@ -46,6 +46,8 @@
     "@testing-library/jest-dom": "^5.5.0",
     "@testing-library/svelte": "^3.0.0",
     "@types/jest": "^26.0.10",
+    "@typescript-eslint/eslint-plugin": "^4.6.1",
+    "@typescript-eslint/parser": "^4.6.1",
     "assemblyscript": "^0.17.1",
     "autoprefixer": "^10.0.1",
     "babel-jest": "^26.3.0",
@@ -101,7 +103,7 @@
     }
   },
   "lint-staged": {
-    "*.js": "eslint --cache --fix"
+    "*.{js,ts}": "eslint --cache --fix"
   },
   "dependencies": {
     "@assemblyscript/loader": "^0.17.1",
