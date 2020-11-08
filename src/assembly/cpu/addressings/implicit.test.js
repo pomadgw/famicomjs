@@ -1,6 +1,6 @@
 import createNES from '../../index'
 
-describe('addressing mode: implicit', () => {
+describe('6502 CPU (wasm): addressing mode: implicit', () => {
   it('should return correct value for specified constant', () => {
     const bus = createNES()
     bus.ram = [0x0f, 0x0f, 0]

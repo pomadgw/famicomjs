@@ -7,7 +7,7 @@ const createCPU = () => {
   return bus.cpu
 }
 
-describe('addressing mode: zero page', () => {
+describe('6502 CPU (wasm): addressing mode: zero page', () => {
   it('should return correct value for zero page address', () => {
     const CPUDummy = createCPU()
     CPUDummy.zp0Mode()

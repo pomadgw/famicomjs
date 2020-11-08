@@ -7,7 +7,7 @@ const CPU = (ram) => {
   return bus.cpu
 }
 
-describe('addressing mode: indexed indirect', () => {
+describe('6502 CPU (wasm): addressing mode: indexed indirect', () => {
   it('should return correct value for absolute address', () => {
     // LDA ($01,X)
     // ram[$01] value: 0x01
