@@ -1,6 +1,6 @@
 import createNES from '../../index'
 
-describe('addressing mode: relative', () => {
+describe('6502 CPU (wasm): addressing mode: relative', () => {
   it('should return correct value for offset', () => {
     const ram = [0x0f, 0x0f, 0]
     const bus = createNES()
