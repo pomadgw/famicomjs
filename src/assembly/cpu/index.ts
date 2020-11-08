@@ -169,5 +169,22 @@ export default class CPU {
   }
 
   // #endregion
+
+  // #region Set Status
+
+  SEC(): void {
+    this.STATUS.setStatus(Flags.C, true)
+  }
+
+  SED(): void {
+    this.STATUS.setStatus(Flags.D, true)
+  }
+
+  SEI(): void {
+    this.STATUS.setStatus(Flags.I, true)
+  }
+
+  // #endregion
+
   // #endregion
 }
