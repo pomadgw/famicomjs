@@ -4,6 +4,8 @@ import { Flags } from './flags'
 
 export default class CPU {
   private bus: Bus
+  private isImplicitInvoked: boolean
+
   public A: u8
   public X: u8
   public Y: u8
@@ -35,6 +37,7 @@ export default class CPU {
     this.PC = 0
     this.fetchedData = 0
     this.STATUS = new RegisterStatus(0x24)
+    this.isImplicitInvoked = false
   }
 
   read(address: u16): u8 {
@@ -51,7 +54,9 @@ export default class CPU {
 
   // eslint-disable-next-line
   fetch(): void {
-    this.fetchedData = this.read(this.absoluteAddress)
+    if (!this.isImplicitInvoked)
+      this.fetchedData = this.read(this.absoluteAddress)
+    this.isImplicitInvoked = false
   }
 
   // #region ADDRESSING MODES
@@ -93,6 +98,7 @@ export default class CPU {
 
   impMode(): void {
     this.fetchedData = this.A
+    this.isImplicitInvoked = true
   }
 
   zp0Mode(): void {
