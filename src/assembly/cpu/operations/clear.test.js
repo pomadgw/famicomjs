@@ -8,7 +8,7 @@ const CPU = (ram) => {
   return bus.cpu
 }
 
-describe('instructions: clear flag operations', () => {
+describe('6502 CPU (wasm): instructions: clear flag operations', () => {
   describe('CLC', () => {
     it('should clear the carry flag', () => {
       const cpudummy = CPU([0])
