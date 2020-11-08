@@ -1,5 +1,6 @@
 import Bus from '../bus'
-import RegisterStatus, { Flags } from './register'
+import RegisterStatus from './register'
+import { Flags } from './flags'
 
 export default class CPU {
   private bus: Bus
@@ -26,7 +27,7 @@ export default class CPU {
     this.clocks = 0
   }
 
-  reset() : void {
+  reset(): void {
     this.A = 0
     this.X = 0
     this.Y = 0
@@ -44,14 +45,15 @@ export default class CPU {
     return this.PC++
   }
 
+  // eslint-disable-next-line
   fetch(): void {}
 
-  //#region ADDRESSING MODES
+  // #region ADDRESSING MODES
   absMode(): void {
     const lo = this.read(this.nextPC())
     const hi = this.read(this.nextPC())
 
-    const absoluteAddress = ((hi << 8) | lo)
+    const absoluteAddress = (hi << 8) | lo
 
     this.absoluteAddress = absoluteAddress
     this.clocks += 0
@@ -108,7 +110,7 @@ export default class CPU {
   rel(): void {
     let offset: i16 = this.read(this.nextPC())
 
-    if (offset > 0x7f) offset -= (0x100 as i16)
+    if (offset > 0x7f) offset -= 0x100 as i16
 
     this.relativeAddress = offset
   }
@@ -145,10 +147,10 @@ export default class CPU {
 
     this.clocks += (this.absoluteAddress & 0xff00) !== hi << 8 ? 1 : 0
   }
-  //#endregion
+  // #endregion
 
-  //#region OPERATORS
-  //#region Clear Status
+  // #region OPERATORS
+  // #region Clear Status
 
   CLC(): void {
     this.STATUS.setStatus(Flags.C, false)
@@ -166,6 +168,6 @@ export default class CPU {
     this.STATUS.setStatus(Flags.V, false)
   }
 
-  //#endregion
-  //#endregion
+  // #endregion
+  // #endregion
 }

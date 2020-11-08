@@ -1,13 +1,4 @@
-export enum Flags {
-  N = 1 << 7,
-  V = 1 << 6,
-  U = 1 << 5,
-  B = 1 << 4,
-  D = 1 << 3,
-  I = 1 << 2,
-  Z = 1 << 1,
-  C = 1
-}
+import { Flags } from './flags'
 
 export default class RegisterStatus {
   public status: u8
@@ -22,9 +13,9 @@ export default class RegisterStatus {
 
   setStatus(flag: Flags, value: bool): void {
     if (value) {
-      this.status = this.status | flag
+      this.status = this.status | (flag as u8)
     } else {
-      this.status = this.status & (~flag & 0xff)
+      this.status = this.status & ((~flag & 0xff) as u8)
     }
   }
 

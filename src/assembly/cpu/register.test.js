@@ -1,4 +1,5 @@
-import RegisterStatus, { Flags } from './register'
+import RegisterStatus from './register'
+import { Flags } from './flags'
 
 describe('6502 CPU (wasm): RegisterStatus', () => {
   describe('#valueOf', () => {

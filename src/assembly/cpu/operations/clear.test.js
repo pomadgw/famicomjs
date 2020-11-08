@@ -1,5 +1,5 @@
 import createNES from '../../index'
-import { Flags } from '../register'
+import { Flags } from '../flags'
 
 const CPU = (ram) => {
   const bus = createNES()
