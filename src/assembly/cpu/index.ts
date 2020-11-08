@@ -41,12 +41,18 @@ export default class CPU {
     return this.bus.cpuRead(address)
   }
 
+  write(address: u16, value: u8): void {
+    this.bus.cpuWrite(address, value)
+  }
+
   nextPC(): u16 {
     return this.PC++
   }
 
   // eslint-disable-next-line
-  fetch(): void {}
+  fetch(): void {
+    this.fetchedData = this.read(this.absoluteAddress)
+  }
 
   // #region ADDRESSING MODES
   absMode(): void {
@@ -184,6 +190,51 @@ export default class CPU {
     this.STATUS.setStatus(Flags.I, true)
   }
 
+  // #endregion
+
+  // #region Load/Store from/to register
+  private setZN(value: u8): void {
+    this.STATUS.setStatus(Flags.N, value >= 0x80)
+    this.STATUS.setStatus(Flags.Z, value === 0)
+  }
+
+  LDA(): void {
+    this.fetch()
+    const content = this.fetchedData
+
+    this.A = this.fetchedData
+    this.setZN(content)
+
+    this.clocks += 0
+  }
+  LDX(): void {
+    this.fetch()
+    const content = this.fetchedData
+
+    this.X = this.fetchedData
+    this.setZN(content)
+
+    this.clocks += 0
+  }
+  LDY(): void {
+    this.fetch()
+    const content = this.fetchedData
+
+    this.Y = this.fetchedData
+    this.setZN(content)
+
+    this.clocks += 0
+  }
+
+  STA(): void {
+    this.write(this.absoluteAddress, this.A)
+  }
+  STX(): void {
+    this.write(this.absoluteAddress, this.X)
+  }
+  STY(): void {
+    this.write(this.absoluteAddress, this.Y)
+  }
   // #endregion
 
   // #endregion
