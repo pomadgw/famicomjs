@@ -109,4 +109,18 @@ export default class CPU {
 
     this.relativeAddress = offset
   }
+
+  ind(): void {
+    const lo = this.read(this.nextPC())
+    const hi = this.read(this.nextPC())
+
+    const pointer: u16 = (hi << 8) | lo
+
+    const actualLo = this.read(pointer)
+
+    const pointerHi: u16 = lo === 0xff ? pointer & 0xff00 : pointer + 1
+    const actualHi = this.read(pointerHi)
+
+    this.absoluteAddress = (actualHi << 8) | actualLo
+  }
 }
