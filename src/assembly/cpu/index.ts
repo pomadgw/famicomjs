@@ -1,5 +1,5 @@
 import Bus from '../bus'
-import RegisterStatus from './register'
+import RegisterStatus, { Flags } from './register'
 
 export default class CPU {
   private bus: Bus
@@ -44,6 +44,9 @@ export default class CPU {
     return this.PC++
   }
 
+  fetch(): void {}
+
+  //#region ADDRESSING MODES
   absMode(): void {
     const lo = this.read(this.nextPC())
     const hi = this.read(this.nextPC())
@@ -142,4 +145,27 @@ export default class CPU {
 
     this.clocks += (this.absoluteAddress & 0xff00) !== hi << 8 ? 1 : 0
   }
+  //#endregion
+
+  //#region OPERATORS
+  //#region Clear Status
+
+  CLC(): void {
+    this.STATUS.setStatus(Flags.C, false)
+  }
+
+  CLD(): void {
+    this.STATUS.setStatus(Flags.D, false)
+  }
+
+  CLI(): void {
+    this.STATUS.setStatus(Flags.I, false)
+  }
+
+  CLV(): void {
+    this.STATUS.setStatus(Flags.V, false)
+  }
+
+  //#endregion
+  //#endregion
 }
