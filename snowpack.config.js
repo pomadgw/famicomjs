@@ -3,7 +3,8 @@ const webpack = require('webpack')
 module.exports = {
   mount: {
     public: '/',
-    src: '/dist'
+    src: '/dist',
+    worker: '/worker'
   },
   plugins: [
     [
@@ -16,6 +17,14 @@ module.exports = {
       '@snowpack/plugin-run-script',
       {
         cmd: 'svelte-check --output human',
+        watch: '$1 --watch',
+        output: 'stream'
+      }
+    ],
+    [
+      '@snowpack/plugin-run-script',
+      {
+        cmd: 'rollup --config scripts/build/rollup.worker.config.js',
         watch: '$1 --watch',
         output: 'stream'
       }

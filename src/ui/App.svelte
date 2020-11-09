@@ -28,9 +28,57 @@
   let disassembled
 
   nes = new Bus(new CPU(), new PPU(), { onRender: render })
+  const controllers = {
+    KeyA: 'A',
+    KeyS: 'B',
+    KeyZ: 'Select',
+    KeyX: 'Start',
+    ArrowUp: 'Up',
+    ArrowDown: 'Down',
+    ArrowLeft: 'Left',
+    ArrowRight: 'Right'
+  }
+
+  const myWorker = new Worker('/worker/worker.js')
+
+  let rendered = null
+
+  myWorker.onmessage = (e) => {
+    // console.log('from worker', e)
+    const { type, value } = e.data
+
+    if (type === 'rendered' || type === 'requestFrame') {
+      rendered = value
+    } else {
+      console.log({ type, value })
+    }
+  }
+
+  Object.entries(controllers).forEach(([button, target]) => {
+    document.addEventListener('keydown', (e) => {
+      if (e.code === button) {
+        console.log(target)
+        myWorker.postMessage({
+          type: 'keydown',
+          value: target
+        })
+      }
+        // this.setButtonState(target, true)
+    })
+
+    document.addEventListener('keyup', (e) => {
+      if (e.code === button) {
+        myWorker.postMessage({
+          type: 'keyup',
+          value: target
+        })
+      }
+    })
+  })
 
   function toggleEmulation() {
     emulationMode = !emulationMode
+    myWorker.postMessage({ type: 'toggleRun' })
   }
 
   function disassembleRAM() {
@@ -39,19 +87,25 @@
 
   async function readFile(event) {
     const file = event.target.files[0]
-    const cart = new Cartridge()
-    await cart.parse(file)
+    // const cart = new Cartridge()
+    // await cart.parse(file)
 
-    nes.cartridge = cart
-    nes.insertCartridge(cart)
-    nes.reset()
+    myWorker.postMessage({
+      type: 'setCart',
+      value: file
+    })
 
-    offsetStart = nes.cpu.registers.PC
-    nesPC = nes.cpu.registers.PC
-    registers = nes.cpu.registers
+    // nes.cartridge = cart
+    // nes.insertCartridge(cart)
+    // nes.reset()
 
-    disassembleRAM()
+    // offsetStart = nes.cpu.registers.PC
+    // nesPC = nes.cpu.registers.PC
+    // registers = nes.cpu.registers
+
+    // disassembleRAM()
     emulationMode = true
+    // myWorker.postMessage({ type: 'toggleRun' })
   }
 
   function resetNES() {
@@ -110,15 +164,19 @@
       if (!startFrame) startFrame = timestamp
 
       if (timestamp - startFrame >= 1000 / 60) {
-        startFrame = timestamp
+        myWorker.postMessage({ type: 'requestFrame' })
+        // startFrame = timestamp
 
-        do {
-          nes.clock()
-        } while (!nes.ppu.isFrameComplete)
-        nes.ppu.isFrameComplete = false
+        // do {
+        //   nes.clock()
+        // } while (!nes.ppu.isFrameComplete)
+        // nes.ppu.isFrameComplete = false
 
-        nesPC = nes.cpu.registers.PC
-        registers = nes.cpu.registers
+        // nesPC = nes.cpu.registers.PC
+        // registers = nes.cpu.registers
+        if (rendered !== null) {
+          render(rendered)
+        }
       }
 
       requestAnimationFrame(runEmulation)

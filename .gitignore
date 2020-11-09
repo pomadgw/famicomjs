@@ -4,6 +4,7 @@ dist/
 coverage/
 _bin/
 yarn-error.log
-build/
+/build/
 nestest.nes
 nestest.log
+/worker/

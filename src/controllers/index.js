@@ -16,17 +16,17 @@ export default class Controller {
     this.strobe = false
     this.cursor = 0
 
-    if (buttons) {
-      document.addEventListener('keydown', (e) => {
-        const buttonValue = buttons[e.code]
-        this.setButtonState(buttonValue, true)
-      })
+    // if (buttons) {
+    //   document.addEventListener('keydown', (e) => {
+    //     const buttonValue = buttons[e.code]
+    //     this.setButtonState(buttonValue, true)
+    //   })
 
-      document.addEventListener('keyup', (e) => {
-        const buttonValue = buttons[e.code]
-        this.setButtonState(buttonValue, false)
-      })
-    }
+    //   document.addEventListener('keyup', (e) => {
+    //     const buttonValue = buttons[e.code]
+    //     this.setButtonState(buttonValue, false)
+    //   })
+    // }
   }
 
   write(value) {

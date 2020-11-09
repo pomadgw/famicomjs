@@ -1,0 +1,66 @@
+import 'regenerator-runtime/runtime'
+import Cartridge from './cartridge'
+import Bus from './bus'
+import CPU from './6502'
+import PPU from './ppu'
+
+const nes = new Bus(new CPU(), new PPU(), {
+  onRender: (imageData) => {
+    self.postMessage({
+      type: 'rendered',
+      value: imageData
+    })
+  }
+})
+
+let run = false
+
+function requestFrame() {
+  do {
+    nes.clock()
+  } while (!nes.ppu.isFrameComplete)
+
+  nes.ppu.isFrameComplete = false
+}
+
+function loop() {
+  // eslint-disable-next-line no-unmodified-loop-condition
+  if (run) {
+    do {
+      nes.clock()
+    } while (!nes.ppu.isFrameComplete)
+
+    nes.ppu.isFrameComplete = false
+  }
+}
+
+onmessage = async (e) => {
+  // console.log('received message', e.data)
+  const { type, value } = e.data
+
+  // console.log({ type, value })
+
+  if (type === 'setCart') {
+    const cart = new Cartridge()
+
+    await cart.parse(value)
+    nes.insertCartridge(cart)
+    nes.reset()
+  } else if (type === 'toggleRun') {
+    run = !run
+    self.postMessage({
+      type: 'toggleRun',
+      value: run
+    })
+
+    if (run) loop()
+  } else if (type === 'requestFrame') {
+    requestFrame()
+  } else if (type === 'keydown') {
+    nes.controllers[0].setButtonState(value, true)
+    requestFrame()
+  } else if (type === 'keyup') {
+    nes.controllers[0].setButtonState(value, false)
+    requestFrame()
+  }
+}
