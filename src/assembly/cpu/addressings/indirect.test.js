@@ -11,7 +11,7 @@ describe('6502 CPU (wasm): addressing mode: indirect', () => {
   it('should return correct value for specified constant', () => {
     const ram = [0x02, 0x00, 0x03, 0x04, 0, 0]
     const CPUDummy = CPU(ram)
-    CPUDummy.ind()
+    CPUDummy.indMode()
     expect(CPUDummy.absoluteAddress).toBe(0x0403)
     expect(CPUDummy.clocks).toBe(0)
   })
@@ -27,7 +27,7 @@ describe('6502 CPU (wasm): addressing mode: indirect', () => {
     // pointer of MSB from 0x1000 (instead of 0x1100) nad LSB 0x10FF
 
     const CPUDummy = CPU(ram)
-    CPUDummy.ind()
+    CPUDummy.indMode()
     expect(CPUDummy.absoluteAddress).toBe(0x1010)
   })
 })

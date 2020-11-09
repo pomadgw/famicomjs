@@ -18,7 +18,7 @@ describe('6502 CPU (wasm): addressing mode: indexed indirect', () => {
     const CPUDummy = CPU(ram)
     CPUDummy.nextPC()
     CPUDummy.X = 0x02
-    CPUDummy.inxMode()
+    CPUDummy.izxMode()
     expect(CPUDummy.absoluteAddress).toBe(0xf000)
     expect(CPUDummy.clocks).toBe(0)
   })

@@ -119,7 +119,7 @@ export default class CPU {
     this.absoluteAddress = (address + this.Y) & 0xff
   }
 
-  rel(): void {
+  relMode(): void {
     let offset: i16 = this.read(this.nextPC())
 
     if (offset > 0x7f) offset -= 0x100 as i16
@@ -127,7 +127,7 @@ export default class CPU {
     this.relativeAddress = offset
   }
 
-  ind(): void {
+  indMode(): void {
     const lo = this.read(this.nextPC())
     const hi = this.read(this.nextPC())
 
@@ -141,7 +141,7 @@ export default class CPU {
     this.absoluteAddress = (actualHi << 8) | actualLo
   }
 
-  inxMode(): void {
+  izxMode(): void {
     const tableAddress = this.read(this.nextPC())
     const lo: u16 = this.read((tableAddress + this.X) & 0xff)
     const hi: u16 = this.read((tableAddress + this.X + 1) & 0xff)
@@ -149,7 +149,7 @@ export default class CPU {
     this.absoluteAddress = (hi << 8) | lo
   }
 
-  inyMode(): void {
+  izyMode(): void {
     const tableAddress = this.read(this.nextPC())
 
     const lo: u16 = this.read(tableAddress & 0xff)
@@ -162,6 +162,10 @@ export default class CPU {
   // #endregion
 
   // #region OPERATORS
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  XXX(): void {}
+
   // #region Clear Status
 
   CLC(): void {

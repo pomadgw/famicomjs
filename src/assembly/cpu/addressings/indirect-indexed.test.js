@@ -18,7 +18,7 @@ describe('6502 CPU (wasm): addressing mode: indirect indexed', () => {
     const CPUDummy = CPU(ram)
     CPUDummy.nextPC()
     CPUDummy.Y = 0x02
-    CPUDummy.inyMode()
+    CPUDummy.izyMode()
     expect(CPUDummy.absoluteAddress).toBe(0x0203)
     expect(CPUDummy.clocks).toBe(0)
   })
@@ -33,7 +33,7 @@ describe('6502 CPU (wasm): addressing mode: indirect indexed', () => {
     const CPUDummy = CPU(ram)
     CPUDummy.nextPC()
     CPUDummy.Y = 0xff
-    CPUDummy.inyMode()
+    CPUDummy.izyMode()
     expect(CPUDummy.absoluteAddress).toBe(0x0300)
     expect(CPUDummy.clocks).toBe(1)
   })
@@ -48,7 +48,7 @@ describe('6502 CPU (wasm): addressing mode: indirect indexed', () => {
     const CPUDummy = CPU(ram)
     CPUDummy.nextPC()
     CPUDummy.Y = 0xff
-    CPUDummy.inyMode()
+    CPUDummy.izyMode()
     expect(CPUDummy.absoluteAddress).toBe(0x0000)
   })
 })
