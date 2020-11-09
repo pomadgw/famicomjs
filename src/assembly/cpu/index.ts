@@ -243,5 +243,86 @@ export default class CPU {
   }
   // #endregion
 
+  // #region Load/Store from/to register
+  ADC(): void {
+    this.fetch()
+
+    const carryBit: u16 = this.STATUS.getStatus(Flags.C) ? 1 : 0
+    const temp: u16 = (this.A as u16) + (this.fetchedData as u16) + carryBit
+
+    this.STATUS.setStatus(Flags.C, temp > 0xff)
+
+    const result: u8 = (temp & 0xff) as u8
+
+    this.setZN(result)
+
+    const isOverflow =
+      (~(this.A ^ this.fetchedData) & (this.A ^ result) & 0x0080) > 0
+
+    this.STATUS.setStatus(Flags.V, isOverflow)
+    this.A = result
+
+    this.clocks += 1
+  }
+
+  SBC(): void {
+    this.fetch()
+
+    const fetched: u16 = ((this.fetchedData as u16) ^ 0xff) & 0xff
+    const carryBit: u16 = this.STATUS.getStatus(Flags.C) ? 1 : 0
+    const temp: u16 = (this.A as u16) + (fetched as u16) + carryBit
+
+    this.STATUS.setStatus(Flags.C, temp > 0xff)
+
+    const result: u8 = (temp & 0xff) as u8
+
+    this.setZN(result)
+
+    const isOverflow = (~(this.A ^ fetched) & (this.A ^ temp) & 0x0080) > 0
+
+    this.STATUS.setStatus(Flags.V, isOverflow)
+    this.A = result
+
+    this.clocks += 1
+  }
+
+  INC(): void {
+    this.fetch()
+
+    const result: u8 = (this.fetchedData + 1) & 0xff
+    this.write(this.absoluteAddress, result)
+    this.setZN(result)
+  }
+
+  INX(): void {
+    const result: u8 = (this.X + 1) & 0xff
+    this.X = result
+    this.setZN(result)
+  }
+
+  INY(): void {
+    const result: u8 = (this.Y + 1) & 0xff
+    this.Y = result
+    this.setZN(result)
+  }
+  DEC(): void {
+    this.fetch()
+
+    const result: u8 = (this.fetchedData - 1) & 0xff
+    this.write(this.absoluteAddress, result)
+    this.setZN(result)
+  }
+  DEX(): void {
+    const result: u8 = (this.X - 1) & 0xff
+    this.X = result
+    this.setZN(result)
+  }
+  DEY(): void {
+    const result: u8 = (this.Y - 1) & 0xff
+    this.Y = result
+    this.setZN(result)
+  }
+  // #endregion
+
   // #endregion
 }
