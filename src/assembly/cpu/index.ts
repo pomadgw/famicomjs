@@ -1,6 +1,7 @@
 import Bus from '../bus'
 import RegisterStatus from './register'
 import { Flags } from './flags'
+import opcodes from './opcodes'
 
 export default class CPU {
   private bus: Bus
@@ -52,7 +53,15 @@ export default class CPU {
     return this.PC++
   }
 
-  // eslint-disable-next-line
+  clock(): void {
+    if (this.clocks === 0) {
+      const opcode = this.read(this.nextPC())
+      opcodes(this, opcode)
+    }
+
+    this.clocks -= 1
+  }
+
   fetch(): void {
     if (!this.isImplicitInvoked)
       this.fetchedData = this.read(this.absoluteAddress)
