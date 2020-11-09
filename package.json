@@ -15,6 +15,7 @@
     "build:bin": "npm run clean:bin && rollup -c scripts/build/rollup.bin.config.js --environment NODE_ENV:production",
     "build": "npm run asbuild && npm run build:web && npm run build:bin",
     "generate-opcodes": "node build-opcode.js && eslint --fix src/6502/instructions/index.js",
+    "generate-opcodes:as": "node build-opcode.as.js && eslint -c src/assembly/.eslintrc.js --fix src/assembly/cpu/opcodes.ts",
     "test": "jest --coverage",
     "download-nes-test": "wget -c http://nickmass.com/images/nestest.nes",
     "remove-nes-test": "rm -fv nestest.nes",
