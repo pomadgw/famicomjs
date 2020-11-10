@@ -95,7 +95,8 @@
       "!src/index.js",
       "!src/assembly/__tests__.dummy/*",
       "!src/6502/assembler.js",
-      "!src/6502/instructions/index.js"
+      "!src/6502/instructions/index.js",
+      "!src/assembly/cpu/opcodes.ts"
     ]
   },
   "husky": {
