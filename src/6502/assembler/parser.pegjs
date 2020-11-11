@@ -1,3 +1,9 @@
+{
+  function word(low, high) {
+    return (high << 8) | low
+  }
+}
+
 Lines "lines"
 	= a:LineWithNewline b:LineWithNewline*  { return [a, ...b].filter(e => e !== '') }
 
@@ -8,7 +14,10 @@ Line "line"
 	= LabelDeclaration / Program / ProgramCounter / DataLine
 
 DataLine "dataline"
-	= ".data"i _ AbsoluteAddress
+	= ".data"i _ address:AbsoluteAddress _ data:Array { return { data, address: word(...address.value) } }
+    
+Array
+	= a:OneByteHex b:(_ OneByteHex)* { return [a[0], ...b.map(e => e[1][0])] }
 
 ProgramCounter "pc"
 	= ".pc"i _ address:AbsoluteAddress { return { pc: address.value } }

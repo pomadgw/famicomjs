@@ -11,7 +11,7 @@ describe('new assembler', () => {
         STA $0201
         LDA #$08
         STA $0202
-      `)
+      `).slice(0, 15)
       ).toEqual(
         'a9 01 8d 00 02 a9 05 8d 01 02 a9 08 8d 02 02'
           .split(' ')
@@ -45,6 +45,7 @@ describe('new assembler', () => {
       expect(
         compile(
           `
+        .data $3000 00 01
         .pc $0600
         LDX #$08
         DEX
@@ -60,6 +61,24 @@ describe('new assembler', () => {
           .split(' ')
           .map((e) => parseInt(e, 16))
       )
+    })
+
+    it('should assemble data correctly', () => {
+      expect(
+        compile(
+          `
+        .data $3000 0f 01
+        .pc $0600
+        LDX #$08
+        DEX
+        STX $0200
+        CPX #$03
+        BNE decrement
+        decrement: STX $0201
+        BRK
+      `
+        ).slice(0x3000, 0x3000 + 2)
+      ).toEqual([15, 1])
     })
   })
 })

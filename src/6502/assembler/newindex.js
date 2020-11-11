@@ -50,11 +50,15 @@ function word(low, high) {
 export default function compile(string) {
   const parseTree = parser.parse(string.trim())
   const labels = []
+  const data = []
   let i = 0
   let pc = 0
 
   while (i < parseTree.length) {
-    if (parseTree[i].pc) {
+    if (parseTree[i].data) {
+      data.push(parseTree[i])
+      parseTree.splice(i, 1)
+    } else if (parseTree[i].pc) {
       pc = word(...parseTree[i].pc)
       parseTree.splice(i, 1)
     } else if (parseTree[i].label) {
@@ -95,5 +99,16 @@ export default function compile(string) {
     .reduce((acc, arr) => [...acc, ...arr], [])
   const offset = [...Array(pc).keys()].map(() => 0)
 
-  return [...offset, ...result]
+  const image = [...offset, ...result]
+  image.length = 0x10000
+  for (let i = 0; i < 0x10000; i++) {
+    image[i] = image[i] ?? 0
+  }
+
+  console.log(data)
+  data.forEach((d) => {
+    image.splice(d.address, d.data.length, ...d.data)
+  })
+
+  return image
 }
