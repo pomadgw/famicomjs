@@ -1,17 +1,17 @@
 Lines "lines"
 	= a:LineWithNewline b:LineWithNewline*  { return [a, ...b].filter(e => e !== '') }
 
-LineWithNewline "linen"
+LineWithNewline
 	= _ line:Line _N { return line }
 
 Line "line"
 	= LabelDeclaration / Program / ProgramCounter / DataLine
 
 DataLine "dataline"
-	= ".data" _ AbsoluteAddress
+	= ".data"i _ AbsoluteAddress
 
 ProgramCounter "pc"
-	= ".pc" _ address:AbsoluteAddress { return { pc: address.value } }
+	= ".pc"i _ address:AbsoluteAddress { return { pc: address.value } }
 
 Program "program"
 	= opcode:Opcode _S? params:Parameters? { return { opcode, params } }
@@ -87,13 +87,13 @@ Implicit
 	= "A"i
 
 Indirect
-	= "(" address:AbsoluteAddress ")" { return { ...address, mode: 'ind' } }
+	= "(" address:AbsoluteAddress ")" { return { ...address, mode: 'IND' } }
 
 IndexedIndirect "Indexed Indirect"
-	= "(" address:ZeroPageAddress ",X)"i { return { ...address, mode: 'izx' } }
+	= "(" address:ZeroPageAddress ",X)"i { return { ...address, mode: 'IZX' } }
 
 IndirectIndexed "Indirect Indexed"
-	= "(" address:ZeroPageAddress "),Y"i { return { ...address, mode: 'izy' } }
+	= "(" address:ZeroPageAddress "),Y"i { return { ...address, mode: 'IZY' } }
 
 Address "address"
 	= AbsoluteAddress / ZeroPageAddress
@@ -102,10 +102,10 @@ AddressWithOffset
 	= address:Address "," reg:Registers { return { ...address, offsetRegister: reg } }
 
 ZeroPageAddress "ZP0 address"
-	= "$" value:OneByteHex { return { mode: 'zp0', value } }
+	= "$" value:OneByteHex { return { mode: 'ZP0', value } }
 
 AbsoluteAddress "absolute address"
-	= "$" value:TwoByteHex { return { mode: 'abs', value } }
+	= "$" value:TwoByteHex { return { mode: 'ABS', value } }
 
 RegisterParam
 	= "," Registers
@@ -114,7 +114,7 @@ Registers
 	= "X"i / "Y"i
 
 ImmediateValue "imm"
-	= "#" number:Number { return { mode: 'imm', value: [number] } }
+	= "#" number:Number { return { mode: 'IMM', value: [number] } }
 
 Number "num"
 	= Hex / BinaryString / Integer
