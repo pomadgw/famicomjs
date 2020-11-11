@@ -105,7 +105,6 @@ export default function compile(string) {
     image[i] = image[i] ?? 0
   }
 
-  console.log(data)
   data.forEach((d) => {
     image.splice(d.address, d.data.length, ...d.data)
   })
