@@ -80,5 +80,26 @@ describe('new assembler', () => {
         ).slice(0x3000, 0x3000 + 2)
       ).toEqual([15, 1])
     })
+
+    it('should set interrupt correctly', () => {
+      const image = compile(
+        `
+      .pc $0600
+      LDX #$08
+      DEX
+      STX $0200
+      CPX #$03
+      BNE decrement
+      decrement: STX $0201
+      BRK
+      .reset $0600
+      .nmi $0602
+      .irq $0604
+    `
+      )
+      expect(image.slice(0xfffc, 0xfffc + 2)).toEqual([0x00, 0x06])
+      expect(image.slice(0xfffa, 0xfffa + 2)).toEqual([0x02, 0x06])
+      expect(image.slice(0xfffe, 0xfffe + 2)).toEqual([0x04, 0x06])
+    })
   })
 })

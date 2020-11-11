@@ -11,16 +11,25 @@ LineWithNewline
 	= _ line:Line _N { return line }
 
 Line "line"
-	= LabelDeclaration / Program / ProgramCounter / DataLine
+	= LabelDeclaration / Program / ProgramCounter / DataLine / ResetInterrupt / NMIInterrupt / IRQInterrupt
 
 DataLine "dataline"
 	= ".data"i _ address:AbsoluteAddress _ data:Array { return { data, address: word(...address.value) } }
-    
+
 Array
 	= a:OneByteHex b:(_ OneByteHex)* { return [a[0], ...b.map(e => e[1][0])] }
 
 ProgramCounter "pc"
 	= ".pc"i _ address:AbsoluteAddress { return { pc: address.value } }
+
+ResetInterrupt
+	= '.reset' _ address:AbsoluteAddress  { return { reset: address.value } }
+
+IRQInterrupt
+	= '.irq' _ address:AbsoluteAddress  { return { irq: address.value } }
+    
+NMIInterrupt
+	= '.nmi' _ address:AbsoluteAddress  { return { nmi: address.value } }
 
 Program "program"
 	= opcode:Opcode _S? params:Parameters? { return { opcode, params } }

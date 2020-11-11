@@ -53,10 +53,22 @@ export default function compile(string) {
   const data = []
   let i = 0
   let pc = 0
+  const reset = { address: 0xfffc }
+  const nmi = { address: 0xfffa }
+  const irq = { address: 0xfffe }
 
   while (i < parseTree.length) {
     if (parseTree[i].data) {
       data.push(parseTree[i])
+      parseTree.splice(i, 1)
+    } else if (parseTree[i].reset) {
+      reset.data = parseTree[i].reset
+      parseTree.splice(i, 1)
+    } else if (parseTree[i].nmi) {
+      nmi.data = parseTree[i].nmi
+      parseTree.splice(i, 1)
+    } else if (parseTree[i].irq) {
+      irq.data = parseTree[i].irq
       parseTree.splice(i, 1)
     } else if (parseTree[i].pc) {
       pc = word(...parseTree[i].pc)
@@ -107,6 +119,9 @@ export default function compile(string) {
 
   data.forEach((d) => {
     image.splice(d.address, d.data.length, ...d.data)
+  })
+  ;[reset, nmi, irq].forEach((interrupt) => {
+    if (interrupt.data) image.splice(interrupt.address, 2, ...interrupt.data)
   })
 
   return image
