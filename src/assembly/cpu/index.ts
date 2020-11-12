@@ -57,6 +57,7 @@ export default class CPU {
     if (this.clocks === 0) {
       const opcode = this.read(this.nextPC())
       opcodes(this, opcode)
+      this.isImplicitInvoked = false
     }
 
     this.clocks -= 1
@@ -65,7 +66,6 @@ export default class CPU {
   fetch(): void {
     if (!this.isImplicitInvoked)
       this.fetchedData = this.read(this.absoluteAddress)
-    this.isImplicitInvoked = false
   }
 
   pushStack(value: u8): void {
@@ -418,6 +418,105 @@ export default class CPU {
 
   BVC(): void {
     this.jumpIfTrue(!this.STATUS.getStatus(Flags.V))
+  }
+  // #endregion
+
+  // #region Bitwise
+  AND(): void {
+    this.fetch()
+    const result = this.A & this.fetchedData
+    this.A = result
+    this.setZN(result)
+
+    this.clocks += 1
+  }
+
+  ORA(): void {
+    this.fetch()
+    const result = this.A | this.fetchedData
+    this.A = result
+    this.setZN(result)
+
+    this.clocks += 1
+  }
+
+  EOR(): void {
+    this.fetch()
+    const result = this.A ^ this.fetchedData
+    this.A = result
+    this.setZN(result)
+
+    this.clocks += 1
+  }
+
+  ASL(): void {
+    this.fetch()
+    const temp: u16 = (this.fetchedData as u16) << 1
+
+    this.STATUS.setStatus(Flags.C, (temp & 0xff00) > 0)
+    this.setZN((temp & 0xff) as u8)
+
+    if (this.isImplicitInvoked) {
+      this.A = (temp & 0xff) as u8
+    } else {
+      this.write(this.absoluteAddress, (temp & 0xff) as u8)
+    }
+  }
+
+  BIT(): void {
+    this.fetch()
+    const temp = this.fetchedData & this.A
+    this.STATUS.setStatus(Flags.Z, temp === 0)
+
+    this.STATUS.setStatus(Flags.N, (this.fetchedData & Flags.N) > 0)
+    this.STATUS.setStatus(Flags.V, (this.fetchedData & Flags.V) > 0)
+  }
+
+  LSR(): void {
+    this.fetch()
+    this.STATUS.setStatus(Flags.C, (this.fetchedData & 0x01) === 1)
+    const result: u8 = (this.fetchedData >> 1) & 0xff
+
+    this.setZN(result)
+
+    if (this.isImplicitInvoked) {
+      this.A = result
+    } else {
+      this.write(this.absoluteAddress, result)
+    }
+  }
+
+  ROL(): void {
+    this.fetch()
+    const carryBit: u8 = this.STATUS.getStatus(Flags.C) ? 1 : 0
+    const result: u8 = (((this.fetchedData as u8) << 1) + carryBit) & 0xff
+
+    this.STATUS.setStatus(Flags.C, (this.fetchedData & 0b10000000) > 0)
+
+    this.setZN(result)
+
+    if (this.isImplicitInvoked) {
+      this.A = result
+    } else {
+      this.write(this.absoluteAddress, result)
+    }
+  }
+
+  ROR(): void {
+    this.fetch()
+    const carryBit: u8 = this.STATUS.getStatus(Flags.C) ? 1 : 0
+    const result: u8 =
+      (((this.fetchedData as u8) >> 1) | (carryBit << 7)) & 0xff
+
+    this.STATUS.setStatus(Flags.C, (this.fetchedData & 0x01) > 0)
+
+    this.setZN(result)
+
+    if (this.isImplicitInvoked) {
+      this.A = result
+    } else {
+      this.write(this.absoluteAddress, result)
+    }
   }
   // #endregion
 
