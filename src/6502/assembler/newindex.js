@@ -102,7 +102,6 @@ export default function compile(string) {
 
   slicePoints.forEach((point, idx, arr) => {
     const nextPoint = arr?.[idx + 1] ?? newTree.length
-    console.log({ point, nextPoint })
     slicedArray.push(newTree.slice(point, nextPoint))
   })
 
@@ -130,7 +129,6 @@ export default function compile(string) {
   }
 
   slicedArray.map(preprocess)
-  console.log(slicedArray)
 
   const image = [...Array(0x10000).keys()].map(() => 0)
 
