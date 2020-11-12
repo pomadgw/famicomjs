@@ -8,10 +8,18 @@ Lines "lines"
 	= a:LineWithNewline b:LineWithNewline*  { return [a, ...b].filter(e => e !== '') }
 
 LineWithNewline
-	= _ line:Line _N { return line }
+	= _ line:Line _N { return line }  
 
 Line "line"
-	= LabelDeclaration / Program / ProgramCounter / DataLine / ResetInterrupt / NMIInterrupt / IRQInterrupt
+	= LabelDeclaration / Program / ProgramCounter / DataLine / ResetInterrupt / NMIInterrupt / IRQInterrupt / Variable
+
+Variable
+	= ".define" _ varName:Label _ value:Value {
+    	return { varName: varName.label , value }
+    }
+
+Value
+	= Address / ImmediateValue
 
 DataLine "dataline"
 	= ".data"i _ address:AbsoluteAddress _ data:DataLineParams { return { data, address: word(...address.value) } }
@@ -103,25 +111,37 @@ Opcode "opcode"
       "TYA"i
 
 Parameters "params"
-	= IndexedIndirect / IndirectIndexed / AddressWithOffset / Address / ImmediateValue / Indirect / Implicit / Label
+	= IndexedIndirect / IndirectIndexed / AddressWithOffset / AddressLiteral / ImmediateValue / Indirect / Implicit / Label
+
+AddressLiteral
+	= AbsoluteAddressLiteral / ZeroPageAddressLiteral
+
+AbsoluteAddressLiteral
+	= AbsoluteAddress / VariableDeclaration
+
+ZeroPageAddressLiteral
+	= ZeroPageAddress / VariableDeclaration
+
+VariableDeclaration
+  = label:Label { return label }
 
 Implicit
 	= "A"i
 
 Indirect
-	= "(" address:AbsoluteAddress ")" { return { ...address, mode: 'IND' } }
+	= "(" address:AbsoluteAddressLiteral ")" { return { ...address, mode: 'IND' } }
 
 IndexedIndirect "Indexed Indirect"
-	= "(" address:ZeroPageAddress ",X)"i { return { ...address, mode: 'IZX' } }
+	= "(" address:ZeroPageAddressLiteral ",X)"i { return { ...address, mode: 'IZX' } }
 
 IndirectIndexed "Indirect Indexed"
-	= "(" address:ZeroPageAddress "),Y"i { return { ...address, mode: 'IZY' } }
+	= "(" address:ZeroPageAddressLiteral "),Y"i { return { ...address, mode: 'IZY' } }
 
 Address "address"
 	= AbsoluteAddress / ZeroPageAddress
 
 AddressWithOffset
-	= address:Address "," reg:Registers { return { ...address, offsetRegister: reg } }
+	= address:AddressLiteral "," reg:Registers { return { ...address, offsetRegister: reg } }
 
 ZeroPageAddress "ZP0 address"
 	= "$" value:OneByteHex { return { mode: 'ZP0', value } }
@@ -200,4 +220,3 @@ _S "whitespace"
 
 _N "newline"
   = [\n\r]*
-  

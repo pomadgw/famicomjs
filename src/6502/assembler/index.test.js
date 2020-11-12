@@ -17,6 +17,56 @@ describe('new assembler', () => {
           .split(' ')
           .map((e) => parseInt(e, 16))
       )
+
+      expect(
+        compile(`
+        STA $0200,X
+        STA $02,X
+        STA ($02,X)
+        STA ($02),Y
+        JMP ($1000)
+      `).slice(0, 12)
+      ).toEqual(
+        '9d 00 02 95 02 81 02 91 02 6c 00 10'
+          .split(' ')
+          .map((e) => parseInt(e, 16))
+      )
+    })
+
+    it('should assemble file with variable correctly', () => {
+      expect(
+        compile(`
+        .define DATA #$01
+        .define ADDRESS $0200
+        LDA DATA
+        STA ADDRESS
+        LDA #$05
+        STA $0201
+        LDA #$08
+        STA $0202
+      `).slice(0, 15)
+      ).toEqual(
+        'a9 01 8d 00 02 a9 05 8d 01 02 a9 08 8d 02 02'
+          .split(' ')
+          .map((e) => parseInt(e, 16))
+      )
+
+      expect(
+        compile(`
+        .define ADDRESS1 $0200
+        .define ADDRESS2 $02
+        .define JUMPADDRESS $1000
+        STA ADDRESS1,X
+        STA ADDRESS2,X
+        STA (ADDRESS2,X)
+        STA (ADDRESS2),Y
+        JMP (JUMPADDRESS)
+      `).slice(0, 12)
+      ).toEqual(
+        '9d 00 02 95 02 81 02 91 02 6c 00 10'
+          .split(' ')
+          .map((e) => parseInt(e, 16))
+      )
     })
 
     it('should assemble correctly with a branching operator', () => {

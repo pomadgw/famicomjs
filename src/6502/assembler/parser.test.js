@@ -3,32 +3,87 @@ import parser from './parser'
 describe('assembly parser', () => {
   it('should parse correctly', () => {
     const text = `
+    .define DATA $ff
     .start $7800
-lda $ff
-lda $ffff
-lda $ff,x
-lda $ff,y
-lda $ffff,x
-lda $ffff,y
-lda ($ff,x)
-lda ($ff),y
-lda #$ff
-lda #%0100
-lda #58
-asl a
-jmp ($ffff)
-label:
-beq label
-.reset $7800
-.nmi $7800
-.irq $7800
-.data $0300 20 20 ff 33
-.data $0400 "Hello, world"
+    lda test
+    lda test,x
+    lda test,y
+    lda (test,x)
+    lda (test),y
+    jmp (test)
+    lda $ff
+    lda $ffff
+    lda $ff,x
+    lda $ff,y
+    lda $ffff,x
+    lda $ffff,y
+    lda ($ff,x)
+    lda ($ff),y
+    lda #$ff
+    lda #%0100
+    lda #58
+    asl a
+    jmp ($ffff)
+    label:
+    beq label
+    .reset $7800
+    .nmi $7800
+    .irq $7800
+    .data $0300 20 20 ff 33
+    .data $0400 "Hello, world"
     `.trim()
 
     const expected = [
       {
+        varName: 'DATA',
+        value: {
+          mode: 'ZP0',
+          value: [255]
+        }
+      },
+      {
         pc: [0, 120]
+      },
+      {
+        opcode: 'lda',
+        params: {
+          label: 'test'
+        }
+      },
+      {
+        opcode: 'lda',
+        params: {
+          label: 'test',
+          offsetRegister: 'x'
+        }
+      },
+      {
+        opcode: 'lda',
+        params: {
+          label: 'test',
+          offsetRegister: 'y'
+        }
+      },
+      {
+        opcode: 'lda',
+        params: {
+          label: 'test',
+          mode: 'IZX'
+        }
+      },
+      {
+        opcode: 'lda',
+        params: {
+          label: 'test',
+          mode: 'IZY'
+        }
+      },
+      {
+        opcode: 'jmp',
+        params: {
+          label: 'test',
+          mode: 'IND'
+        }
       },
       {
         opcode: 'lda',
@@ -113,7 +168,9 @@ beq label
       },
       {
         opcode: 'asl',
-        params: 'a'
+        params: {
+          label: 'a'
+        }
       },
       {
         opcode: 'jmp',

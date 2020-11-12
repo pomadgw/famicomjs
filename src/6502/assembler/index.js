@@ -12,8 +12,9 @@ const branchingOperators = [
   'bvc'
 ]
 
-function assembleLine({ opcode, params, label, startBinary }) {
+function assembleLine({ opcode, params, label, startBinary }, variables = {}) {
   let addressingMode = params?.mode ?? 'IMP'
+  let defaultValue = []
 
   if (branchingOperators.includes(opcode.toLowerCase())) {
     addressingMode = 'REL'
@@ -21,6 +22,11 @@ function assembleLine({ opcode, params, label, startBinary }) {
 
   if (!params?.mode && ['jmp', 'jsr'].includes(opcode.toLowerCase())) {
     addressingMode = 'ABS'
+  }
+
+  if (params?.label && variables[params.label]) {
+    addressingMode = params?.mode ?? variables[params.label].mode
+    defaultValue = variables[params.label].value
   }
 
   if (params?.offsetRegister) {
@@ -37,7 +43,10 @@ function assembleLine({ opcode, params, label, startBinary }) {
 
   if (addressingMode === 'IMP') result = [Number(opcodeNumber[0])]
   else
-    result = [Number(opcodeNumber[0]), ...(params?.value ? params.value : [])]
+    result = [
+      Number(opcodeNumber[0]),
+      ...(params?.value ? params.value : defaultValue)
+    ]
 
   let length = result.length
   if (!params?.mode && ['jmp', 'jsr'].includes(opcode.toLowerCase())) {
@@ -65,6 +74,7 @@ export default function compile(string) {
   const parseTree = parser.parse(string.trim().replace(/(;|\/\/).+/g, ''))
   const labels = []
   const data = []
+  const variables = {}
   let i = 0
   let pc = null
   let currPc = null
@@ -78,6 +88,9 @@ export default function compile(string) {
     const currData = parseTree[i]
     if (currData.data) {
       data.push(currData)
+      parseTree.splice(i, 1)
+    } else if (currData.varName) {
+      variables[currData.varName] = currData.value
       parseTree.splice(i, 1)
     } else if (currData.reset) {
       reset.data = currData.reset
@@ -110,7 +123,7 @@ export default function compile(string) {
     }
   }
 
-  const newTree = parseTree.map(assembleLine)
+  const newTree = parseTree.map((e) => assembleLine(e, variables))
 
   const slicedArray = []
 
