@@ -1,5 +1,5 @@
 import fs from 'fs'
-import assembler from '../src/6502/assembler/newindex'
+import assembler from '../src/6502/assembler'
 
 import yargs from 'yargs'
 
