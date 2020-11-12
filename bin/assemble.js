@@ -1,5 +1,4 @@
 import fs from 'fs'
-// import assembler from '../src/6502/assembler/index'
 import assembler from '../src/6502/assembler/newindex'
 
 import yargs from 'yargs'
@@ -16,15 +15,6 @@ const { argv } = yargs
     description: 'output filename'
   })
 
-// const as6502 = assembler({ memorySize: 0x10000, PC: 0x8000 })
-
 const sourceFile = fs.readFileSync(argv._[0], { encoding: 'utf8' })
-
-assembler(sourceFile)
-
-// const result = as6502([sourceFile])
-
-// result[0xfffc] = 0x00
-// result[0xfffd] = 0x80
-
-// fs.writeFileSync(argv.output ?? 'result.bin', result)
+const result = assembler(sourceFile)
+fs.writeFileSync(argv.output ?? 'result.bin', new Uint8Array(result))
