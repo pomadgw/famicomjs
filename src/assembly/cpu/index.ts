@@ -68,6 +68,22 @@ export default class CPU {
     this.isImplicitInvoked = false
   }
 
+  pushStack(value: u8): void {
+    this.write((this.SP + 0x100) as u16, value)
+
+    this.SP--
+    this.SP &= 0xff
+  }
+
+  popStack(): u8 {
+    this.SP++
+    this.SP &= 0xff
+
+    const temp = this.read((this.SP + 0x100) as u16)
+
+    return temp
+  }
+
   // #region ADDRESSING MODES
   absMode(): void {
     const lo = this.read(this.nextPC())
@@ -334,6 +350,74 @@ export default class CPU {
     const result: u8 = (this.Y - 1) & 0xff
     this.Y = result
     this.setZN(result)
+  }
+  // #endregion
+
+  // #region Branching
+  JMP(): void {
+    this.PC = this.absoluteAddress
+  }
+
+  JSR(): void {
+    const prevPC: u16 = this.PC - 1
+
+    this.pushStack(((prevPC >> 8) & 0xff) as u8)
+    this.pushStack((prevPC & 0xff) as u8)
+
+    this.JMP()
+  }
+
+  RTS(): void {
+    let nextPC: u16 = this.popStack() as u16
+    nextPC |= (this.popStack() as u16) << 8
+
+    this.PC = nextPC + 1
+  }
+
+  private jumpIfTrue(condition: bool): void {
+    if (condition) {
+      this.clocks += 1
+      this.absoluteAddress = ((this.relativeAddress as i32) +
+        (this.PC as i32)) as u16
+
+      if ((this.absoluteAddress & 0xff00) !== (this.PC & 0xff00)) {
+        this.clocks += 1
+      }
+
+      this.PC = this.absoluteAddress
+    }
+  }
+
+  BCC(): void {
+    this.jumpIfTrue(!this.STATUS.getStatus(Flags.C))
+  }
+
+  BCS(): void {
+    this.jumpIfTrue(this.STATUS.getStatus(Flags.C))
+  }
+
+  BEQ(): void {
+    this.jumpIfTrue(this.STATUS.getStatus(Flags.Z))
+  }
+
+  BNE(): void {
+    this.jumpIfTrue(!this.STATUS.getStatus(Flags.Z))
+  }
+
+  BMI(): void {
+    this.jumpIfTrue(this.STATUS.getStatus(Flags.N))
+  }
+
+  BPL(): void {
+    this.jumpIfTrue(!this.STATUS.getStatus(Flags.N))
+  }
+
+  BVS(): void {
+    this.jumpIfTrue(this.STATUS.getStatus(Flags.V))
+  }
+
+  BVC(): void {
+    this.jumpIfTrue(!this.STATUS.getStatus(Flags.V))
   }
   // #endregion
 
