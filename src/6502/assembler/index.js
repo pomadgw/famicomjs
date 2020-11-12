@@ -39,9 +39,16 @@ function assembleLine({ opcode, params, label, startBinary }) {
   else
     result = [Number(opcodeNumber[0]), ...(params?.value ? params.value : [])]
 
+  let length = result.length
+  if (!params?.mode && ['jmp', 'jsr'].includes(opcode.toLowerCase())) {
+    length += 2
+  } else if (branchingOperators.includes(opcode.toLowerCase())) {
+    length += 1
+  }
+
   return {
     result,
-    length: result.length,
+    length,
     label,
     opcode,
     addressingMode,
@@ -118,6 +125,7 @@ export default function compile(string) {
     tree.reduce((acc, length, idx, arr) => {
       const newLength = acc + arr[idx].length
       arr[idx].totalLength = newLength
+      arr[idx].pos = acc
       return newLength
     }, 0)
 
@@ -130,14 +138,13 @@ export default function compile(string) {
 
         if (target) {
           if (e.addressingMode === 'ABS') {
-            const targetAddress = target.label.pc + target.totalLength - 1
+            const targetAddress = target.label.pc + target.pos
             const lo = targetAddress & 0xff
             const hi = (targetAddress >> 8) & 0xff
             e.result.push(lo)
             e.result.push(hi)
           } else {
-            let offset = target.totalLength - e.totalLength - target.length
-            if (offset < 0) offset -= 1
+            const offset = target.totalLength - e.totalLength - target.length
 
             e.result.push(offset & 0xff)
           }

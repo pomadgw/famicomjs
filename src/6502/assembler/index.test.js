@@ -63,6 +63,36 @@ describe('new assembler', () => {
       )
     })
 
+    it('should assemble correctly with a branching operator', () => {
+      expect(
+        compile(
+          `
+          .start $0600
+          JSR init
+          JSR loop
+          JSR end
+
+        init:
+          LDX #$00
+          RTS
+
+        loop:
+          INX
+          CPX #$05
+          BNE loop
+          RTS
+
+        end:
+          BRK
+      `
+        ).slice(0x0600, 0x0600 + 19)
+      ).toEqual(
+        '20 09 06 20 0c 06 20 12 06 a2 00 60 e8 e0 05 d0 fb 60 00'
+          .split(' ')
+          .map((e) => parseInt(e, 16))
+      )
+    })
+
     it('should assemble correctly with jmp operator', () => {
       expect(
         compile(
