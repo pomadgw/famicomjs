@@ -49,7 +49,7 @@ function word(low, high) {
 }
 
 export default function compile(string) {
-  const parseTree = parser.parse(string.trim())
+  const parseTree = parser.parse(string.trim().replace(/(;|\/\/).+/g, ''))
   const labels = []
   const data = []
   let i = 0

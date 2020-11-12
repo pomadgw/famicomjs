@@ -101,5 +101,24 @@ describe('new assembler', () => {
       expect(image.slice(0xfffa, 0xfffa + 2)).toEqual([0x02, 0x06])
       expect(image.slice(0xfffe, 0xfffe + 2)).toEqual([0x04, 0x06])
     })
+
+    it('should remove comment correctly', () => {
+      expect(
+        compile(`
+        ; Ignore This
+        // Also This
+        LDA #$01 ; Also This
+        STA $0200 // Also this
+        LDA #$05
+        STA $0201
+        LDA #$08
+        STA $0202
+      `).slice(0, 15)
+      ).toEqual(
+        'a9 01 8d 00 02 a9 05 8d 01 02 a9 08 8d 02 02'
+          .split(' ')
+          .map((e) => parseInt(e, 16))
+      )
+    })
   })
 })
