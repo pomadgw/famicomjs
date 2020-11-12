@@ -19,7 +19,7 @@ function assembleLine({ opcode, params, label, startBinary }) {
     addressingMode = 'REL'
   }
 
-  if (!params?.mode && opcode.toLowerCase() === 'jmp') {
+  if (!params?.mode && ['jmp', 'jsr'].includes(opcode.toLowerCase())) {
     addressingMode = 'ABS'
   }
 
