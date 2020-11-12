@@ -23,7 +23,7 @@ describe('new assembler', () => {
       expect(
         compile(
           `
-        .pc $0600
+        .start $0600
         LDX #$08
         decrement:
           DEX
@@ -46,7 +46,7 @@ describe('new assembler', () => {
         compile(
           `
         .data $3000 00 01
-        .pc $0600
+        .start $0600
         LDX #$08
         DEX
         STX $0200
@@ -68,7 +68,7 @@ describe('new assembler', () => {
         compile(
           `
         .data $3000 0f 01
-        .pc $0600
+        .start $0600
         LDX #$08
         DEX
         STX $0200
@@ -84,7 +84,7 @@ describe('new assembler', () => {
     it('should set interrupt correctly', () => {
       const image = compile(
         `
-      .pc $0600
+      .start $0600
       LDX #$08
       DEX
       STX $0200

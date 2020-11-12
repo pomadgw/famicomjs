@@ -12,7 +12,7 @@ const branchingOperators = [
   'bvc'
 ]
 
-function assembleLine({ opcode, params, label }) {
+function assembleLine({ opcode, params, label, startBinary }) {
   let addressingMode = params?.mode ?? 'IMP'
 
   if (branchingOperators.includes(opcode.toLowerCase())) {
@@ -39,7 +39,8 @@ function assembleLine({ opcode, params, label }) {
     result,
     length: result.length,
     label,
-    ...(params?.label ? { labelTarget: params.label } : {})
+    ...(params?.label ? { labelTarget: params.label } : {}),
+    ...(startBinary ? { startBinary } : {})
   }
 }
 
@@ -52,10 +53,12 @@ export default function compile(string) {
   const labels = []
   const data = []
   let i = 0
-  let pc = 0
+  let pc = null
   const reset = { address: 0xfffc }
   const nmi = { address: 0xfffa }
   const irq = { address: 0xfffe }
+
+  const slicePoints = []
 
   while (i < parseTree.length) {
     if (parseTree[i].data) {
@@ -77,45 +80,71 @@ export default function compile(string) {
       labels.push({ ...parseTree[i], offset: i })
       parseTree.splice(i, 1)
     } else {
+      if (pc !== null) {
+        parseTree[i].startBinary = pc
+        slicePoints.push(i)
+        pc = null
+      }
+
       if (labels.length > 0) {
         parseTree[i].label = labels.pop()
       }
+
       i++
     }
   }
 
   const newTree = parseTree.map(assembleLine)
-  newTree.reduce((acc, length, idx, arr) => {
-    const newLength = acc + arr[idx].length
-    arr[idx].totalLength = newLength
-    return newLength
-  }, 0)
 
-  newTree
-    .filter((e) => e.labelTarget)
-    .forEach((e) => {
-      const target = newTree.find((en) => {
-        return en.label?.label === e.labelTarget
+  const slicedArray = []
+
+  if (slicePoints.length === 0) slicePoints.push(0)
+
+  slicePoints.forEach((point, idx, arr) => {
+    const nextPoint = arr?.[idx + 1] ?? newTree.length
+    console.log({ point, nextPoint })
+    slicedArray.push(newTree.slice(point, nextPoint))
+  })
+
+  const preprocess = (tree) => {
+    tree.reduce((acc, length, idx, arr) => {
+      const newLength = acc + arr[idx].length
+      arr[idx].totalLength = newLength
+      return newLength
+    }, 0)
+
+    tree
+      .filter((e) => e.labelTarget)
+      .forEach((e) => {
+        const target = tree.find((en) => {
+          return en.label?.label === e.labelTarget
+        })
+
+        if (target) {
+          let offset = target.totalLength - e.totalLength - target.length
+          if (offset < 0) offset -= 1
+
+          e.result.push(offset & 0xff)
+        }
       })
+  }
 
-      if (target) {
-        let offset = target.totalLength - e.totalLength - target.length
-        if (offset < 0) offset -= 1
+  slicedArray.map(preprocess)
+  console.log(slicedArray)
 
-        e.result.push(offset & 0xff)
-      }
-    })
+  const image = [...Array(0x10000).keys()].map(() => 0)
 
-  const result = newTree
-    .map((e) => e.result)
-    .reduce((acc, arr) => [...acc, ...arr], [])
-  const offset = [...Array(pc).keys()].map(() => 0)
-
-  const image = [...offset, ...result]
-  image.length = 0x10000
   for (let i = 0; i < 0x10000; i++) {
     image[i] = image[i] ?? 0
   }
+
+  slicedArray.forEach((array) => {
+    const startBinary = array[0].startBinary ?? 0
+    const result = array
+      .map((e) => e.result)
+      .reduce((acc, arr) => [...acc, ...arr], [])
+    image.splice(startBinary, result.length, ...result)
+  })
 
   data.forEach((d) => {
     image.splice(d.address, d.data.length, ...d.data)

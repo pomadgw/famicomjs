@@ -150,9 +150,9 @@ function peg$parse(input, options) {
       peg$c6 = peg$literalExpectation(".data", true),
       peg$c7 = function(address, data) { return { data, address: word(...address.value) } },
       peg$c8 = function(a, b) { return [a[0], ...b.map(e => e[1][0])] },
-      peg$c9 = peg$otherExpectation("pc"),
-      peg$c10 = ".pc",
-      peg$c11 = peg$literalExpectation(".pc", true),
+      peg$c9 = peg$otherExpectation("start"),
+      peg$c10 = ".start",
+      peg$c11 = peg$literalExpectation(".start", true),
       peg$c12 = function(address) { return { pc: address.value } },
       peg$c13 = ".reset",
       peg$c14 = peg$literalExpectation(".reset", false),
@@ -698,9 +698,9 @@ function peg$parse(input, options) {
 
     peg$silentFails++;
     s0 = peg$currPos;
-    if (input.substr(peg$currPos, 3).toLowerCase() === peg$c10) {
-      s1 = input.substr(peg$currPos, 3);
-      peg$currPos += 3;
+    if (input.substr(peg$currPos, 6).toLowerCase() === peg$c10) {
+      s1 = input.substr(peg$currPos, 6);
+      peg$currPos += 6;
     } else {
       s1 = peg$FAILED;
       if (peg$silentFails === 0) { peg$fail(peg$c11); }

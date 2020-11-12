@@ -19,8 +19,8 @@ DataLine "dataline"
 Array
 	= a:OneByteHex b:(_ OneByteHex)* { return [a[0], ...b.map(e => e[1][0])] }
 
-ProgramCounter "pc"
-	= ".pc"i _ address:AbsoluteAddress { return { pc: address.value } }
+ProgramCounter "start"
+	= ".start"i _ address:AbsoluteAddress { return { pc: address.value } }
 
 ResetInterrupt
 	= '.reset' _ address:AbsoluteAddress  { return { reset: address.value } }
