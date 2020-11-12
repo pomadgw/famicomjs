@@ -14,7 +14,11 @@ Line "line"
 	= LabelDeclaration / Program / ProgramCounter / DataLine / ResetInterrupt / NMIInterrupt / IRQInterrupt
 
 DataLine "dataline"
-	= ".data"i _ address:AbsoluteAddress _ data:Array { return { data, address: word(...address.value) } }
+	= ".data"i _ address:AbsoluteAddress _ data:DataLineParams { return { data, address: word(...address.value) } }
+
+DataLineParams
+	= data:Array { return data }
+      / StringLiteral
 
 Array
 	= a:OneByteHex b:(_ OneByteHex)* { return [a[0], ...b.map(e => e[1][0])] }
@@ -164,6 +168,29 @@ Integer "integer"
 
 String "string"
 	= [a-zA-Z0-9]+ { return text() }
+
+StringLiteral
+  = '"' chars:DoubleStringCharacter* '"' { return chars.map(e => e.charCodeAt(0)); }
+  / "'" chars:SingleStringCharacter* "'" { return chars.map(e => e.charCodeAt(0)); }
+
+DoubleStringCharacter
+  = !('"' / "\\") char:. { return char; }
+  / "\\" sequence:EscapeSequence { return sequence; }
+
+SingleStringCharacter
+  = !("'" / "\\") char:. { return char; }
+  / "\\" sequence:EscapeSequence { return sequence; }
+
+EscapeSequence
+  = "'"
+  / '"'
+  / "\\"
+  / "b"  { return "\b";   }
+  / "f"  { return "\f";   }
+  / "n"  { return "\n";   }
+  / "r"  { return "\r";   }
+  / "t"  { return "\t";   }
+  / "v"  { return "\x0B"; }
 
 _ "whitespace"
   = [ \t\n\r]*
