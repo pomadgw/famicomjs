@@ -63,6 +63,48 @@ describe('new assembler', () => {
       )
     })
 
+    it('should assemble correctly with jmp operator', () => {
+      expect(
+        compile(
+          `
+        .start $0600
+          LDA #$03
+          JMP there
+          BRK
+          BRK
+          BRK
+        there:
+          STA $0200
+      `
+        ).slice(0x0600, 0x0600 + 11)
+      ).toEqual(
+        'a9 03 4c 08 06 00 00 00 8d 00 02'
+          .split(' ')
+          .map((e) => parseInt(e, 16))
+      )
+
+      expect(
+        compile(
+          `
+        .start $0600
+          LDA #$03
+          JMP there
+        there:
+          STA $0200
+        .start $0610
+          LDA #$03
+          JMP here
+        here:
+          STA $0200
+      `
+        ).slice(0x0600, 0x0600 + 24)
+      ).toEqual(
+        'a9 03 4c 05 06 8d 00 02 00 00 00 00 00 00 00 00 a9 03 4c 15 06 8d 00 02'
+          .split(' ')
+          .map((e) => parseInt(e, 16))
+      )
+    })
+
     it('should assemble data correctly', () => {
       expect(
         compile(

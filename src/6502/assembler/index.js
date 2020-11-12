@@ -19,6 +19,10 @@ function assembleLine({ opcode, params, label, startBinary }) {
     addressingMode = 'REL'
   }
 
+  if (!params?.mode && opcode.toLowerCase() === 'jmp') {
+    addressingMode = 'ABS'
+  }
+
   if (params?.offsetRegister) {
     addressingMode = `${addressingMode.slice(0, 2)}${params.offsetRegister}`
   }
@@ -39,6 +43,8 @@ function assembleLine({ opcode, params, label, startBinary }) {
     result,
     length: result.length,
     label,
+    opcode,
+    addressingMode,
     ...(params?.label ? { labelTarget: params.label } : {}),
     ...(startBinary ? { startBinary } : {})
   }
@@ -54,6 +60,7 @@ export default function compile(string) {
   const data = []
   let i = 0
   let pc = null
+  let currPc = null
   const reset = { address: 0xfffc }
   const nmi = { address: 0xfffa }
   const irq = { address: 0xfffe }
@@ -61,33 +68,35 @@ export default function compile(string) {
   const slicePoints = []
 
   while (i < parseTree.length) {
-    if (parseTree[i].data) {
-      data.push(parseTree[i])
+    const currData = parseTree[i]
+    if (currData.data) {
+      data.push(currData)
       parseTree.splice(i, 1)
-    } else if (parseTree[i].reset) {
-      reset.data = parseTree[i].reset
+    } else if (currData.reset) {
+      reset.data = currData.reset
       parseTree.splice(i, 1)
-    } else if (parseTree[i].nmi) {
-      nmi.data = parseTree[i].nmi
+    } else if (currData.nmi) {
+      nmi.data = currData.nmi
       parseTree.splice(i, 1)
-    } else if (parseTree[i].irq) {
-      irq.data = parseTree[i].irq
+    } else if (currData.irq) {
+      irq.data = currData.irq
       parseTree.splice(i, 1)
-    } else if (parseTree[i].pc) {
-      pc = word(...parseTree[i].pc)
+    } else if (currData.pc) {
+      pc = word(...currData.pc)
+      currPc = pc
       parseTree.splice(i, 1)
-    } else if (parseTree[i].label) {
-      labels.push({ ...parseTree[i], offset: i })
+    } else if (currData.label) {
+      labels.push({ ...currData, offset: i, pc: currPc ?? 0 })
       parseTree.splice(i, 1)
     } else {
       if (pc !== null) {
-        parseTree[i].startBinary = pc
+        currData.startBinary = pc
         slicePoints.push(i)
         pc = null
       }
 
       if (labels.length > 0) {
-        parseTree[i].label = labels.pop()
+        currData.label = labels.pop()
       }
 
       i++
@@ -120,10 +129,18 @@ export default function compile(string) {
         })
 
         if (target) {
-          let offset = target.totalLength - e.totalLength - target.length
-          if (offset < 0) offset -= 1
+          if (e.addressingMode === 'ABS') {
+            const targetAddress = target.label.pc + target.totalLength - 1
+            const lo = targetAddress & 0xff
+            const hi = (targetAddress >> 8) & 0xff
+            e.result.push(lo)
+            e.result.push(hi)
+          } else {
+            let offset = target.totalLength - e.totalLength - target.length
+            if (offset < 0) offset -= 1
 
-          e.result.push(offset & 0xff)
+            e.result.push(offset & 0xff)
+          }
         }
       })
   }
