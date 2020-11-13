@@ -520,5 +520,41 @@ export default class CPU {
   }
   // #endregion
 
+  // #region Interrupts
+
+  BRK(): void {
+    this.nextPC()
+
+    const pc = this.PC
+
+    this.pushStack(((pc >> 8) & 0xff) as u8)
+    this.pushStack((pc & 0xff) as u8)
+
+    this.STATUS.setStatus(Flags.I, true)
+
+    this.STATUS.setStatus(Flags.B, true)
+    this.pushStack(this.STATUS.status)
+    this.STATUS.setStatus(Flags.B, false)
+
+    const newPCLo: u16 = this.read(0xfffe) as u16
+    const newPCHi: u16 = this.read(0xffff) as u16
+
+    this.PC = (newPCHi << 8) | newPCLo
+  }
+
+  RTI(): void {
+    let status: u8 = this.popStack()
+    const newPCLo: u16 = this.popStack() as u16
+    const newPCHi: u16 = this.popStack() as u16
+
+    status &= ~(Flags.U as u8)
+    status &= ~(Flags.B as u8)
+
+    this.STATUS.status = status
+    this.PC = (newPCHi << 8) | newPCLo
+  }
+
+  // #endregion
+
   // #endregion
 }
