@@ -6,7 +6,7 @@ describe('6502 CPU (wasm): addressing mode: relative', () => {
     const bus = createNES()
     bus.ram = new Uint8Array(ram)
     bus.cpu.nextPC()
-    bus.cpu.rel()
+    bus.cpu.relMode()
     expect(bus.cpu.relativeAddress).toEqual(0x0f)
     expect(bus.cpu.clocks).toEqual(0)
   })
@@ -17,7 +17,7 @@ describe('6502 CPU (wasm): addressing mode: relative', () => {
     const bus = createNES()
     bus.ram = new Uint8Array(ram)
     bus.cpu.nextPC()
-    bus.cpu.rel()
+    bus.cpu.relMode()
 
     expect(bus.cpu.relativeAddress).toEqual(expectOffset)
   })

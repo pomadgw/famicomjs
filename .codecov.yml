@@ -23,3 +23,6 @@ coverage:
       bus:
         paths:
           - src/bus
+      'AssemblyScript/CPU':
+        paths:
+          - src/assembly/cpu

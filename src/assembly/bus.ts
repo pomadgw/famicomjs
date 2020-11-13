@@ -12,4 +12,8 @@ export default class Bus {
   cpuRead(address: u16): u8 {
     return this.ram[address]
   }
+
+  cpuWrite(address: u16, value: u8): void {
+    this.ram[address] = value
+  }
 }

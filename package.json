@@ -15,6 +15,7 @@
     "build:bin": "npm run clean:bin && rollup -c scripts/build/rollup.bin.config.js --environment NODE_ENV:production",
     "build": "npm run asbuild && npm run build:web && npm run build:bin",
     "generate-opcodes": "node build-opcode.js && eslint --fix src/6502/instructions/index.js",
+    "generate-opcodes:as": "node build-opcode.as.js && eslint -c src/assembly/.eslintrc.js --fix src/assembly/cpu/opcodes.ts",
     "test": "jest --coverage",
     "download-nes-test": "wget -c http://nickmass.com/images/nestest.nes",
     "remove-nes-test": "rm -fv nestest.nes",
@@ -46,6 +47,8 @@
     "@testing-library/jest-dom": "^5.5.0",
     "@testing-library/svelte": "^3.0.0",
     "@types/jest": "^26.0.10",
+    "@typescript-eslint/eslint-plugin": "^4.6.1",
+    "@typescript-eslint/parser": "^4.6.1",
     "assemblyscript": "^0.17.1",
     "autoprefixer": "^10.0.1",
     "babel-jest": "^26.3.0",
@@ -92,7 +95,8 @@
       "!src/index.js",
       "!src/assembly/__tests__.dummy/*",
       "!src/6502/assembler.js",
-      "!src/6502/instructions/index.js"
+      "!src/6502/instructions/index.js",
+      "!src/assembly/cpu/opcodes.ts"
     ]
   },
   "husky": {
@@ -101,7 +105,7 @@
     }
   },
   "lint-staged": {
-    "*.js": "eslint --cache --fix"
+    "*.{js,ts}": "eslint --cache --fix"
   },
   "dependencies": {
     "@assemblyscript/loader": "^0.17.1",
