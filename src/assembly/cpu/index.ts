@@ -6,6 +6,7 @@ import opcodes from './opcodes'
 export default class CPU {
   private bus: Bus
   private isImplicitInvoked: boolean
+  private opcode: u8
 
   public A: u8
   public X: u8
@@ -39,6 +40,7 @@ export default class CPU {
     this.fetchedData = 0
     this.STATUS = new RegisterStatus(0x24)
     this.isImplicitInvoked = false
+    this.opcode = 0
   }
 
   read(address: u16): u8 {
@@ -56,6 +58,7 @@ export default class CPU {
   clock(): void {
     if (this.clocks === 0) {
       const opcode = this.read(this.nextPC())
+      this.opcode = opcode
       opcodes(this, opcode)
       this.isImplicitInvoked = false
     }
@@ -554,6 +557,14 @@ export default class CPU {
     this.PC = (newPCHi << 8) | newPCLo
   }
 
+  // #endregion
+
+  // #region NOP
+  NOP(): void {
+    if ([0x1c, 0x3c, 0x5c, 0x7c, 0xdc, 0xfc].includes(this.opcode)) {
+      this.clocks += 1
+    }
+  }
   // #endregion
 
   // #endregion
