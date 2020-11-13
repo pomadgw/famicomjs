@@ -628,6 +628,28 @@ export default class CPU {
   }
   // #endregion
 
+  // #region Register Transfer
+  TAX(): void {
+    this.X = this.A
+    this.setZN(this.X)
+  }
+
+  TAY(): void {
+    this.Y = this.A
+    this.setZN(this.Y)
+  }
+
+  TXA(): void {
+    this.A = this.X
+    this.setZN(this.A)
+  }
+
+  TYA(): void {
+    this.A = this.Y
+    this.setZN(this.A)
+  }
+  // #endregion
+
   // #region NOP
   NOP(): void {
     if ([0x1c, 0x3c, 0x5c, 0x7c, 0xdc, 0xfc].includes(this.opcode)) {
