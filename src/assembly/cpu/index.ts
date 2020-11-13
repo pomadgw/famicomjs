@@ -559,6 +559,39 @@ export default class CPU {
 
   // #endregion
 
+  // #region Comparison
+  CMP(): void {
+    this.fetch()
+    const temp = this.A - this.fetchedData
+
+    this.STATUS.setStatus(Flags.C, temp >= 0)
+    this.STATUS.setStatus(Flags.Z, temp === 0)
+    this.STATUS.setStatus(Flags.N, temp < 0 || temp >= 0x80)
+
+    this.clocks += 1
+  }
+  CPX(): void {
+    this.fetch()
+    const temp = this.X - this.fetchedData
+
+    this.STATUS.setStatus(Flags.C, temp >= 0)
+    this.STATUS.setStatus(Flags.Z, temp === 0)
+    this.STATUS.setStatus(Flags.N, temp < 0 || temp >= 0x80)
+
+    this.clocks += 1
+  }
+  CPY(): void {
+    this.fetch()
+    const temp = this.Y - this.fetchedData
+
+    this.STATUS.setStatus(Flags.C, temp >= 0)
+    this.STATUS.setStatus(Flags.Z, temp === 0)
+    this.STATUS.setStatus(Flags.N, temp < 0 || temp >= 0x80)
+
+    this.clocks += 1
+  }
+  // #endregion
+
   // #region NOP
   NOP(): void {
     if ([0x1c, 0x3c, 0x5c, 0x7c, 0xdc, 0xfc].includes(this.opcode)) {
