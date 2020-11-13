@@ -49,47 +49,79 @@ const definitions = [
 describe('instructions: branch instructions', () => {
   describe('JMP', () => {
     it('should change PC register to specified value', () => {
-      const cpudummy = new CPU([0x02, 0, 0, 0])
-      cpudummy.registers.PC = 0
-      cpudummy.fetchAddress({ absoluteAddress: 0x0100 })
-      branch.JMP(cpudummy)
-      expect(cpudummy.registers.PC).toBe(0x0100)
+      const cpu = new CPU([0x02, 0, 0, 0])
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
+      cpu.registers.PC = 0
+      cpu.fetchAddress({ absoluteAddress: 0x0100 })
+      branch.JMP(cpu)
+      expect(cpu.registers.PC).toBe(0x0100)
     })
   })
 
   describe('JSR', () => {
     it('should change PC register to specified value', () => {
-      const cpudummy = new CPU(generateArray(0x1000))
-      cpudummy.registers.PC = 0
-      cpudummy.fetchAddress({ absoluteAddress: 0x0100 })
-      branch.JSR(cpudummy)
-      expect(cpudummy.registers.PC).toBe(0x0100)
+      const cpu = new CPU(generateArray(0x1000))
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
+      cpu.registers.PC = 0
+      cpu.fetchAddress({ absoluteAddress: 0x0100 })
+      branch.JSR(cpu)
+      expect(cpu.registers.PC).toBe(0x0100)
     })
 
     it('should save previous PC to stack correctly', () => {
-      const cpudummy = new CPU(generateArray(0x1000))
-      cpudummy.registers.PC = 0x1234
+      const cpu = new CPU(generateArray(0x1000))
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
+      cpu.registers.PC = 0x1234
 
-      cpudummy.fetchAddress({ absoluteAddress: 0x0100 })
-      branch.JSR(cpudummy)
+      cpu.fetchAddress({ absoluteAddress: 0x0100 })
+      branch.JSR(cpu)
 
-      expect(cpudummy.ram[0x1ff]).toBe(0x12)
-      expect(cpudummy.ram[0x1fe]).toBe(0x33)
+      expect(cpu.ram[0x1ff]).toBe(0x12)
+      expect(cpu.ram[0x1fe]).toBe(0x33)
     })
   })
 
   describe('RTS', () => {
     it('should restore saved PC in stack back to PC register correctly', () => {
-      const cpudummy = new CPU(generateArray(0x1000))
-      cpudummy.registers.PC = 0x1000
+      const cpu = new CPU(generateArray(0x1000))
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
+      cpu.registers.PC = 0x1000
 
-      cpudummy.ram[0x1ff] = 0x12
-      cpudummy.ram[0x1fe] = 0x33
-      cpudummy.registers.SP = 0xfd
-      cpudummy.fetchAddress()
-      branch.RTS(cpudummy)
+      cpu.ram[0x1ff] = 0x12
+      cpu.ram[0x1fe] = 0x33
+      cpu.registers.SP = 0xfd
+      cpu.fetchAddress()
+      branch.RTS(cpu)
 
-      expect(cpudummy.registers.PC).toBe(0x1234)
+      expect(cpu.registers.PC).toBe(0x1234)
     })
   })
 
@@ -98,37 +130,61 @@ describe('instructions: branch instructions', () => {
       it(`should change PC if ${flagToTest} flags is ${
         jumpIfFlagIs ? 'on' : 'off'
       }`, () => {
-        const cpudummy = new CPU([0x02, 0, 0, 0])
-        cpudummy.registers.PC = 0
-        cpudummy.registers.STATUS[flagToTest] = jumpIfFlagIs
-        cpudummy.fetchAddress({ relativeAddress: 2 })
-        branch[instruction](cpudummy)
+        const cpu = new CPU([0x02, 0, 0, 0])
+        cpu.bus = {
+          cpuRead(addr) {
+            return cpu.ram[addr]
+          },
+          cpuWrite(addr, value) {
+            cpu.ram[addr] = value
+          }
+        }
+        cpu.registers.PC = 0
+        cpu.registers.STATUS[flagToTest] = jumpIfFlagIs
+        cpu.fetchAddress({ relativeAddress: 2 })
+        branch[instruction](cpu)
 
-        expect(cpudummy.registers.PC).toBe(0x02)
-        expect(cpudummy.cycles).toBe(1)
+        expect(cpu.registers.PC).toBe(0x02)
+        expect(cpu.cycles).toBe(1)
       })
 
       it(`should change not PC if ${flagToTest} flags is ${
         jumpIfFlagIs ? 'off' : 'on'
       }`, () => {
-        const cpudummy = new CPU([0x02, 0, 0, 0])
-        cpudummy.registers.PC = 0
-        cpudummy.registers.STATUS[flagToTest] = !jumpIfFlagIs
-        cpudummy.fetchAddress({ relativeAddress: 2 })
-        branch[instruction](cpudummy)
+        const cpu = new CPU([0x02, 0, 0, 0])
+        cpu.bus = {
+          cpuRead(addr) {
+            return cpu.ram[addr]
+          },
+          cpuWrite(addr, value) {
+            cpu.ram[addr] = value
+          }
+        }
+        cpu.registers.PC = 0
+        cpu.registers.STATUS[flagToTest] = !jumpIfFlagIs
+        cpu.fetchAddress({ relativeAddress: 2 })
+        branch[instruction](cpu)
 
-        expect(cpudummy.registers.PC).toBe(0x00)
+        expect(cpu.registers.PC).toBe(0x00)
       })
 
       it('should add additional clock cycle if page is changed', () => {
-        const cpudummy = new CPU([0x02, 0, 0, 0])
-        cpudummy.registers.PC = 0x10ff
-        cpudummy.registers.STATUS[flagToTest] = jumpIfFlagIs
-        cpudummy.fetchAddress({ relativeAddress: 1 })
-        branch[instruction](cpudummy)
+        const cpu = new CPU([0x02, 0, 0, 0])
+        cpu.bus = {
+          cpuRead(addr) {
+            return cpu.ram[addr]
+          },
+          cpuWrite(addr, value) {
+            cpu.ram[addr] = value
+          }
+        }
+        cpu.registers.PC = 0x10ff
+        cpu.registers.STATUS[flagToTest] = jumpIfFlagIs
+        cpu.fetchAddress({ relativeAddress: 1 })
+        branch[instruction](cpu)
 
-        expect(cpudummy.registers.PC).toBe(0x1100)
-        expect(cpudummy.cycles).toBe(2)
+        expect(cpu.registers.PC).toBe(0x1100)
+        expect(cpu.cycles).toBe(2)
       })
     })
   })

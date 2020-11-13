@@ -12,6 +12,14 @@ describe('instructions: interrupts', () => {
 
     beforeEach(() => {
       cpu = new CPU(generateArray(0x10000))
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
       cpu.registers.PC = defaultPC
       cpu.ram[0xfffe] = 0x34
       cpu.ram[0xffff] = 0x12
@@ -41,32 +49,48 @@ describe('instructions: interrupts', () => {
 
   describe('RTI', () => {
     it('should restore saved PC in stack back to PC register correctly', () => {
-      const cpudummy = new CPU(generateArray(0x1000))
-      cpudummy.registers.PC = 0x1000
+      const cpu = new CPU(generateArray(0x1000))
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
+      cpu.registers.PC = 0x1000
 
-      cpudummy.ram[0x1ff] = 0x12
-      cpudummy.ram[0x1fe] = 0x33
-      cpudummy.ram[0x1fd] = 0x33
-      cpudummy.registers.SP = 0xfc
-      cpudummy.fetch()
-      interrupts.RTI(cpudummy)
+      cpu.ram[0x1ff] = 0x12
+      cpu.ram[0x1fe] = 0x33
+      cpu.ram[0x1fd] = 0x33
+      cpu.registers.SP = 0xfc
+      cpu.fetch()
+      interrupts.RTI(cpu)
 
-      expect(cpudummy.registers.PC).toBe(0x1233)
+      expect(cpu.registers.PC).toBe(0x1233)
     })
 
     it('should restore saved status in stack back to status register correctly', () => {
       const status = 0b11111111
-      const cpudummy = new CPU(generateArray(0x1000))
-      cpudummy.registers.PC = 0x1000
+      const cpu = new CPU(generateArray(0x1000))
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
+      cpu.registers.PC = 0x1000
 
-      cpudummy.ram[0x1ff] = 0x12
-      cpudummy.ram[0x1fe] = 0x33
-      cpudummy.ram[0x1fd] = status
-      cpudummy.registers.SP = 0xfc
-      cpudummy.fetch()
-      interrupts.RTI(cpudummy)
+      cpu.ram[0x1ff] = 0x12
+      cpu.ram[0x1fe] = 0x33
+      cpu.ram[0x1fd] = status
+      cpu.registers.SP = 0xfc
+      cpu.fetch()
+      interrupts.RTI(cpu)
 
-      expect(+cpudummy.registers.STATUS).toBe(0b11001111)
+      expect(+cpu.registers.STATUS).toBe(0b11001111)
     })
   })
 })

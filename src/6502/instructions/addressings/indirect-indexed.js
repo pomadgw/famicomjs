@@ -1,8 +1,8 @@
 export default function indirectIndexedMode(cpu) {
-  const tableAddress = cpu.ram[cpu.nextPC()]
+  const tableAddress = cpu.readRAM(cpu.nextPC())
 
-  const lo = cpu.ram[tableAddress & 0xff]
-  const hi = cpu.ram[(tableAddress + 1) & 0xff]
+  const lo = cpu.readRAM(tableAddress & 0xff)
+  const hi = cpu.readRAM((tableAddress + 1) & 0xff)
 
   const absoluteAddress = (((hi << 8) | lo) + cpu.registers.Y) & 0xffff
 

@@ -14,6 +14,14 @@ describe('instructions: memory-related instructions', () => {
 
       beforeEach(() => {
         cpu = new CPU(ram)
+        cpu.bus = {
+          cpuRead(addr) {
+            return cpu.ram[addr]
+          },
+          cpuWrite(addr, value) {
+            cpu.ram[addr] = value
+          }
+        }
       })
 
       it(`should load from specified memory to ${targetRegister} register`, () => {

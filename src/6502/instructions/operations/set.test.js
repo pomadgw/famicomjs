@@ -4,29 +4,53 @@ import CPU from '../../cpu'
 describe('instructions: clear flag operations', () => {
   describe('SEC', () => {
     it('should set the carry flag', () => {
-      const cpudummy = new CPU([0])
-      cpudummy.registers.STATUS.C = false
-      cpudummy.fetch()
-      set.SEC(cpudummy)
-      expect(cpudummy.registers.STATUS.C).toBe(true)
+      const cpu = new CPU([0])
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
+      cpu.registers.STATUS.C = false
+      cpu.fetch()
+      set.SEC(cpu)
+      expect(cpu.registers.STATUS.C).toBe(true)
     })
   })
   describe('SED', () => {
     it('should set the BCD flag', () => {
-      const cpudummy = new CPU([0])
-      cpudummy.registers.STATUS.D = false
-      cpudummy.fetch()
-      set.SED(cpudummy)
-      expect(cpudummy.registers.STATUS.D).toBe(true)
+      const cpu = new CPU([0])
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
+      cpu.registers.STATUS.D = false
+      cpu.fetch()
+      set.SED(cpu)
+      expect(cpu.registers.STATUS.D).toBe(true)
     })
   })
   describe('SEI', () => {
     it('should set the interrupt flag', () => {
-      const cpudummy = new CPU([0])
-      cpudummy.registers.STATUS.I = false
-      cpudummy.fetch()
-      set.SEI(cpudummy)
-      expect(cpudummy.registers.STATUS.I).toBe(true)
+      const cpu = new CPU([0])
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
+      cpu.registers.STATUS.I = false
+      cpu.fetch()
+      set.SEI(cpu)
+      expect(cpu.registers.STATUS.I).toBe(true)
     })
   })
 })

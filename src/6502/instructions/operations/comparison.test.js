@@ -9,6 +9,14 @@ describe('instructions: comparison', () => {
       let cpu
       beforeEach(() => {
         cpu = new CPU([0, 0, 0])
+        cpu.bus = {
+          cpuRead(addr) {
+            return cpu.ram[addr]
+          },
+          cpuWrite(addr, value) {
+            cpu.ram[addr] = value
+          }
+        }
       })
 
       it(`should set carry flag if ${targetRegister} register is more than or equal to compared value`, () => {

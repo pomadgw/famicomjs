@@ -4,178 +4,282 @@ import CPU from '../../cpu'
 describe('instructions: bitwise operators', () => {
   describe('ORA', () => {
     it('should return correct value (trigger N flag)', () => {
-      const cpudummy = new CPU([0, 0xf0, 0, 0])
-      cpudummy.registers.A = 0x0f
+      const cpu = new CPU([0, 0xf0, 0, 0])
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
+      cpu.registers.A = 0x0f
 
-      cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
+      cpu.fetchAddress({ absoluteAddress: 0x0001 })
 
-      bitwise.ORA(cpudummy)
-      expect(cpudummy.registers.A).toBe(0xff)
+      bitwise.ORA(cpu)
+      expect(cpu.registers.A).toBe(0xff)
 
       // Resulting value: 0xff, expected status flag value:
       // Z: 0
       // N: 1
-      expect(cpudummy.registers.STATUS.Z).toBe(false)
-      expect(cpudummy.registers.STATUS.N).toBe(true)
+      expect(cpu.registers.STATUS.Z).toBe(false)
+      expect(cpu.registers.STATUS.N).toBe(true)
     })
 
     it('should return correct value (trigger Z flag)', () => {
-      const cpudummy = new CPU([0, 0x00, 0, 0])
-      cpudummy.registers.A = 0x00
+      const cpu = new CPU([0, 0x00, 0, 0])
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
+      cpu.registers.A = 0x00
 
-      cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
+      cpu.fetchAddress({ absoluteAddress: 0x0001 })
 
-      bitwise.ORA(cpudummy)
-      expect(cpudummy.registers.A).toBe(0x00)
+      bitwise.ORA(cpu)
+      expect(cpu.registers.A).toBe(0x00)
 
       // Resulting value: 0xff, expected status flag value:
       // Z: 1
       // N: 0
-      expect(cpudummy.registers.STATUS.Z).toBe(true)
-      expect(cpudummy.registers.STATUS.N).toBe(false)
+      expect(cpu.registers.STATUS.Z).toBe(true)
+      expect(cpu.registers.STATUS.N).toBe(false)
     })
   })
 
   describe('AND', () => {
     it('should return correct value (trigger N flag)', () => {
-      const cpudummy = new CPU([0, 0xff, 0, 0])
-      cpudummy.registers.A = 0xfa
+      const cpu = new CPU([0, 0xff, 0, 0])
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
+      cpu.registers.A = 0xfa
 
-      cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
+      cpu.fetchAddress({ absoluteAddress: 0x0001 })
 
-      bitwise.AND(cpudummy)
-      expect(cpudummy.registers.A).toBe(0xfa)
+      bitwise.AND(cpu)
+      expect(cpu.registers.A).toBe(0xfa)
 
       // Resulting value: 0xfa, expected status flag value:
       // Z: 0
       // N: 1
-      expect(cpudummy.registers.STATUS.Z).toBe(false)
-      expect(cpudummy.registers.STATUS.N).toBe(true)
+      expect(cpu.registers.STATUS.Z).toBe(false)
+      expect(cpu.registers.STATUS.N).toBe(true)
     })
 
     it('should return correct value (trigger Z flag)', () => {
-      const cpudummy = new CPU([0, 0x00, 0, 0])
-      cpudummy.registers.A = 0x01
+      const cpu = new CPU([0, 0x00, 0, 0])
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
+      cpu.registers.A = 0x01
 
-      cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
+      cpu.fetchAddress({ absoluteAddress: 0x0001 })
 
-      bitwise.AND(cpudummy)
-      expect(cpudummy.registers.A).toBe(0x00)
+      bitwise.AND(cpu)
+      expect(cpu.registers.A).toBe(0x00)
 
       // Resulting value: 0xff, expected status flag value:
       // Z: 1
       // N: 0
-      expect(cpudummy.registers.STATUS.Z).toBe(true)
-      expect(cpudummy.registers.STATUS.N).toBe(false)
+      expect(cpu.registers.STATUS.Z).toBe(true)
+      expect(cpu.registers.STATUS.N).toBe(false)
     })
   })
 
   describe('EOR', () => {
     it('should return correct value (trigger N flag)', () => {
-      const cpudummy = new CPU([0, 0x70, 0, 0])
-      cpudummy.registers.A = 0xfa
+      const cpu = new CPU([0, 0x70, 0, 0])
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
+      cpu.registers.A = 0xfa
 
-      cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
+      cpu.fetchAddress({ absoluteAddress: 0x0001 })
 
-      bitwise.EOR(cpudummy)
-      expect(cpudummy.registers.A).toBe(0xfa ^ 0x70)
+      bitwise.EOR(cpu)
+      expect(cpu.registers.A).toBe(0xfa ^ 0x70)
 
       // Resulting value: 0xfa, expected status flag value:
       // Z: 0
       // N: 1
-      expect(cpudummy.registers.STATUS.Z).toBe(false)
-      expect(cpudummy.registers.STATUS.N).toBe(true)
+      expect(cpu.registers.STATUS.Z).toBe(false)
+      expect(cpu.registers.STATUS.N).toBe(true)
     })
 
     it('should return correct value (trigger Z flag)', () => {
-      const cpudummy = new CPU([0, 0x01, 0, 0])
-      cpudummy.registers.A = 0x01
+      const cpu = new CPU([0, 0x01, 0, 0])
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
+      cpu.registers.A = 0x01
 
-      cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
+      cpu.fetchAddress({ absoluteAddress: 0x0001 })
 
-      bitwise.EOR(cpudummy)
-      expect(cpudummy.registers.A).toBe(0x00)
+      bitwise.EOR(cpu)
+      expect(cpu.registers.A).toBe(0x00)
 
       // Resulting value: 0xff, expected status flag value:
       // Z: 1
       // N: 0
-      expect(cpudummy.registers.STATUS.Z).toBe(true)
-      expect(cpudummy.registers.STATUS.N).toBe(false)
+      expect(cpu.registers.STATUS.Z).toBe(true)
+      expect(cpu.registers.STATUS.N).toBe(false)
     })
   })
 
   describe('ASL', () => {
     it('should be able to shift value of a memory at specified address', () => {
-      const cpudummy = new CPU([0, 0x01, 0, 0])
-      cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
+      const cpu = new CPU([0, 0x01, 0, 0])
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
+      cpu.fetchAddress({ absoluteAddress: 0x0001 })
 
-      bitwise.ASL(cpudummy)
+      bitwise.ASL(cpu)
 
-      expect(cpudummy.ram[0x01]).toBe(0x01 << 1)
+      expect(cpu.ram[0x01]).toBe(0x01 << 1)
     })
 
     it('should be able to shift value of register A in-place', () => {
-      const cpudummy = new CPU([0, 0x00, 0, 0])
-      cpudummy.registers.A = 0x01
-      cpudummy.fetchAddress({ value: cpudummy.registers.A })
+      const cpu = new CPU([0, 0x00, 0, 0])
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
+      cpu.registers.A = 0x01
+      cpu.fetchAddress({ value: cpu.registers.A })
 
-      bitwise.ASL(cpudummy)
+      bitwise.ASL(cpu)
 
-      expect(cpudummy.registers.A).toBe(0x01 << 1)
+      expect(cpu.registers.A).toBe(0x01 << 1)
     })
 
     it('should toggle C flag', () => {
-      const cpudummy = new CPU([0, 0x00, 0, 0])
-      cpudummy.registers.A = 0xff
-      cpudummy.fetchAddress({ value: cpudummy.registers.A })
+      const cpu = new CPU([0, 0x00, 0, 0])
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
+      cpu.registers.A = 0xff
+      cpu.fetchAddress({ value: cpu.registers.A })
 
-      bitwise.ASL(cpudummy)
+      bitwise.ASL(cpu)
 
-      expect(cpudummy.registers.A).toBe((0xff << 1) & 0xff)
-      expect(cpudummy.registers.STATUS.C).toBe(true)
+      expect(cpu.registers.A).toBe((0xff << 1) & 0xff)
+      expect(cpu.registers.STATUS.C).toBe(true)
     })
 
     it('should toggle Z flag', () => {
-      const cpudummy = new CPU([0, 0x00, 0, 0])
-      cpudummy.registers.A = 0b10000000
-      cpudummy.fetchAddress({ value: cpudummy.registers.A })
+      const cpu = new CPU([0, 0x00, 0, 0])
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
+      cpu.registers.A = 0b10000000
+      cpu.fetchAddress({ value: cpu.registers.A })
 
-      bitwise.ASL(cpudummy)
+      bitwise.ASL(cpu)
 
-      expect(cpudummy.registers.A).toBe(0)
-      expect(cpudummy.registers.STATUS.Z).toBe(true)
+      expect(cpu.registers.A).toBe(0)
+      expect(cpu.registers.STATUS.Z).toBe(true)
     })
 
     it('should toggle N flag', () => {
-      const cpudummy = new CPU([0, 0x00, 0, 0])
-      cpudummy.registers.A = 0x79
-      cpudummy.fetchAddress({ value: cpudummy.registers.A })
+      const cpu = new CPU([0, 0x00, 0, 0])
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
+      cpu.registers.A = 0x79
+      cpu.fetchAddress({ value: cpu.registers.A })
 
-      bitwise.ASL(cpudummy)
+      bitwise.ASL(cpu)
 
-      expect(cpudummy.registers.A).toBe(0x79 << 1)
-      expect(cpudummy.registers.STATUS.N).toBe(true)
+      expect(cpu.registers.A).toBe(0x79 << 1)
+      expect(cpu.registers.STATUS.N).toBe(true)
     })
   })
 
   describe('BIT', () => {
     it('should toggle Z flags if specify value ANDed with accumulator resulting in zero', () => {
-      const cpudummy = new CPU([0, 0x00, 0, 0])
-      cpudummy.registers.A = 0x79
-      cpudummy.fetchAddress({ absoluteAddress: 0x01 })
+      const cpu = new CPU([0, 0x00, 0, 0])
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
+      cpu.registers.A = 0x79
+      cpu.fetchAddress({ absoluteAddress: 0x01 })
 
-      bitwise.BIT(cpudummy)
-      expect(cpudummy.registers.STATUS.Z).toBe(true)
+      bitwise.BIT(cpu)
+      expect(cpu.registers.STATUS.Z).toBe(true)
     })
 
     it('should copy bit 7 and 6 of specified value into N and V flags', () => {
-      const cpudummy = new CPU([0, 0b11000000, 0, 0])
-      cpudummy.registers.A = 0b00000000
-      cpudummy.fetchAddress({ absoluteAddress: 0x01 })
+      const cpu = new CPU([0, 0b11000000, 0, 0])
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
+      cpu.registers.A = 0b00000000
+      cpu.fetchAddress({ absoluteAddress: 0x01 })
 
-      bitwise.BIT(cpudummy)
-      expect(cpudummy.registers.STATUS.N).toBe(true)
-      expect(cpudummy.registers.STATUS.V).toBe(true)
+      bitwise.BIT(cpu)
+      expect(cpu.registers.STATUS.N).toBe(true)
+      expect(cpu.registers.STATUS.V).toBe(true)
     })
   })
 
@@ -184,6 +288,14 @@ describe('instructions: bitwise operators', () => {
 
     beforeEach(() => {
       cpu = new CPU([0, 0, 0, 0])
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
     })
 
     it('should shift accumulator value to right', () => {
@@ -234,6 +346,14 @@ describe('instructions: bitwise operators', () => {
 
     beforeEach(() => {
       cpu = new CPU([0, 0, 0, 0])
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
     })
 
     it('should rotate accumulator value to left', () => {
@@ -281,6 +401,14 @@ describe('instructions: bitwise operators', () => {
 
     beforeEach(() => {
       cpu = new CPU([0, 0, 0, 0])
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
     })
 
     it('should rotate accumulator value to left', () => {

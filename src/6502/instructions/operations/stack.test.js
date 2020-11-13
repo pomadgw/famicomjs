@@ -7,6 +7,14 @@ describe('instructions: stack operations', () => {
   describe('PHA', () => {
     it('should put accumulator value to correct location', () => {
       const cpu = new CPU(generateArray(0x200))
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
       cpu.registers.A = 0xff
       cpu.fetch()
       const oldStackPointer = cpu.registers.SP
@@ -20,6 +28,14 @@ describe('instructions: stack operations', () => {
   describe('PLA', () => {
     it('should put accumulator value to correct location', () => {
       const cpu = new CPU(generateArray(0x200))
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
       cpu.fetch()
       const oldStackPointer = 0xfe
       cpu.ram[oldStackPointer + 0x100 + 1] = 0xff
@@ -32,6 +48,14 @@ describe('instructions: stack operations', () => {
 
     it('should set N flag correct', () => {
       const cpu = new CPU(generateArray(0x200))
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
       cpu.fetch()
       const oldStackPointer = 0xfd
       cpu.ram[oldStackPointer + 0x100 + 1] = 0xff
@@ -48,6 +72,14 @@ describe('instructions: stack operations', () => {
 
     it('should set Z flag correct', () => {
       const cpu = new CPU(generateArray(0x200))
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
       cpu.fetch()
       const oldStackPointer = 0xfc
       cpu.ram[oldStackPointer + 0x100 + 1] = 0x00
@@ -65,6 +97,14 @@ describe('instructions: stack operations', () => {
   describe('PHP', () => {
     it('should push status register value into stack and set correct flags appropriately', () => {
       const cpu = new CPU(generateArray(0x200))
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
       const status = 0b11000001
       cpu.registers.STATUS.status = status
       cpu.fetch()
@@ -81,6 +121,14 @@ describe('instructions: stack operations', () => {
   describe('PLP', () => {
     it('should pop into status register and set correct flags appropriately', () => {
       const cpu = new CPU(generateArray(0x200))
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
       cpu.fetch()
 
       const status = 0b11110001
@@ -98,6 +146,14 @@ describe('instructions: stack operations', () => {
   describe('TSX', () => {
     it('should transfer stack pointer register to register X', () => {
       const cpu = new CPU(generateArray(0x200))
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
       cpu.fetch()
 
       cpu.registers.SP = 0xff
@@ -107,6 +163,14 @@ describe('instructions: stack operations', () => {
 
     it('should toggle N flag correctly', () => {
       const cpu = new CPU(generateArray(0x200))
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
       cpu.fetch()
 
       cpu.registers.SP = 0xff
@@ -116,6 +180,14 @@ describe('instructions: stack operations', () => {
 
     it('should toggle Z flag correctly', () => {
       const cpu = new CPU(generateArray(0x200))
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
       cpu.fetch()
 
       cpu.registers.SP = 0x00
@@ -127,6 +199,14 @@ describe('instructions: stack operations', () => {
   describe('TXS', () => {
     it('should transfer register X to stack pointer register', () => {
       const cpu = new CPU(generateArray(0x200))
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
       cpu.fetch()
 
       cpu.registers.X = 0xe0

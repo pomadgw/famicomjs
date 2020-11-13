@@ -59,8 +59,8 @@ export default class CPU {
     this.registers.STATUS.U = true
 
     const startPCAddress = 0xfffc
-    const loPC = this.ram[startPCAddress]
-    const hiPC = this.ram[startPCAddress + 1]
+    const loPC = this.readRAM(startPCAddress)
+    const hiPC = this.readRAM(startPCAddress + 1)
     this.registers.PC = (hiPC << 8) | loPC
     this.debugCurrentOps.pc = this.registers.PC
 
@@ -84,8 +84,8 @@ export default class CPU {
 
     this.addresses.absoluteAddress = targetAddress
 
-    const loPC = this.ram[targetAddress]
-    const hiPC = this.ram[targetAddress + 1]
+    const loPC = this.readRAM(targetAddress)
+    const hiPC = this.readRAM(targetAddress + 1)
     this.registers.PC = (hiPC << 8) | loPC
 
     this.cycles = 7
@@ -148,8 +148,12 @@ export default class CPU {
 
   readRAM(address) {
     this.ram.isReadOnly = false
-    const data = this.ram[address]
+    const data = this.bus.cpuRead(address)
     return data
+  }
+
+  writeRAM(address, value) {
+    this.bus.cpuWrite(address, value)
   }
 
   fetch() {
@@ -163,13 +167,13 @@ export default class CPU {
   }
 
   pushStack(value) {
-    this.ram[this.registers.SP + 0x100] = value
+    this.writeRAM(this.registers.SP + 0x100, value)
     this.registers.SP--
   }
 
   popStack() {
     this.registers.SP++
-    const temp = this.ram[this.registers.SP + 0x100]
+    const temp = this.readRAM(this.registers.SP + 0x100)
 
     return temp
   }

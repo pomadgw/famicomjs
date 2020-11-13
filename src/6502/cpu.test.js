@@ -8,6 +8,14 @@ describe('CPU', () => {
   describe('when connected to bus', () => {
     it('should be able to connect to bus', () => {
       const cpu = new CPU(a6502`BRK`)
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
       const bus = new Bus(cpu)
 
       expect(cpu.bus).toBe(bus)
@@ -19,6 +27,14 @@ describe('CPU', () => {
 
     beforeAll(() => {
       cpu = new CPU(a6502`BRK`)
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
       cpu.registers.A = 0x10
       cpu.registers.X = 0x10
       cpu.registers.Y = 0x10
@@ -53,6 +69,14 @@ describe('CPU', () => {
 
     beforeEach(() => {
       cpu = new CPU(a6502`BRK`)
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
       cpu.ram[0xfffa] = 0x34
       cpu.ram[0xfffb] = 0x12
       cpu.ram[0xfffc] = 0x34
@@ -110,7 +134,23 @@ describe('CPU', () => {
     // LDA $F0
     // operator: LDA, addressing mode: zero page
     // const cpu = new CPU([...new Array(0x2000)].map((_) => 0))
+    // cpu.bus = {
+    //   cpuRead(addr) {
+    //     return cpu.ram[addr]
+    //   },
+    //   cpuWrite(addr, value) {
+    //     cpu.ram[addr] = value
+    //   }
+    // }
     const cpu = new CPU(a6502`LDA $F0`)
+    cpu.bus = {
+      cpuRead(addr) {
+        return cpu.ram[addr]
+      },
+      cpuWrite(addr, value) {
+        cpu.ram[addr] = value
+      }
+    }
     // cpu.ram[0x00] = 0xa5
     // cpu.ram[0x01] = 0xf0
     cpu.ram[0xf0] = 0x79
@@ -124,6 +164,14 @@ describe('CPU', () => {
     // LDA $F0,X
     // operator: LDA, addressing mode: zero page, X
     const cpu = new CPU(a6502`LDA $F0,X`)
+    cpu.bus = {
+      cpuRead(addr) {
+        return cpu.ram[addr]
+      },
+      cpuWrite(addr, value) {
+        cpu.ram[addr] = value
+      }
+    }
 
     cpu.ram[0xf1] = 0x79
     cpu.registers.X = 0x01
@@ -137,6 +185,14 @@ describe('CPU', () => {
     // LDX $F0,Y
     // operator: LDX, addressing mode: zero page, Y
     const cpu = new CPU(a6502`LDX $F0,Y`)
+    cpu.bus = {
+      cpuRead(addr) {
+        return cpu.ram[addr]
+      },
+      cpuWrite(addr, value) {
+        cpu.ram[addr] = value
+      }
+    }
 
     cpu.ram[0xf1] = 0x79
     cpu.registers.Y = 0x01
@@ -150,6 +206,14 @@ describe('CPU', () => {
     // LDA $1000
     // operator: LDA, addressing mode: absolute
     const cpu = new CPU(a6502`LDA $1000`)
+    cpu.bus = {
+      cpuRead(addr) {
+        return cpu.ram[addr]
+      },
+      cpuWrite(addr, value) {
+        cpu.ram[addr] = value
+      }
+    }
     cpu.ram[0x1000] = 0x05
 
     cpu.clock()
@@ -161,6 +225,14 @@ describe('CPU', () => {
     // LDA $1000,X
     // operator: LDA, addressing mode: absolute, X
     const cpu = new CPU(a6502`LDA $1000,X`)
+    cpu.bus = {
+      cpuRead(addr) {
+        return cpu.ram[addr]
+      },
+      cpuWrite(addr, value) {
+        cpu.ram[addr] = value
+      }
+    }
     cpu.ram[0x1001] = 0x05
     cpu.registers.X = 0x01
 
@@ -173,6 +245,14 @@ describe('CPU', () => {
     // LDA $1000,Y
     // operator: LDA, addressing mode: absolute, Y
     const cpu = new CPU(a6502`LDA $1000,Y`)
+    cpu.bus = {
+      cpuRead(addr) {
+        return cpu.ram[addr]
+      },
+      cpuWrite(addr, value) {
+        cpu.ram[addr] = value
+      }
+    }
     cpu.ram[0x1001] = 0x05
     cpu.registers.Y = 0x01
 
@@ -185,6 +265,14 @@ describe('CPU', () => {
     // LDA #$FF
     // operator: LDA, addressing mode: immediate
     const cpu = new CPU(a6502`LDA #$FF`)
+    cpu.bus = {
+      cpuRead(addr) {
+        return cpu.ram[addr]
+      },
+      cpuWrite(addr, value) {
+        cpu.ram[addr] = value
+      }
+    }
 
     cpu.clock()
 
@@ -195,6 +283,14 @@ describe('CPU', () => {
     // LDA ($B0,X)
     // operator: LDA, addressing mode: indexed indirect (IZX)
     const cpu = new CPU(a6502`LDA ($B0,X)`)
+    cpu.bus = {
+      cpuRead(addr) {
+        return cpu.ram[addr]
+      },
+      cpuWrite(addr, value) {
+        cpu.ram[addr] = value
+      }
+    }
 
     cpu.ram[0xb2] = 0x00
     cpu.ram[0xb3] = 0x10
@@ -211,6 +307,14 @@ describe('CPU', () => {
     // LDA ($B1),Y
     // operator: LDA, addressing mode: indirect indexed (IZY)
     const cpu = new CPU(a6502`LDA ($B1),Y`)
+    cpu.bus = {
+      cpuRead(addr) {
+        return cpu.ram[addr]
+      },
+      cpuWrite(addr, value) {
+        cpu.ram[addr] = value
+      }
+    }
 
     cpu.ram[0xb1] = 0x00
     cpu.ram[0xb2] = 0x10
@@ -227,6 +331,14 @@ describe('CPU', () => {
     // JMP ($1234)
     // operator: JMP, addressing mode: indirect
     const cpu = new CPU(a6502`JMP ($1234)`)
+    cpu.bus = {
+      cpuRead(addr) {
+        return cpu.ram[addr]
+      },
+      cpuWrite(addr, value) {
+        cpu.ram[addr] = value
+      }
+    }
 
     cpu.ram[0x1234] = 0x00
     cpu.ram[0x1235] = 0x10

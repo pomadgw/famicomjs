@@ -3,216 +3,232 @@ import CPU from '../../cpu'
 
 describe('instructions: arithmatic operators', () => {
   describe('ADC', () => {
-    let cpudummy
+    let cpu
     let ram
 
     beforeEach(() => {
       ram = [0, 0, 0, 0]
-      cpudummy = new CPU(ram)
+      cpu = new CPU(ram)
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
 
-      cpudummy.registers.A = 0x10
+      cpu.registers.A = 0x10
     })
 
     it('should be able to add to accumulator', () => {
-      cpudummy.ram[1] = 0x10
-      cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
-      cpudummy.registers.STATUS.C = false
+      cpu.ram[1] = 0x10
+      cpu.fetchAddress({ absoluteAddress: 0x0001 })
+      cpu.registers.STATUS.C = false
 
-      arithmatic.ADC(cpudummy)
+      arithmatic.ADC(cpu)
 
-      expect(cpudummy.registers.A).toBe(0x20)
+      expect(cpu.registers.A).toBe(0x20)
     })
 
     it('should be able to add to accumulator with carry', () => {
-      cpudummy.ram[1] = 0x10
-      cpudummy.registers.STATUS.C = true
-      cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
+      cpu.ram[1] = 0x10
+      cpu.registers.STATUS.C = true
+      cpu.fetchAddress({ absoluteAddress: 0x0001 })
 
-      arithmatic.ADC(cpudummy)
+      arithmatic.ADC(cpu)
 
-      expect(cpudummy.registers.A).toBe(0x21)
+      expect(cpu.registers.A).toBe(0x21)
     })
 
     it('should be able to set carry flag if it is overflow', () => {
-      cpudummy.ram[1] = 0xff
-      cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
-      cpudummy.registers.STATUS.C = false
+      cpu.ram[1] = 0xff
+      cpu.fetchAddress({ absoluteAddress: 0x0001 })
+      cpu.registers.STATUS.C = false
 
-      arithmatic.ADC(cpudummy)
+      arithmatic.ADC(cpu)
 
-      expect(cpudummy.registers.A).toBe(0x0f)
-      expect(cpudummy.registers.STATUS.C).toBe(true)
+      expect(cpu.registers.A).toBe(0x0f)
+      expect(cpu.registers.STATUS.C).toBe(true)
     })
 
     it('should be able to set negative flag if high bit is 1', () => {
-      cpudummy.ram[1] = 0x71
-      cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
-      cpudummy.registers.STATUS.C = false
+      cpu.ram[1] = 0x71
+      cpu.fetchAddress({ absoluteAddress: 0x0001 })
+      cpu.registers.STATUS.C = false
 
-      arithmatic.ADC(cpudummy)
+      arithmatic.ADC(cpu)
 
-      expect(cpudummy.registers.A).toBe(0x81)
-      expect(cpudummy.registers.STATUS.N).toBe(true)
+      expect(cpu.registers.A).toBe(0x81)
+      expect(cpu.registers.STATUS.N).toBe(true)
     })
 
     it('should be able to set zero flag if result is zero', () => {
-      cpudummy.ram[1] = 0xf0
-      cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
+      cpu.ram[1] = 0xf0
+      cpu.fetchAddress({ absoluteAddress: 0x0001 })
 
-      arithmatic.ADC(cpudummy)
+      arithmatic.ADC(cpu)
 
-      expect(cpudummy.registers.A).toBe(0x00)
-      expect(cpudummy.registers.STATUS.Z).toBe(true)
+      expect(cpu.registers.A).toBe(0x00)
+      expect(cpu.registers.STATUS.Z).toBe(true)
     })
 
     describe('trigger overflow flag', () => {
       it('should be able to set overflow if pos + pos is neg', () => {
-        cpudummy.ram[1] = 0x70
-        cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
+        cpu.ram[1] = 0x70
+        cpu.fetchAddress({ absoluteAddress: 0x0001 })
 
-        arithmatic.ADC(cpudummy)
+        arithmatic.ADC(cpu)
 
-        expect(cpudummy.registers.STATUS.V).toBe(true)
+        expect(cpu.registers.STATUS.V).toBe(true)
       })
 
       it('should be able to set overflow if neg + neg is pos', () => {
-        cpudummy.registers.A = 0xd0
-        cpudummy.ram[1] = 0x90
-        cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
+        cpu.registers.A = 0xd0
+        cpu.ram[1] = 0x90
+        cpu.fetchAddress({ absoluteAddress: 0x0001 })
 
-        arithmatic.ADC(cpudummy)
+        arithmatic.ADC(cpu)
 
-        expect(cpudummy.registers.STATUS.V).toBe(true)
+        expect(cpu.registers.STATUS.V).toBe(true)
       })
 
       it('should not set overflow if pos + pos is pos', () => {
-        cpudummy.ram[1] = 0x10
-        cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
+        cpu.ram[1] = 0x10
+        cpu.fetchAddress({ absoluteAddress: 0x0001 })
 
-        arithmatic.ADC(cpudummy)
+        arithmatic.ADC(cpu)
 
-        expect(cpudummy.registers.STATUS.V).toBe(false)
+        expect(cpu.registers.STATUS.V).toBe(false)
       })
 
       it('should not set overflow if neg + neg is neg', () => {
-        cpudummy.registers.A = 0xd0
-        cpudummy.ram[1] = 0xd0
-        cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
+        cpu.registers.A = 0xd0
+        cpu.ram[1] = 0xd0
+        cpu.fetchAddress({ absoluteAddress: 0x0001 })
 
-        arithmatic.ADC(cpudummy)
+        arithmatic.ADC(cpu)
 
-        expect(cpudummy.registers.STATUS.V).toBe(false)
+        expect(cpu.registers.STATUS.V).toBe(false)
       })
     })
   })
 
   describe('SBC', () => {
-    let cpudummy
+    let cpu
     let ram
 
     beforeEach(() => {
       ram = [0, 0, 0, 0]
-      cpudummy = new CPU(ram)
+      cpu = new CPU(ram)
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
 
-      cpudummy.registers.A = 0x10
+      cpu.registers.A = 0x10
     })
 
     it('should be able to add to accumulator', () => {
-      cpudummy.ram[1] = 0x10
-      cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
-      cpudummy.registers.STATUS.C = true
+      cpu.ram[1] = 0x10
+      cpu.fetchAddress({ absoluteAddress: 0x0001 })
+      cpu.registers.STATUS.C = true
 
-      arithmatic.SBC(cpudummy)
+      arithmatic.SBC(cpu)
 
-      expect(cpudummy.registers.A).toBe(0)
+      expect(cpu.registers.A).toBe(0)
     })
 
     it('should be able to add to accumulator with carry flag off', () => {
-      cpudummy.registers.A = 0x10
-      cpudummy.ram[1] = 0x10
-      cpudummy.registers.STATUS.C = false
-      cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
+      cpu.registers.A = 0x10
+      cpu.ram[1] = 0x10
+      cpu.registers.STATUS.C = false
+      cpu.fetchAddress({ absoluteAddress: 0x0001 })
 
-      arithmatic.SBC(cpudummy)
+      arithmatic.SBC(cpu)
 
-      expect(cpudummy.registers.A).toBe(0xff)
+      expect(cpu.registers.A).toBe(0xff)
     })
 
     it('should be able to set carry flag', () => {
-      cpudummy.registers.A = 0x07
-      cpudummy.ram[1] = -2
-      cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
-      cpudummy.registers.STATUS.C = true
+      cpu.registers.A = 0x07
+      cpu.ram[1] = -2
+      cpu.fetchAddress({ absoluteAddress: 0x0001 })
+      cpu.registers.STATUS.C = true
 
-      arithmatic.SBC(cpudummy)
+      arithmatic.SBC(cpu)
 
-      expect(cpudummy.registers.A).toBe(0x09)
-      expect(cpudummy.registers.STATUS.C).toBe(false)
+      expect(cpu.registers.A).toBe(0x09)
+      expect(cpu.registers.STATUS.C).toBe(false)
     })
 
     it('should be able to set negative flag if high bit is 1', () => {
-      cpudummy.registers.A = 0x07
-      cpudummy.ram[1] = 0x09
-      cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
-      cpudummy.registers.STATUS.C = true
+      cpu.registers.A = 0x07
+      cpu.ram[1] = 0x09
+      cpu.fetchAddress({ absoluteAddress: 0x0001 })
+      cpu.registers.STATUS.C = true
 
-      arithmatic.SBC(cpudummy)
+      arithmatic.SBC(cpu)
 
-      expect(cpudummy.registers.A).toBe(0xfe)
-      expect(cpudummy.registers.STATUS.N).toBe(true)
+      expect(cpu.registers.A).toBe(0xfe)
+      expect(cpu.registers.STATUS.N).toBe(true)
     })
 
     it('should be able to set zero flag if result is zero', () => {
-      cpudummy.registers.A = 0x01
-      cpudummy.ram[1] = 0x01
-      cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
-      cpudummy.registers.STATUS.C = true
+      cpu.registers.A = 0x01
+      cpu.ram[1] = 0x01
+      cpu.fetchAddress({ absoluteAddress: 0x0001 })
+      cpu.registers.STATUS.C = true
 
-      arithmatic.SBC(cpudummy)
+      arithmatic.SBC(cpu)
 
-      expect(cpudummy.registers.A).toBe(0x00)
-      expect(cpudummy.registers.STATUS.Z).toBe(true)
+      expect(cpu.registers.A).toBe(0x00)
+      expect(cpu.registers.STATUS.Z).toBe(true)
     })
 
     describe('trigger overflow flag', () => {
       it('should be able to set overflow 1', () => {
-        cpudummy.registers.A = 0x81
-        cpudummy.ram[1] = 0x07
-        cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
+        cpu.registers.A = 0x81
+        cpu.ram[1] = 0x07
+        cpu.fetchAddress({ absoluteAddress: 0x0001 })
 
-        arithmatic.SBC(cpudummy)
+        arithmatic.SBC(cpu)
 
-        expect(cpudummy.registers.STATUS.V).toBe(true)
+        expect(cpu.registers.STATUS.V).toBe(true)
       })
 
       it('should be able to set overflow 2', () => {
-        cpudummy.registers.A = 0x10
-        cpudummy.ram[1] = 0x80
-        cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
+        cpu.registers.A = 0x10
+        cpu.ram[1] = 0x80
+        cpu.fetchAddress({ absoluteAddress: 0x0001 })
 
-        arithmatic.SBC(cpudummy)
+        arithmatic.SBC(cpu)
 
-        expect(cpudummy.registers.STATUS.V).toBe(true)
+        expect(cpu.registers.STATUS.V).toBe(true)
       })
 
       it('should not set overflow 1', () => {
-        cpudummy.registers.A = 0x07
-        cpudummy.ram[1] = 0x02
-        cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
+        cpu.registers.A = 0x07
+        cpu.ram[1] = 0x02
+        cpu.fetchAddress({ absoluteAddress: 0x0001 })
 
-        arithmatic.SBC(cpudummy)
+        arithmatic.SBC(cpu)
 
-        expect(cpudummy.registers.STATUS.V).toBe(false)
+        expect(cpu.registers.STATUS.V).toBe(false)
       })
 
       it('should not set overflow 2', () => {
-        cpudummy.registers.A = 0x10
-        cpudummy.ram[1] = 0x91
-        cpudummy.fetchAddress({ absoluteAddress: 0x0001 })
+        cpu.registers.A = 0x10
+        cpu.ram[1] = 0x91
+        cpu.fetchAddress({ absoluteAddress: 0x0001 })
 
-        arithmatic.SBC(cpudummy)
+        arithmatic.SBC(cpu)
 
-        expect(cpudummy.registers.STATUS.V).toBe(false)
+        expect(cpu.registers.STATUS.V).toBe(false)
       })
     })
   })
@@ -224,6 +240,14 @@ describe('instructions: arithmatic operators', () => {
       let cpu
       beforeEach(() => {
         cpu = new CPU([0, 0, 0])
+        cpu.bus = {
+          cpuRead(addr) {
+            return cpu.ram[addr]
+          },
+          cpuWrite(addr, value) {
+            cpu.ram[addr] = value
+          }
+        }
       })
 
       it(`should decrease value of ${targetRegister} register by one`, () => {
@@ -261,6 +285,14 @@ describe('instructions: arithmatic operators', () => {
     let cpu
     beforeEach(() => {
       cpu = new CPU([0, 0x01, 0])
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
     })
 
     it(`should decrease value of a memory by one`, () => {
@@ -301,6 +333,14 @@ describe('instructions: arithmatic operators', () => {
       let cpu
       beforeEach(() => {
         cpu = new CPU([0, 0, 0])
+        cpu.bus = {
+          cpuRead(addr) {
+            return cpu.ram[addr]
+          },
+          cpuWrite(addr, value) {
+            cpu.ram[addr] = value
+          }
+        }
       })
 
       it(`should decrease value of ${targetRegister} register by one`, () => {
@@ -338,6 +378,14 @@ describe('instructions: arithmatic operators', () => {
     let cpu
     beforeEach(() => {
       cpu = new CPU([0, 0x01, 0])
+      cpu.bus = {
+        cpuRead(addr) {
+          return cpu.ram[addr]
+        },
+        cpuWrite(addr, value) {
+          cpu.ram[addr] = value
+        }
+      }
     })
 
     it(`should decrease value of a memory by one`, () => {

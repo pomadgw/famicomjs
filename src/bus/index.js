@@ -78,6 +78,14 @@ export default class Bus {
     this.ram = proxyRAM
   }
 
+  cpuRead(address) {
+    return this.ram[address]
+  }
+
+  cpuWrite(address, value) {
+    this.ram[address] = value
+  }
+
   getRAMSnapshot() {
     const cpuRAM = new Uint8Array(0x10000)
     const oldFlagValue = this.ram.isReadOnly
