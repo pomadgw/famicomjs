@@ -4,13 +4,13 @@ export default function execute(cpu: CPU, opcode: u8): void {
   switch (opcode) {
     case 0x0:
       cpu.impMode()
-      cpu.XXX()
+      cpu.BRK()
       cpu.clocks += 7
       break
 
     case 0x1:
       cpu.izxMode()
-      cpu.XXX()
+      cpu.ORA()
       cpu.clocks += 6
       break
 
@@ -34,13 +34,13 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x5:
       cpu.zp0Mode()
-      cpu.XXX()
+      cpu.ORA()
       cpu.clocks += 3
       break
 
     case 0x6:
       cpu.zp0Mode()
-      cpu.XXX()
+      cpu.ASL()
       cpu.clocks += 5
       break
 
@@ -52,19 +52,19 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x8:
       cpu.impMode()
-      cpu.XXX()
+      cpu.PHP()
       cpu.clocks += 3
       break
 
     case 0x9:
       cpu.immMode()
-      cpu.XXX()
+      cpu.ORA()
       cpu.clocks += 2
       break
 
     case 0xa:
       cpu.impMode()
-      cpu.XXX()
+      cpu.ASL()
       cpu.clocks += 2
       break
 
@@ -82,13 +82,13 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0xd:
       cpu.absMode()
-      cpu.XXX()
+      cpu.ORA()
       cpu.clocks += 4
       break
 
     case 0xe:
       cpu.absMode()
-      cpu.XXX()
+      cpu.ASL()
       cpu.clocks += 6
       break
 
@@ -100,13 +100,13 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x10:
       cpu.relMode()
-      cpu.XXX()
+      cpu.BPL()
       cpu.clocks += 2
       break
 
     case 0x11:
       cpu.izyMode()
-      cpu.XXX()
+      cpu.ORA()
       cpu.clocks += 5
       break
 
@@ -130,13 +130,13 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x15:
       cpu.zpxMode()
-      cpu.XXX()
+      cpu.ORA()
       cpu.clocks += 4
       break
 
     case 0x16:
       cpu.zpxMode()
-      cpu.XXX()
+      cpu.ASL()
       cpu.clocks += 6
       break
 
@@ -154,7 +154,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x19:
       cpu.abyMode()
-      cpu.XXX()
+      cpu.ORA()
       cpu.clocks += 4
       break
 
@@ -178,13 +178,13 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x1d:
       cpu.abxMode()
-      cpu.XXX()
+      cpu.ORA()
       cpu.clocks += 4
       break
 
     case 0x1e:
       cpu.abxMode()
-      cpu.XXX()
+      cpu.ASL()
       cpu.clocks += 7
       break
 
@@ -196,13 +196,13 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x20:
       cpu.absMode()
-      cpu.XXX()
+      cpu.JSR()
       cpu.clocks += 6
       break
 
     case 0x21:
       cpu.izxMode()
-      cpu.XXX()
+      cpu.AND()
       cpu.clocks += 6
       break
 
@@ -220,19 +220,19 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x24:
       cpu.zp0Mode()
-      cpu.XXX()
+      cpu.BIT()
       cpu.clocks += 3
       break
 
     case 0x25:
       cpu.zp0Mode()
-      cpu.XXX()
+      cpu.AND()
       cpu.clocks += 3
       break
 
     case 0x26:
       cpu.zp0Mode()
-      cpu.XXX()
+      cpu.ROL()
       cpu.clocks += 5
       break
 
@@ -244,19 +244,19 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x28:
       cpu.impMode()
-      cpu.XXX()
+      cpu.PLP()
       cpu.clocks += 4
       break
 
     case 0x29:
       cpu.immMode()
-      cpu.XXX()
+      cpu.AND()
       cpu.clocks += 2
       break
 
     case 0x2a:
       cpu.impMode()
-      cpu.XXX()
+      cpu.ROL()
       cpu.clocks += 2
       break
 
@@ -268,19 +268,19 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x2c:
       cpu.absMode()
-      cpu.XXX()
+      cpu.BIT()
       cpu.clocks += 4
       break
 
     case 0x2d:
       cpu.absMode()
-      cpu.XXX()
+      cpu.AND()
       cpu.clocks += 4
       break
 
     case 0x2e:
       cpu.absMode()
-      cpu.XXX()
+      cpu.ROL()
       cpu.clocks += 6
       break
 
@@ -292,13 +292,13 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x30:
       cpu.relMode()
-      cpu.XXX()
+      cpu.BMI()
       cpu.clocks += 2
       break
 
     case 0x31:
       cpu.izyMode()
-      cpu.XXX()
+      cpu.AND()
       cpu.clocks += 5
       break
 
@@ -322,13 +322,13 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x35:
       cpu.zpxMode()
-      cpu.XXX()
+      cpu.AND()
       cpu.clocks += 4
       break
 
     case 0x36:
       cpu.zpxMode()
-      cpu.XXX()
+      cpu.ROL()
       cpu.clocks += 6
       break
 
@@ -346,7 +346,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x39:
       cpu.abyMode()
-      cpu.XXX()
+      cpu.AND()
       cpu.clocks += 4
       break
 
@@ -370,13 +370,13 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x3d:
       cpu.abxMode()
-      cpu.XXX()
+      cpu.AND()
       cpu.clocks += 4
       break
 
     case 0x3e:
       cpu.abxMode()
-      cpu.XXX()
+      cpu.ROL()
       cpu.clocks += 7
       break
 
@@ -388,13 +388,13 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x40:
       cpu.impMode()
-      cpu.XXX()
+      cpu.RTI()
       cpu.clocks += 6
       break
 
     case 0x41:
       cpu.izxMode()
-      cpu.XXX()
+      cpu.EOR()
       cpu.clocks += 6
       break
 
@@ -418,13 +418,13 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x45:
       cpu.zp0Mode()
-      cpu.XXX()
+      cpu.EOR()
       cpu.clocks += 3
       break
 
     case 0x46:
       cpu.zp0Mode()
-      cpu.XXX()
+      cpu.LSR()
       cpu.clocks += 5
       break
 
@@ -436,19 +436,19 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x48:
       cpu.impMode()
-      cpu.XXX()
+      cpu.PHA()
       cpu.clocks += 3
       break
 
     case 0x49:
       cpu.immMode()
-      cpu.XXX()
+      cpu.EOR()
       cpu.clocks += 2
       break
 
     case 0x4a:
       cpu.impMode()
-      cpu.XXX()
+      cpu.LSR()
       cpu.clocks += 2
       break
 
@@ -460,19 +460,19 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x4c:
       cpu.absMode()
-      cpu.XXX()
+      cpu.JMP()
       cpu.clocks += 3
       break
 
     case 0x4d:
       cpu.absMode()
-      cpu.XXX()
+      cpu.EOR()
       cpu.clocks += 4
       break
 
     case 0x4e:
       cpu.absMode()
-      cpu.XXX()
+      cpu.LSR()
       cpu.clocks += 6
       break
 
@@ -484,13 +484,13 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x50:
       cpu.relMode()
-      cpu.XXX()
+      cpu.BVC()
       cpu.clocks += 2
       break
 
     case 0x51:
       cpu.izyMode()
-      cpu.XXX()
+      cpu.EOR()
       cpu.clocks += 5
       break
 
@@ -514,13 +514,13 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x55:
       cpu.zpxMode()
-      cpu.XXX()
+      cpu.EOR()
       cpu.clocks += 4
       break
 
     case 0x56:
       cpu.zpxMode()
-      cpu.XXX()
+      cpu.LSR()
       cpu.clocks += 6
       break
 
@@ -538,7 +538,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x59:
       cpu.abyMode()
-      cpu.XXX()
+      cpu.EOR()
       cpu.clocks += 4
       break
 
@@ -562,13 +562,13 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x5d:
       cpu.abxMode()
-      cpu.XXX()
+      cpu.EOR()
       cpu.clocks += 4
       break
 
     case 0x5e:
       cpu.abxMode()
-      cpu.XXX()
+      cpu.LSR()
       cpu.clocks += 7
       break
 
@@ -580,7 +580,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x60:
       cpu.impMode()
-      cpu.XXX()
+      cpu.RTS()
       cpu.clocks += 6
       break
 
@@ -616,7 +616,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x66:
       cpu.zp0Mode()
-      cpu.XXX()
+      cpu.ROR()
       cpu.clocks += 5
       break
 
@@ -628,7 +628,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x68:
       cpu.impMode()
-      cpu.XXX()
+      cpu.PLA()
       cpu.clocks += 4
       break
 
@@ -640,7 +640,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x6a:
       cpu.impMode()
-      cpu.XXX()
+      cpu.ROR()
       cpu.clocks += 2
       break
 
@@ -652,7 +652,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x6c:
       cpu.indMode()
-      cpu.XXX()
+      cpu.JMP()
       cpu.clocks += 5
       break
 
@@ -664,7 +664,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x6e:
       cpu.absMode()
-      cpu.XXX()
+      cpu.ROR()
       cpu.clocks += 6
       break
 
@@ -676,7 +676,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x70:
       cpu.relMode()
-      cpu.XXX()
+      cpu.BVS()
       cpu.clocks += 2
       break
 
@@ -712,7 +712,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x76:
       cpu.zpxMode()
-      cpu.XXX()
+      cpu.ROR()
       cpu.clocks += 6
       break
 
@@ -760,7 +760,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x7e:
       cpu.abxMode()
-      cpu.XXX()
+      cpu.ROR()
       cpu.clocks += 7
       break
 
@@ -832,7 +832,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x8a:
       cpu.impMode()
-      cpu.XXX()
+      cpu.TXA()
       cpu.clocks += 2
       break
 
@@ -868,7 +868,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x90:
       cpu.relMode()
-      cpu.XXX()
+      cpu.BCC()
       cpu.clocks += 2
       break
 
@@ -916,7 +916,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x98:
       cpu.impMode()
-      cpu.XXX()
+      cpu.TYA()
       cpu.clocks += 2
       break
 
@@ -928,7 +928,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0x9a:
       cpu.impMode()
-      cpu.XXX()
+      cpu.TXS()
       cpu.clocks += 2
       break
 
@@ -1012,7 +1012,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0xa8:
       cpu.impMode()
-      cpu.XXX()
+      cpu.TAY()
       cpu.clocks += 2
       break
 
@@ -1024,7 +1024,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0xaa:
       cpu.impMode()
-      cpu.XXX()
+      cpu.TAX()
       cpu.clocks += 2
       break
 
@@ -1060,7 +1060,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0xb0:
       cpu.relMode()
-      cpu.XXX()
+      cpu.BCS()
       cpu.clocks += 2
       break
 
@@ -1120,7 +1120,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0xba:
       cpu.impMode()
-      cpu.XXX()
+      cpu.TSX()
       cpu.clocks += 2
       break
 
@@ -1156,13 +1156,13 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0xc0:
       cpu.immMode()
-      cpu.XXX()
+      cpu.CPY()
       cpu.clocks += 2
       break
 
     case 0xc1:
       cpu.izxMode()
-      cpu.XXX()
+      cpu.CMP()
       cpu.clocks += 6
       break
 
@@ -1180,13 +1180,13 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0xc4:
       cpu.zp0Mode()
-      cpu.XXX()
+      cpu.CPY()
       cpu.clocks += 3
       break
 
     case 0xc5:
       cpu.zp0Mode()
-      cpu.XXX()
+      cpu.CMP()
       cpu.clocks += 3
       break
 
@@ -1210,7 +1210,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0xc9:
       cpu.immMode()
-      cpu.XXX()
+      cpu.CMP()
       cpu.clocks += 2
       break
 
@@ -1228,13 +1228,13 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0xcc:
       cpu.absMode()
-      cpu.XXX()
+      cpu.CPY()
       cpu.clocks += 4
       break
 
     case 0xcd:
       cpu.absMode()
-      cpu.XXX()
+      cpu.CMP()
       cpu.clocks += 4
       break
 
@@ -1252,13 +1252,13 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0xd0:
       cpu.relMode()
-      cpu.XXX()
+      cpu.BNE()
       cpu.clocks += 2
       break
 
     case 0xd1:
       cpu.izyMode()
-      cpu.XXX()
+      cpu.CMP()
       cpu.clocks += 5
       break
 
@@ -1282,7 +1282,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0xd5:
       cpu.zpxMode()
-      cpu.XXX()
+      cpu.CMP()
       cpu.clocks += 4
       break
 
@@ -1306,13 +1306,13 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0xd9:
       cpu.abyMode()
-      cpu.XXX()
+      cpu.CMP()
       cpu.clocks += 4
       break
 
     case 0xda:
       cpu.impMode()
-      cpu.XXX()
+      cpu.NOP()
       cpu.clocks += 2
       break
 
@@ -1330,7 +1330,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0xdd:
       cpu.abxMode()
-      cpu.XXX()
+      cpu.CMP()
       cpu.clocks += 4
       break
 
@@ -1348,7 +1348,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0xe0:
       cpu.immMode()
-      cpu.XXX()
+      cpu.CPX()
       cpu.clocks += 2
       break
 
@@ -1372,7 +1372,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0xe4:
       cpu.zp0Mode()
-      cpu.XXX()
+      cpu.CPX()
       cpu.clocks += 3
       break
 
@@ -1408,7 +1408,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0xea:
       cpu.impMode()
-      cpu.XXX()
+      cpu.NOP()
       cpu.clocks += 2
       break
 
@@ -1420,7 +1420,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0xec:
       cpu.absMode()
-      cpu.XXX()
+      cpu.CPX()
       cpu.clocks += 4
       break
 
@@ -1444,7 +1444,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0xf0:
       cpu.relMode()
-      cpu.XXX()
+      cpu.BEQ()
       cpu.clocks += 2
       break
 
@@ -1504,7 +1504,7 @@ export default function execute(cpu: CPU, opcode: u8): void {
 
     case 0xfa:
       cpu.impMode()
-      cpu.XXX()
+      cpu.NOP()
       cpu.clocks += 2
       break
 

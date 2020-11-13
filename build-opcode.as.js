@@ -6,30 +6,13 @@ const fs = require('fs')
 const opcodes = require('./src/6502/instructions/opcodes.json')
 
 const implementedOpcodes = `
-CLC
-CLD
-CLI
-CLV
-SEC
-SED
-SEI
-LDA
-LDX
-LDY
-STA
-STX
-STY
-ADC
-SBC
-INC
-INX
-INY
-DEC
-DEX
-DEY
+ADC	AND	ASL	BCC	BCS	BEQ	BIT	BMI	BNE	BPL	BRK	BVC	BVS	CLC
+CLD	CLI	CLV	CMP	CPX	CPY	DEC	DEX	DEY	EOR	INC	INX	INY	JMP
+JSR	LDA	LDX	LDY	LSR	NOP	ORA	PHA	PHP	PLA	PLP	ROL	ROR	RTI
+RTS	SBC	SEC	SED	SEI	STA	STX	STY	TAX	TAY	TSX	TXA	TXS	TYA
 `
   .trim()
-  .split(/(\s|\n)/)
+  .split(/(\s|\n)+/)
 
 const bigString = `import CPU from './index'
 
