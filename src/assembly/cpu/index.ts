@@ -592,6 +592,42 @@ export default class CPU {
   }
   // #endregion
 
+  // #region Stacks
+  PHA(): void {
+    this.pushStack(this.A)
+  }
+
+  PLA(): void {
+    this.A = this.popStack()
+    this.setZN(this.A)
+  }
+
+  PHP(): void {
+    const statusToBePushed =
+      this.STATUS.status | (Flags.U as u8) | (Flags.B as u8)
+
+    this.STATUS.setStatus(Flags.U, false)
+    this.STATUS.setStatus(Flags.B, false)
+
+    this.pushStack(statusToBePushed)
+  }
+
+  PLP(): void {
+    const status = this.popStack()
+    this.STATUS.status = status
+    this.STATUS.setStatus(Flags.U, true)
+  }
+
+  TSX(): void {
+    this.X = this.SP
+    this.setZN(this.X)
+  }
+
+  TXS(): void {
+    this.SP = this.X
+  }
+  // #endregion
+
   // #region NOP
   NOP(): void {
     if ([0x1c, 0x3c, 0x5c, 0x7c, 0xdc, 0xfc].includes(this.opcode)) {
