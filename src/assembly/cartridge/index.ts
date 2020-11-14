@@ -1,12 +1,6 @@
 import Result from '../utils/result'
 import { Mapper, Mapper000 } from '../mappers'
-
-export enum MirrorMode {
-  HORIZONTAL,
-  VERTICAL,
-  ONESCREEN_LO,
-  ONESCREEN_HI
-}
+import { MirrorMode } from '../utils/mirror-mode'
 
 export default class Cartridge {
   public mapperId: u8
