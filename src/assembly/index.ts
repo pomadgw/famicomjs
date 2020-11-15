@@ -2,6 +2,7 @@
 import CPU from './cpu'
 import PPU from './ppu'
 import Bus from './bus'
+import { NES } from './bus'
 import Cartridge from './cartridge'
 import Bitfield from './utils/bitfield'
 import Controller from './controller'
@@ -15,7 +16,14 @@ export default function createBus(): Bus {
   cpu.connect(bus)
   bus.cpu = cpu
 
-  // const a = new Bitfield([], new Uint32Array(1))
+  return bus
+}
+
+export function createNES(): Bus {
+  const cpu = new CPU()
+  const ppu = new PPU()
+  const bus = new NES(cpu, ppu)
+  cpu.connect(bus)
 
   return bus
 }

@@ -20,22 +20,22 @@ export default class Bus {
     return this.ram[address]
   }
 
-  cpuWrite(address: u16, value: u8): void {
+  cpuWrite(address: u16, value: u8): bool {
     this.ram[address] = value
+    return true
   }
 }
 
 export class NES extends Bus {
-  public ppu: PPU
   public globalSystemClockNumber: u32
-  public cartridge: Cartridge
+  public cartridge: Cartridge | null
   public isReadOnly: bool
   public controllers: Controller[]
+  public ppu: PPU
 
   constructor(cpu: CPU, ppu: PPU) {
     super(0x2000)
 
-    this.setCPU(cpu)
     this.ppu = ppu
     this.globalSystemClockNumber = 0
     this.isReadOnly = false
@@ -43,6 +43,7 @@ export class NES extends Bus {
     this.controllers = [new Controller(), new Controller()]
 
     cpu.connect(this)
+    this.setCPU(cpu)
   }
 
   insertCartridge(cartridge: Cartridge): void {
@@ -55,7 +56,7 @@ export class NES extends Bus {
     if (!cartridge) return 0
 
     const checkFromCartridge = cartridge.cpuRead(address)
-    if (!checkFromCartridge.error) return checkFromCartridge.value
+    if (!checkFromCartridge.error) return checkFromCartridge.value as u8
     else if (address < 0x2000) return this.ram[address & 0x07ff]
     else if (address < 0x4000)
       return this.ppu.cpuRead(address & 0x0007, this.isReadOnly)
