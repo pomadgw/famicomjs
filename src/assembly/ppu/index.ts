@@ -179,10 +179,10 @@ export default class PPU {
   public fineX: u8
   private bgShifter: BgShifter
 
-  public bgNextTileId: u8 = 0
-  public bgNextTileAttrib: u8 = 0
-  public bgNextTileLsb: u8 = 0
-  public bgNextTileMsb: u8 = 0
+  public bgNextTileId: u8
+  public bgNextTileAttrib: u8
+  public bgNextTileLsb: u8
+  public bgNextTileMsb: u8
 
   constructor() {
     this.cartridge = null
@@ -244,6 +244,10 @@ export default class PPU {
     this.fineX = 0
 
     this.nmi = false
+    this.bgNextTileId = 0
+    this.bgNextTileAttrib = 0
+    this.bgNextTileLsb = 0
+    this.bgNextTileMsb = 0
 
     this.bgShifter = new BgShifter()
     this.bgShifter.setPPU(this)

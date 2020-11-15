@@ -1,6 +1,6 @@
 export class MappingResult {
-  public status: bool = false
-  public mappedAddress: u16 = 0
+  public status: bool
+  public mappedAddress: u16
 }
 
 export class Mapper {
