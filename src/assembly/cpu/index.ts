@@ -87,6 +87,36 @@ export default class CPU {
     return temp
   }
 
+  private interrupt(targetAddress: u16): void {
+    const PC = this.PC
+    this.pushStack(((PC >> 8) & 0xff) as u8)
+    this.pushStack((PC & 0xff) as u8)
+
+    this.STATUS.setStatus(Flags.B, false)
+    this.STATUS.setStatus(Flags.U, true)
+    this.STATUS.setStatus(Flags.I, true)
+
+    this.pushStack(this.STATUS.status)
+
+    this.absoluteAddress = targetAddress
+
+    const loPC = this.read(targetAddress) as u16
+    const hiPC = this.read(targetAddress + 1) as u16
+    this.PC = (hiPC << 8) | loPC
+
+    this.clocks = 7
+  }
+
+  irq(): void {
+    if (this.STATUS.getStatus(Flags.I)) {
+      this.interrupt(0xfffe)
+    }
+  }
+
+  nmi(): void {
+    this.interrupt(0xfffa)
+  }
+
   // #region ADDRESSING MODES
   absMode(): void {
     const lo = this.read(this.nextPC())

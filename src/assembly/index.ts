@@ -8,7 +8,7 @@ import Bitfield from './utils/bitfield'
 export { Bus, CPU, PPU, Cartridge, Bitfield }
 
 export default function createNES(): Bus {
-  const bus = new Bus()
+  const bus = new Bus(0x10000)
   const cpu = new CPU(bus)
   bus.cpu = cpu
 
