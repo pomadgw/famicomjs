@@ -64,29 +64,29 @@ describe.skip('PPU', () => {
       ppu.scanline = 241
       ppu.clock()
 
-      expect(ppu.statusReg.verticalBlank).toBe(1)
+      expect(ppu.statusReg.get('verticalBlank')).toBe(1)
     })
 
     it('should set vertical blank to 0 at cycle 1, scanline -1', () => {
-      ppu.statusReg.verticalBlank = 1
+      ppu.statusReg.set('verticalBlank', 1)
       ppu.cycle = 1
       ppu.scanline = -1
       ppu.clock()
 
-      expect(ppu.statusReg.verticalBlank).toBe(0)
+      expect(ppu.statusReg.get('verticalBlank')).toBe(0)
     })
 
     it('should set nmi at cycle 1, scanline 241 if nmi control is set', () => {
       ppu.cycle = 1
       ppu.scanline = 241
-      ppu.controlReg.enablenmi = 1
+      ppu.controlReg.set('enablenmi', 1)
       ppu.clock()
 
       expect(ppu.nmi).toBe(true)
 
       ppu.cycle = 1
       ppu.scanline = 241
-      ppu.controlReg.enablenmi = 0
+      ppu.controlReg.set('enablenmi', 0)
       ppu.nmi = false
       ppu.clock()
 
@@ -252,7 +252,7 @@ describe.skip('PPU', () => {
 
       const fetched = ppu.cpuRead(0x0002)
       expect(fetched & 0xe0).toBe(expected)
-      expect(ppu.statusReg.verticalBlank).toBe(0)
+      expect(ppu.statusReg.get('verticalBlank')).toBe(0)
       expect(ppu.addressLatch).toBe(0)
     })
   })
@@ -266,8 +266,8 @@ describe.skip('PPU', () => {
 
       it('should be able to set nametables', () => {
         ppu.cpuWrite(0x0000, 0x03)
-        expect(ppu.tramAddress.nametableX).toBe(0x1)
-        expect(ppu.tramAddress.nametableY).toBe(0x1)
+        expect(ppu.tramAddress.get('nametableX')).toBe(0x1)
+        expect(ppu.tramAddress.get('nametableY')).toBe(0x1)
       })
     })
 
@@ -285,12 +285,12 @@ describe.skip('PPU', () => {
       ppu.addressLatch = 0
       ppu.cpuWrite(0x0005, 0x17)
       expect(ppu.fineX).toBe(0x17 & 0x07)
-      expect(ppu.tramAddress.coarseX).toBe(0x17 >> 3)
-      // console.log(ppu.tramAddress.value)
+      expect(ppu.tramAddress.get('coarseX')).toBe(0x17 >> 3)
+      // console.log(ppu.tramAddress.get('value'))
       ppu.cpuWrite(0x0005, 0x17)
-      // console.log(ppu.tramAddress.value)
-      expect(ppu.tramAddress.fineY).toBe(0x17 & 0x07)
-      expect(ppu.tramAddress.coarseY).toBe(0x17 >> 3)
+      // console.log(ppu.tramAddress.get('value'))
+      expect(ppu.tramAddress.get('fineY')).toBe(0x17 & 0x07)
+      expect(ppu.tramAddress.get('coarseY')).toBe(0x17 >> 3)
     })
 
     it('should be able to write to ppu (increment mode = 0)', () => {
@@ -306,7 +306,7 @@ describe.skip('PPU', () => {
 
     it('should be able to write to ppu (increment mode = 1)', () => {
       jest.spyOn(ppu, 'ppuWrite')
-      ppu.controlReg.incrementMode = 1
+      ppu.controlReg.set('incrementMode', 1)
       ppu.cpuWrite(0x0006, 0x11)
       ppu.cpuWrite(0x0006, 0x10)
       expect(ppu.vramAddress.value).toBe(0x1110)

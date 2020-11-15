@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
+import Bitfield from '../utils/bitfield'
+import { BitfieldSize } from '../utils/bitfield'
 import Cartridge from '../cartridge'
 import { MirrorMode } from '../utils/mirror-mode'
 import Screen from '../utils/screen'
@@ -74,12 +76,107 @@ export const palScreen: RGB[] = [
   { r: 0, g: 0, b: 0 }
 ]
 
+class Pixel {
+  public pixel: u8
+  public palette: u8
+}
+
+class BgShifer {
+  private ppu: PPU | null
+
+  private patternLo: u8
+  private patternHi: u8
+  private attribLo: u8
+  private attribHi: u8
+
+  constructor() {
+    this.ppu = null
+
+    this.patternLo = 0
+    this.patternHi = 0
+
+    this.attribLo = 0
+    this.attribHi = 0
+  }
+
+  reset(): void {
+    this.patternLo = 0
+    this.patternHi = 0
+
+    this.attribLo = 0
+    this.attribHi = 0
+  }
+
+  setPPU(ppu: PPU): void {
+    this.ppu = ppu
+  }
+
+  loadBgShifter(): void {
+    if (this.ppu) {
+      this.patternLo = (this.patternLo & 0xff00) | this.ppu.bgNextTileLsb
+      this.patternHi = (this.patternHi & 0xff00) | this.ppu.bgNextTileMsb
+
+      this.attribLo =
+        (this.attribLo & 0xff00) |
+        ((this.ppu.bgNextTileAttrib & 0x01) > 0 ? 0xff : 0)
+      this.attribHi =
+        (this.attribHi & 0xff00) |
+        ((this.ppu.bgNextTileAttrib & 0x02) > 0 ? 0xff : 0)
+    }
+  }
+
+  updateShifter(): void {
+    if (this.ppu && this.ppu.maskReg.getAsBoolean('bRenderBg')) {
+      this.patternLo <<= 1
+      this.patternHi <<= 1
+
+      this.attribLo <<= 1
+      this.attribHi <<= 1
+    }
+  }
+
+  yieldBgPixel(): Pixel {
+    if (!this.ppu || !this.ppu.maskReg.getAsBoolean('bRenderBg')) {
+      return { pixel: 0, palette: 0 }
+    }
+
+    const bitmux: u16 = 0x8000 >> this.ppu.fineX
+    const p0Pixel = (this.patternLo & bitmux) > 0 ? 1 : 0
+    const p1Pixel = (this.patternHi & bitmux) > 0 ? 1 : 0
+    const bgPal0 = (this.attribLo & bitmux) > 0 ? 1 : 0
+    const bgPal1 = (this.attribHi & bitmux) > 0 ? 1 : 0
+
+    return { pixel: (p1Pixel << 1) | p0Pixel, palette: (bgPal1 << 1) | bgPal0 }
+  }
+}
+
 export default class PPU {
   public cartridge: Cartridge | null
   public screen: Screen
   public cycle: u32
   public scanline: u32
   public isFrameComplete: bool
+  public nmi: bool
+
+  private tableName: Uint8Array[]
+  private tablePattern: Uint8Array[]
+  private tablePalette: Uint8Array
+  public statusReg: Bitfield
+  public maskReg: Bitfield
+  public controlReg: Bitfield
+
+  private addressLatch: u8
+  private ppuDataBuffer: u8
+  private ppuAddress: u16
+  private vramAddress: Bitfield
+  private tramAddress: Bitfield
+  public fineX: u8
+  private bgShifer: BgShifer
+
+  public bgNextTileId: u8 = 0
+  public bgNextTileAttrib: u8 = 0
+  public bgNextTileLsb: u8 = 0
+  public bgNextTileMsb: u8 = 0
 
   constructor() {
     this.cartridge = null
@@ -87,6 +184,63 @@ export default class PPU {
     this.cycle = 0
     this.scanline = 0
     this.isFrameComplete = false
+
+    this.tableName = [new Uint8Array(1024), new Uint8Array(1024)]
+    this.tablePattern = [new Uint8Array(4096), new Uint8Array(4096)]
+    this.tablePalette = new Uint8Array(32)
+
+    this.statusReg = new Bitfield([
+      new BitfieldSize('_unused', 5),
+      new BitfieldSize('spriteOverflow', 1),
+      new BitfieldSize('spriteZeroHit', 1),
+      new BitfieldSize('verticalBlank', 1)
+    ])
+
+    this.maskReg = new Bitfield([
+      new BitfieldSize('grayscale', 1),
+      new BitfieldSize('renderBgLeft', 1),
+      new BitfieldSize('renderSpritesLeft', 1),
+      new BitfieldSize('renderBg', 1),
+      new BitfieldSize('renderSprites', 1),
+      new BitfieldSize('enhanceRed', 1),
+      new BitfieldSize('enhanceGreen', 1),
+      new BitfieldSize('enhanceBlue', 1)
+    ])
+
+    this.controlReg = new Bitfield([
+      new BitfieldSize('nametableX', 1),
+      new BitfieldSize('nametableY', 1),
+      new BitfieldSize('incrementMode', 1),
+      new BitfieldSize('patternSprite', 1),
+      new BitfieldSize('patternBg', 1),
+      new BitfieldSize('spriteSize', 1),
+      new BitfieldSize('slaveMode', 1),
+      new BitfieldSize('enablenmi', 1)
+    ])
+
+    this.addressLatch = 0x00
+    this.ppuDataBuffer = 0x00
+    this.ppuAddress = 0x0000
+
+    const loopyRegister = (): Bitfield =>
+      new Bitfield([
+        new BitfieldSize('coarseX', 5),
+        new BitfieldSize('coarseY', 5),
+        new BitfieldSize('nametableX', 1),
+        new BitfieldSize('nametableY', 1),
+        new BitfieldSize('fineY', 3),
+        new BitfieldSize('unused', 1)
+      ])
+
+    this.vramAddress = loopyRegister()
+    this.tramAddress = loopyRegister()
+
+    this.fineX = 0
+
+    this.nmi = false
+
+    this.bgShifer = new BgShifer()
+    this.bgShifer.setPPU(this)
   }
 
   insertCartridge(cart: Cartridge): void {
