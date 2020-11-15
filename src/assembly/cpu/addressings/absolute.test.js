@@ -1,8 +1,8 @@
-import createNES from '../../index'
+import createBus from '../../index'
 
 describe('6502 CPU (wasm): addressing mode: absolute', () => {
   it('should return correct value for absolute address', () => {
-    const bus = createNES()
+    const bus = createBus()
     bus.ram = new Uint8Array([0x00, 0x0f, 0])
     bus.cpu.absMode()
     expect(bus.cpu).toEqual(
@@ -11,7 +11,7 @@ describe('6502 CPU (wasm): addressing mode: absolute', () => {
   })
 
   it('should return correct value for indexed absolute address', () => {
-    const bus = createNES()
+    const bus = createBus()
     bus.ram = new Uint8Array([0x00, 0x0f, 0])
 
     bus.cpu.X = 0x01
@@ -29,7 +29,7 @@ describe('6502 CPU (wasm): addressing mode: absolute', () => {
   })
 
   it('should return additional clock for indexed absolute address if page is changed', () => {
-    const bus = createNES()
+    const bus = createBus()
     bus.ram = new Uint8Array([0xff, 0x0f, 0])
 
     bus.cpu.X = 0x01

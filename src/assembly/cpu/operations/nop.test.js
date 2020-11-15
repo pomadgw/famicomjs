@@ -1,7 +1,7 @@
-import createNES from '../../index'
+import createBus from '../../index'
 
 const CPU = (ram) => {
-  const bus = createNES()
+  const bus = createBus()
   bus.ram = ram
 
   return bus.cpu

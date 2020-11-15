@@ -1,4 +1,4 @@
-import createNES from '../../index'
+import createBus from '../../index'
 import { Flags } from '../flags'
 
 const generateArray = (len) => [...new Array(len)].map((_) => 0)
@@ -47,7 +47,7 @@ const definitions = [
 ]
 
 const CPU = (ram) => {
-  const bus = createNES()
+  const bus = createBus()
   bus.ram = ram
 
   return bus.cpu
