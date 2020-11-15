@@ -8,7 +8,7 @@ import Bitfield from './utils/bitfield'
 import Controller from './controller'
 import { Button } from './controller'
 
-export { Bus, CPU, PPU, Cartridge, Bitfield, Controller, Button }
+export { Bus, NES, CPU, PPU, Cartridge, Bitfield, Controller, Button }
 
 export default function createBus(): Bus {
   const cpu = new CPU()

@@ -1,14 +1,14 @@
 <script>
   import { onMount } from 'svelte'
-  import RAM from './RAM.svelte'
-  import Register from './Register.svelte'
-  import toHex from '../utils/tohex'
+  // import RAM from './RAM.svelte'
+  // import Register from './Register.svelte'
+  // import toHex from '../utils/tohex'
 
-  import disassember, { argParamsGenerator } from '../6502/disassembler'
-  import Cartridge from '../cartridge'
-  import Bus from '../bus'
-  import CPU from '../6502'
-  import PPU from '../ppu'
+  // import disassember, { argParamsGenerator } from '../6502/disassembler'
+  // import Cartridge from '../cartridge'
+  // import Bus from '../bus'
+  // import CPU from '../6502'
+  // import PPU from '../ppu'
 
   let nes
   let canvas
@@ -27,15 +27,17 @@
 
   let disassembled
 
-  nes = new Bus(new CPU(), new PPU(), { onRender: render })
+  const { NES, CPU, PPU, Cartridge } = window.NES
+
+  nes = new NES(new CPU(), new PPU(), { onRender: render })
 
   function toggleEmulation() {
     emulationMode = !emulationMode
   }
 
-  function disassembleRAM() {
-    disassembled = disassember(nes.getRAMSnapshot(), { binaryStart: 0 })
-  }
+  // function disassembleRAM() {
+  //   disassembled = disassember(nes.getRAMSnapshot(), { binaryStart: 0 })
+  // }
 
   async function readFile(event) {
     const file = event.target.files[0]
@@ -46,34 +48,37 @@
     nes.insertCartridge(cart)
     nes.reset()
 
-    offsetStart = nes.cpu.registers.PC
-    nesPC = nes.cpu.registers.PC
-    registers = nes.cpu.registers
+    // offsetStart = nes.cpu.registers.PC
+    // nesPC = nes.cpu.registers.PC
+    // registers = nes.cpu.registers
 
-    disassembleRAM()
+    // disassembleRAM()
     emulationMode = true
   }
 
   function resetNES() {
     nes.reset()
-    offsetStart = nes.cpu.registers.PC
-    nesPC = nes.cpu.registers.PC
-    registers = nes.cpu.registers
+    // offsetStart = nes.cpu.registers.PC
+    // nesPC = nes.cpu.registers.PC
+    // registers = nes.cpu.registers
   }
+
+  let imageData
 
   function stepNES() {
     do {
       nes.clock()
-    } while (!nes.cpu.isComplete)
+    } while (!nes.cpu.clocks === 0)
 
     do {
       nes.clock()
-    } while (nes.cpu.isComplete)
+    } while (nes.cpu.clocks === 0)
 
-    nesPC = nes.cpu.registers.PC
-    registers = nes.cpu.registers
+    // nesPC = nes.cpu.registers.PC
+    // registers = nes.cpu.registers
 
-    render(nes.ppu.getScreen().imageData)
+    imageData = new ImageData(nes.ppu.screen, nes.ppu.screen.width)
+    render(imageData)
   }
 
   function render(imageData) {
@@ -87,22 +92,22 @@
     }
   }
 
-  function drawTableName() {
-    selectedTable = nes.ppu.tableName[0]
-  }
+  // function drawTableName() {
+  //   selectedTable = nes.ppu.tableName[0]
+  // }
 
   function renderSingleFrame() {
-    do {
-      nes.clock()
-    } while (!nes.ppu.isFrameComplete)
+  //   do {
+  //     nes.clock()
+  //   } while (!nes.ppu.isFrameComplete)
 
-    do {
-      nes.clock()
-    } while (nes.cpu.isComplete)
-    nes.ppu.isFrameComplete = false
+  //   do {
+  //     nes.clock()
+  //   } while (nes.cpu.isComplete)
+  //   nes.ppu.isFrameComplete = false
 
-    nesPC = nes.cpu.registers.PC
-    registers = nes.cpu.registers
+  //   nesPC = nes.cpu.registers.PC
+  //   registers = nes.cpu.registers
   }
 
   function runEmulation(timestamp) {
@@ -125,42 +130,42 @@
     }
   }
 
-  function drawPalette() {
-    const pCtx = paletteCanvas.getContext('2d')
-    const pCtx2 = paletteCanvas2.getContext('2d')
-    // pCtx.imageSmoothingEnabled = false
-    // pCtx.mozImageSmoothingEnabled = false
-    // pCtx.webkitImageSmoothingEnabled = false
-    // pCtx.msImageSmoothingEnabled = false
-    // pCtx2.imageSmoothingEnabled = false
-    // pCtx2.mozImageSmoothingEnabled = false
-    // pCtx2.webkitImageSmoothingEnabled = false
-    // pCtx2.msImageSmoothingEnabled = false
+  // function drawPalette() {
+  //   const pCtx = paletteCanvas.getContext('2d')
+  //   const pCtx2 = paletteCanvas2.getContext('2d')
+  //   // pCtx.imageSmoothingEnabled = false
+  //   // pCtx.mozImageSmoothingEnabled = false
+  //   // pCtx.webkitImageSmoothingEnabled = false
+  //   // pCtx.msImageSmoothingEnabled = false
+  //   // pCtx2.imageSmoothingEnabled = false
+  //   // pCtx2.mozImageSmoothingEnabled = false
+  //   // pCtx2.webkitImageSmoothingEnabled = false
+  //   // pCtx2.msImageSmoothingEnabled = false
 
-    pCtx.putImageData(nes.ppu.getPatternTable(0, selectedPalette).imageData, 0, 0)
-    pCtx2.putImageData(nes.ppu.getPatternTable(1, selectedPalette).imageData, 0, 0)
-  }
+  //   pCtx.putImageData(nes.ppu.getPatternTable(0, selectedPalette).imageData, 0, 0)
+  //   pCtx2.putImageData(nes.ppu.getPatternTable(1, selectedPalette).imageData, 0, 0)
+  // }
 
-  function updateOffset({ detail: { value } }) {
-    offsetStart = value.offsetStart
-  }
+  // function updateOffset({ detail: { value } }) {
+  //   offsetStart = value.offsetStart
+  // }
 
   $: if (emulationMode) {
     requestAnimationFrame(runEmulation)
   }
 
-  $: if (selectedPalette > 7) {
-    selectedPalette = selectedPalette % 7
-  } else if (selectedPalette < 0) {
-    selectedPalette = 7
-  }
+  // $: if (selectedPalette > 7) {
+  //   selectedPalette = selectedPalette % 7
+  // } else if (selectedPalette < 0) {
+  //   selectedPalette = 7
+  // }
 
-  $: paletteColors = (() => {
-    if (!nes.cartridge) return []
-    const toRgb = ({ r, g, b }) => `#${toHex(r)}${toHex(g)}${toHex(b)}`
+  // $: paletteColors = (() => {
+  //   if (!nes.cartridge) return []
+  //   const toRgb = ({ r, g, b }) => `#${toHex(r)}${toHex(g)}${toHex(b)}`
 
-    return [...Array(8).keys()].map(i => toRgb(nes.ppu.getColorFromPaletteRAM(selectedPalette, i)))
-  })()
+  //   return [...Array(8).keys()].map(i => toRgb(nes.ppu.getColorFromPaletteRAM(selectedPalette, i)))
+  // })()
 
   onMount(() => {
     ctx = canvas.getContext('2d')
