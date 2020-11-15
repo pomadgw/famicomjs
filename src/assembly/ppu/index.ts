@@ -424,5 +424,49 @@ export default class PPU {
 
     return data
   }
-  ppuWrite(address: u16, value: u8): void {}
+
+  ppuWrite(addr: u16, value: u8): void {
+    const cartridge = this.cartridge // as Cartridge
+
+    if (cartridge) {
+      const cartridgeData = cartridge.ppuWrite(addr, value)
+
+      if (!cartridgeData.error) {
+        // TODO: implement this later
+      } else if (addr < 0x2000) {
+        this.tablePattern[(addr & 0x1000) >> 12][addr & 0x0fff] = value
+      } else if (addr < 0x3f00) {
+        addr = addr & 0x0fff
+        if (cartridge.mirrorMode === MirrorMode.VERTICAL) {
+          if (addr < 0x0400) {
+            this.tableName[0][addr & 0x03ff] = value
+          } else if (addr < 0x0800) {
+            this.tableName[1][addr & 0x03ff] = value
+          } else if (addr < 0x0c00) {
+            this.tableName[0][addr & 0x03ff] = value
+          } else {
+            this.tableName[1][addr & 0x03ff] = value
+          }
+        } else if (cartridge.mirrorMode === MirrorMode.HORIZONTAL) {
+          if (addr < 0x0400) {
+            this.tableName[0][addr & 0x03ff] = value
+          } else if (addr < 0x0800) {
+            this.tableName[0][addr & 0x03ff] = value
+          } else if (addr < 0x0c00) {
+            this.tableName[1][addr & 0x03ff] = value
+          } else {
+            this.tableName[1][addr & 0x03ff] = value
+          }
+        }
+      } else if (addr < 0x3fff) {
+        addr = addr & 0x001f
+
+        if (addr >= 0x0010 && addr % 4 === 0) {
+          addr = addr & 0x000f
+        }
+
+        this.tablePalette[addr] = value
+      }
+    }
+  }
 }
