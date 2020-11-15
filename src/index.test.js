@@ -2,7 +2,7 @@ import fs from 'fs'
 import { resolve } from 'path'
 import Cartridge from './cartridge'
 import Bus from './bus'
-import CPU from './6502'
+import CPU from './6502.new'
 import opcodes from './6502/instructions'
 import PPU from './ppu'
 
@@ -27,16 +27,15 @@ async function mockNES({
 }
 
 test('NES test', async () => {
-  const nes = new Bus(new CPU(), new PPU(), { onRender: () => {} })
+  const nes = new Bus(new CPU(), new PPU(), () => {})
   const cart = new Cartridge()
   const cartFile = await mockNES()
   await cart.parse(cartFile)
   nes.insertCartridge(cart)
   nes.reset()
 
-  nes.cpu.registers.PC = 0xc000
-  nes.cpu.debugCurrentOps.pc = 0xc000
-  nes.cpu.registers.STATUS.status = 0x24
+  nes.cpu.PC = 0xc000
+  nes.cpu.debugCurrentOpsPC = 0xc000
 
   const argsParam = argParamsGenerator(0xc000)
 
@@ -48,7 +47,7 @@ test('NES test', async () => {
   for (let i = 0; i < 3 * 30000; i++) {
     logValue = ''
     nes.clock()
-    const prevPC = nes.cpu.debugCurrentOps.pc
+    const prevPC = nes.cpu.debugCurrentOpsPC
     prevCycle = nes.cpu.debugCycles
 
     const disassembled = disassember(nes.cpu.debugCurrentOps, {
@@ -69,11 +68,11 @@ test('NES test', async () => {
       .join(' ')
       .padEnd(8, ' ')}`
     logValue += `  ${disassembledInstruction}`
-    logValue += `  A:${toHex(nes.cpu.registers.A)}`
-    logValue += ` X:${toHex(nes.cpu.registers.X)}`
-    logValue += ` Y:${toHex(nes.cpu.registers.Y)}`
-    logValue += ` P:${(+nes.cpu.registers.STATUS).toString(2).padStart(8, '0')}`
-    logValue += ` SP:${toHex(nes.cpu.registers.SP)}`
+    logValue += `  A:${toHex(nes.cpu.A)}`
+    logValue += ` X:${toHex(nes.cpu.X)}`
+    logValue += ` Y:${toHex(nes.cpu.Y)}`
+    logValue += ` P:${(+nes.cpu.STATUS).toString(2).padStart(8, '0')}`
+    logValue += ` SP:${toHex(nes.cpu.SP)}`
     logValue += ` PPU:${nes.ppu.scanline.toString().padStart(3, ' ')}`
     logValue += `,${(nes.ppu.cycle - 1).toString().padStart(3, ' ')}`
     logValue += ` CYC:${prevCycle}`
@@ -101,6 +100,6 @@ test('NES test', async () => {
 
   fs.writeFileSync(logTestFilename, logValue)
 
-  expect(nes.cpu.ram[0x0002]).toBe(0)
+  expect(nes.cpuRead(0x0002)).toBe(0)
   // expect(nes.cpu.ram[0x0003]).toBe(0) // for implementing undefined opcodes
 })
