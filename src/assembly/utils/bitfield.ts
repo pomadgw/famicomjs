@@ -1,23 +1,29 @@
-class BitfieldSize {
+export class BitfieldSize {
   public name: string
   public size: u8
 
-  constructor() {
-    this.size = 0
-    this.name = ''
+  constructor(name: string, size: u8) {
+    this.size = size
+    this.name = name
   }
 }
 
 class BitfieldSizeWihStartPos extends BitfieldSize {
   public startPos: u8
+
+  constructor(name: string, size: u8, startPos: u8) {
+    super(name, size)
+    this.startPos = startPos
+  }
 }
 
 export default class BitfieldTemplate {
   private _value: Uint32Array
   private _propsMap: Map<string, BitfieldSizeWihStartPos>
 
-  constructor(props: BitfieldSize[], value: Uint32Array) {
-    this._value = value
+  constructor(props: BitfieldSize[], value: u32 = 0) {
+    this._value = new Uint32Array(1)
+    this._value[0] = value
 
     this._propsMap = new Map<string, BitfieldSizeWihStartPos>()
 
@@ -25,11 +31,11 @@ export default class BitfieldTemplate {
     for (let idx = 0; idx < props.length; idx++) {
       const prop = props[idx]
       const startPos = pos as u8
-      const newProp: BitfieldSizeWihStartPos = {
-        name: prop.name,
-        size: prop.size,
+      const newProp: BitfieldSizeWihStartPos = new BitfieldSizeWihStartPos(
+        prop.name,
+        prop.size,
         startPos
-      }
+      )
 
       this._propsMap.set(prop.name, newProp)
       pos += prop.size

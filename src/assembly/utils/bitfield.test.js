@@ -29,7 +29,7 @@ describe('bitfield', () => {
           size: 5
         }
       ],
-      new Uint32Array([0])
+      0
     )
     expect(field.get('data')).toBe(0)
 
@@ -61,7 +61,7 @@ describe('bitfield', () => {
         { name: 'fineY', size: 3 },
         { name: 'unused', size: 1 }
       ],
-      new Uint32Array([0])
+      0
     )
 
     loopy.value = 0
@@ -83,7 +83,7 @@ describe('bitfield', () => {
           size: 4
         }
       ],
-      new Uint32Array([0])
+      0
     )
 
     expect(field.getAsBoolean('data')).toBe(false)
