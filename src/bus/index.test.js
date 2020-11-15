@@ -1,5 +1,5 @@
 import Bus from './index'
-import CPU from '../6502.new'
+import CPU from '../6502'
 import PPU from '../ppu'
 
 const createDummyCartridge = (

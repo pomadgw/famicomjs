@@ -2,7 +2,7 @@ import fs from 'fs'
 import { resolve } from 'path'
 import Cartridge from './cartridge'
 import Bus from './bus'
-import CPU from './6502.new'
+import CPU from './6502'
 import opcodes from './6502/instructions'
 import PPU from './ppu'
 

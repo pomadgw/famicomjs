@@ -1,6 +1,6 @@
 import cartridge from '../cartridge'
 import Controller from '../controllers'
-import CPU from '../6502.new'
+import CPU from '../6502'
 import PPU from '../ppu'
 
 type RenderFn = (imageData: ImageData) => void

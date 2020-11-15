@@ -7,7 +7,7 @@
   import disassember, { argParamsGenerator } from '../6502/disassembler'
   import Cartridge from '../cartridge'
   import Bus from '../bus'
-  import CPU from '../6502.new'
+  import CPU from '../6502'
   import PPU from '../ppu'
 
   let nes
