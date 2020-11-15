@@ -1,9 +1,9 @@
 import CPU from './cpu'
 import Bus from '../bus/index'
-import assemblerGenerator from './assembler/index'
+import asm from './assembler/index'
 
 describe('CPU', () => {
-  const a6502 = assemblerGenerator({ memorySize: 0x10000, PC: 0 })
+  const a6502 = ([str]) => asm(str)
 
   describe('when connected to bus', () => {
     it('should be able to connect to bus', () => {
