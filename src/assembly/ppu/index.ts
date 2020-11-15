@@ -128,7 +128,7 @@ class BgShifter {
 
   updateShifter(): void {
     const ppu = this.ppu
-    if (ppu && ppu.maskReg.getAsBoolean('bRenderBg')) {
+    if (ppu && ppu.maskReg.getAsBoolean('renderBg')) {
       this.patternLo <<= 1
       this.patternHi <<= 1
 
@@ -139,7 +139,7 @@ class BgShifter {
 
   yieldBgPixel(): Pixel {
     const ppu = this.ppu
-    if (!ppu || !ppu.maskReg.getAsBoolean('bRenderBg')) {
+    if (!ppu || !ppu.maskReg.getAsBoolean('renderBg')) {
       return { pixel: 0, palette: 0 }
     }
 

@@ -4,7 +4,7 @@ import { Flags } from './flags'
 import opcodes from './opcodes'
 
 export default class CPU {
-  private bus: Bus
+  private bus: Bus | null
   private isImplicitInvoked: boolean
   private opcode: u8
 
@@ -20,8 +20,8 @@ export default class CPU {
 
   public fetchedData: u8
 
-  constructor(bus: Bus) {
-    this.bus = bus
+  constructor() {
+    this.bus = null
     this.STATUS = new RegisterStatus(0)
 
     this.reset()
@@ -29,6 +29,10 @@ export default class CPU {
     this.absoluteAddress = 0
     this.relativeAddress = 0
     this.clocks = 0
+  }
+
+  connect(bus: Bus): void {
+    this.bus = bus
   }
 
   reset(): void {
@@ -44,11 +48,15 @@ export default class CPU {
   }
 
   read(address: u16): u8 {
-    return this.bus.cpuRead(address)
+    const bus = this.bus
+    if (!bus) return 0
+    return bus.cpuRead(address)
   }
 
   write(address: u16, value: u8): void {
-    this.bus.cpuWrite(address, value)
+    const bus = this.bus
+    if (!bus) return
+    bus.cpuWrite(address, value)
   }
 
   nextPC(): u16 {

@@ -10,8 +10,9 @@ import { Button } from './controller'
 export { Bus, CPU, PPU, Cartridge, Bitfield, Controller, Button }
 
 export default function createNES(): Bus {
+  const cpu = new CPU()
   const bus = new Bus(0x10000)
-  const cpu = new CPU(bus)
+  cpu.connect(bus)
   bus.cpu = cpu
 
   // const a = new Bitfield([], new Uint32Array(1))

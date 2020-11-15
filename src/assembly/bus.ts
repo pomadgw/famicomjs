@@ -12,6 +12,10 @@ export default class Bus {
     this.ram = new Uint8Array(size)
   }
 
+  setCPU(cpu: CPU): void {
+    this.cpu = cpu
+  }
+
   cpuRead(address: u16): u8 {
     return this.ram[address]
   }
@@ -31,12 +35,14 @@ export class NES extends Bus {
   constructor(cpu: CPU, ppu: PPU) {
     super(0x2000)
 
-    this.cpu = cpu
+    this.setCPU(cpu)
     this.ppu = ppu
     this.globalSystemClockNumber = 0
     this.isReadOnly = false
 
     this.controllers = [new Controller(), new Controller()]
+
+    cpu.connect(this)
   }
 
   insertCartridge(cartridge: Cartridge): void {
