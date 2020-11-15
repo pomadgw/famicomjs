@@ -81,7 +81,7 @@ class Pixel {
   public palette: u8
 }
 
-class BgShifer {
+class BgShifter {
   private ppu: PPU | null
 
   private patternLo: u8
@@ -171,7 +171,7 @@ export default class PPU {
   private vramAddress: Bitfield
   private tramAddress: Bitfield
   public fineX: u8
-  private bgShifer: BgShifer
+  private bgShifter: BgShifter
 
   public bgNextTileId: u8 = 0
   public bgNextTileAttrib: u8 = 0
@@ -239,23 +239,190 @@ export default class PPU {
 
     this.nmi = false
 
-    this.bgShifer = new BgShifer()
-    this.bgShifer.setPPU(this)
+    this.bgShifter = new BgShifter()
+    this.bgShifter.setPPU(this)
   }
 
   insertCartridge(cart: Cartridge): void {
     this.cartridge = cart
   }
 
+  reset(): void {
+    this.cycle = 0
+    this.scanline = 0
+    this.isFrameComplete = false
+
+    this.addressLatch = 0x00
+    this.ppuDataBuffer = 0x00
+    this.ppuAddress = 0x0000
+
+    this.statusReg.value = 0
+    this.controlReg.value = 0
+    this.maskReg.value = 0
+    this.vramAddress.value = 0
+    this.tramAddress.value = 0
+
+    this.bgShifter.reset()
+    this.fineX = 0
+
+    this.nmi = false
+
+    this.bgNextTileId = 0
+    this.bgNextTileAttrib = 0
+    this.bgNextTileLsb = 0
+    this.bgNextTileMsb = 0
+  }
+
+  private get incrementValue(): u8 {
+    return this.controlReg.get('incrementMode') === 1 ? 32 : 1
+  }
+
   clock(): void {}
 
-  cpuRead(address: u16): u8 {
-    return 0
-  }
-  cpuWrite(address: u16, value: u8): void {}
+  getColorFromPaletteRAM(palette: u8, pixel: u8): RGB {
+    const paletteId = this.ppuRead(0x3f00 + (palette << 2) + pixel)
 
-  ppuRead(address: u16): u8 {
-    return 0
+    return palScreen[paletteId]
+  }
+
+  cpuRead(address: u16, isReadOnly: bool): u8 {
+    let data: u8 = 0
+
+    switch (address) {
+      case 0x0000: // Control
+        break
+      case 0x0001: // Mask
+        break
+      case 0x0002: // Status
+        data =
+          ((this.statusReg.value & 0xe0) as u8) | (this.ppuDataBuffer & 0x1f)
+        if (!isReadOnly) {
+          this.statusReg.set('verticalBlank', 0)
+          this.addressLatch = 0
+        }
+        break
+      case 0x0003: // OAM Address
+        break
+      case 0x0004: // OAM Data
+        break
+      case 0x0005: // Scroll
+        break
+      case 0x0006: // PPU Address
+        break
+      case 0x0007: // PPU Data
+        data = this.ppuDataBuffer
+        this.ppuDataBuffer = this.ppuRead(this.vramAddress.value as u16)
+
+        if (this.vramAddress.value >= 0x3f00) {
+          data = this.ppuDataBuffer
+        }
+
+        if (!isReadOnly) this.vramAddress.value += this.incrementValue
+        break
+      default:
+        break
+    }
+
+    return data
+  }
+  cpuWrite(address: u16, value: u8): void {
+    switch (address) {
+      case 0x0000: // Control
+        this.controlReg.value = value
+        this.tramAddress.set('nametableX', this.controlReg.get('nametableX'))
+        this.tramAddress.set('nametableY', this.controlReg.get('nametableY'))
+        break
+      case 0x0001: // Mask
+        this.maskReg.value = value
+        break
+      case 0x0002: // Status
+        this.statusReg.value = value
+        break
+      case 0x0003: // OAM Address
+        break
+      case 0x0004: // OAM Data
+        break
+      case 0x0005: // Scroll
+        if (this.addressLatch === 0) {
+          this.fineX = value & 0x07
+          this.tramAddress.set('coarseX', value >> 3)
+          this.addressLatch = 1
+        } else {
+          this.tramAddress.set('fineY', value & 0x07)
+          this.tramAddress.set('coarseY', value >> 3)
+          this.addressLatch = 0
+        }
+        break
+      case 0x0006: // PPU Address
+        if (this.addressLatch === 0) {
+          this.tramAddress.value =
+            (this.tramAddress.value & 0x00ff) | (value << 8)
+          this.addressLatch = 1
+        } else {
+          this.tramAddress.value = (this.tramAddress.value & 0xff00) | value
+          this.vramAddress.value = this.tramAddress.value
+          this.addressLatch = 0
+        }
+        break
+      case 0x0007: // PPU Data
+        this.ppuWrite(this.vramAddress.value as u16, value)
+        this.vramAddress.value += this.incrementValue
+        break
+      default:
+        break
+    }
+  }
+
+  ppuRead(addr: u16): u8 {
+    addr = addr & 0x3fff
+    let data: u8 = 0
+
+    const cartridge = this.cartridge // as Cartridge
+    if (cartridge !== null) {
+      const cartridgeData = cartridge.ppuRead(addr)
+
+      if (!cartridgeData.error) {
+        // TODO: implement this later
+        data = 0
+      } else if (addr < 0x2000) {
+        data = this.tablePattern[(addr & 0x1000) >> 12][addr & 0x0fff]
+      } else if (addr < 0x3f00) {
+        addr = addr & 0x0fff
+        if (cartridge.mirrorMode === MirrorMode.VERTICAL) {
+          if (addr < 0x0400) {
+            data = this.tableName[0][addr & 0x03ff]
+          } else if (addr < 0x0800) {
+            data = this.tableName[1][addr & 0x03ff]
+          } else if (addr < 0x0c00) {
+            data = this.tableName[0][addr & 0x03ff]
+          } else {
+            data = this.tableName[1][addr & 0x03ff]
+          }
+        } else if (cartridge.mirrorMode === MirrorMode.HORIZONTAL) {
+          if (addr < 0x0400) {
+            data = this.tableName[0][addr & 0x03ff]
+          } else if (addr < 0x0800) {
+            data = this.tableName[0][addr & 0x03ff]
+          } else if (addr < 0x0c00) {
+            data = this.tableName[1][addr & 0x03ff]
+          } else {
+            data = this.tableName[1][addr & 0x03ff]
+          }
+        }
+      } else if (addr < 0x3fff) {
+        addr = addr & 0x001f
+
+        if (addr >= 0x0010 && addr % 4 === 0) {
+          addr = addr & 0x000f
+        }
+
+        data = this.tablePalette[addr]
+      } else {
+        data = 0
+      }
+    }
+
+    return data
   }
   ppuWrite(address: u16, value: u8): void {}
 }

@@ -3,7 +3,7 @@ import CPU from './cpu'
 import PPU from './ppu'
 import Bus from './bus'
 import Cartridge from './cartridge'
-import Result from './utils/result'
+import { Result } from './utils/result'
 import Bitfield from './utils/bitfield'
 
 export { Bus, CPU, PPU, Cartridge, Result, Bitfield }

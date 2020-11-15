@@ -7,7 +7,7 @@ const createDummyCartridge = (defaultValue = null) => ({
   ppuWrite: jest.fn(() => defaultValue)
 })
 
-describe.skip('PPU', () => {
+describe('PPU', () => {
   let ppu
 
   beforeEach(() => {
