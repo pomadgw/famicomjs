@@ -168,7 +168,7 @@ export default class CPU {
     const offset = this.X
     const absoluteAddress = ((hi << 8) | lo) + offset
 
-    this.absoluteAddress = absoluteAddress
+    this.absoluteAddress = absoluteAddress & 0xffff
     this.clocks += (absoluteAddress & 0xff00) !== hi << 8 ? 1 : 0
   }
 
@@ -179,7 +179,7 @@ export default class CPU {
     const offset = this.Y
     const absoluteAddress = ((hi << 8) | lo) + offset
 
-    this.absoluteAddress = absoluteAddress
+    this.absoluteAddress = absoluteAddress & 0xffff
     this.clocks += (absoluteAddress & 0xff00) !== hi << 8 ? 1 : 0
   }
 
