@@ -1,5 +1,5 @@
 import opcodes from '../instructions'
-import toHex from '../../utils/tohex'
+import parser from './parser'
 
 const branchingOperators = [
   'bcc',
@@ -12,173 +12,181 @@ const branchingOperators = [
   'bvc'
 ]
 
-export function compileParam(string) {
-  const result = /\(?(#)?(\$?)([\da-f]+)\)?(?:,([xy]))?\)?/.exec(
-    string.toLowerCase()
-  )
+function assembleLine({ opcode, params, label, startBinary }, variables = {}) {
+  let addressingMode = params?.mode ?? 'IMP'
+  let defaultValue = []
 
-  let params
-  let addressingMode = 'IMP'
-
-  if (!result || string.toLowerCase() === 'a') {
-    return { params: [], addressingMode }
-  }
-
-  const useIndirect = /\(\$[\da-f]+\)/.exec(string.toLowerCase())
-  const useInxInd = /\(\$[\da-f]+,x\)/.exec(string.toLowerCase())
-  const useIndInx = /\(\$[\da-f]+\),y/.exec(string.toLowerCase())
-
-  const [, isImmediate, isHex, numberString, offsetRegister] = result
-
-  const number = isHex ? parseInt(numberString, 16) : parseInt(numberString, 10)
-
-  const is8bitParam = numberString.length <= 2
-
-  if (isImmediate || is8bitParam) {
-    params = [number]
-  } else {
-    params = [number & 0xff, (number >> 8) & 0xff]
-  }
-
-  if (isImmediate) {
-    addressingMode = 'IMM'
-  } else if (!is8bitParam && useIndirect) {
-    addressingMode = 'IND'
-  } else if (useInxInd) {
-    addressingMode = 'IZX'
-  } else if (useIndInx) {
-    addressingMode = 'IZY'
-  } else if (offsetRegister) {
-    addressingMode = is8bitParam
-      ? `ZP${offsetRegister.toUpperCase()}`
-      : `AB${offsetRegister.toUpperCase()}`
-  } else {
-    addressingMode = is8bitParam ? 'ZP0' : 'ABS'
-  }
-
-  return { params, addressingMode }
-}
-
-export function assembleLine(string) {
-  const lowerString = string.toLowerCase()
-  const [, instruction, rawParams] = /([a-z]+)(\s+.+?)?$/.exec(lowerString)
-  let { params, addressingMode } = compileParam((rawParams ?? '').trim())
-
-  if (branchingOperators.includes(instruction)) {
+  if (branchingOperators.includes(opcode.toLowerCase())) {
     addressingMode = 'REL'
   }
 
-  const opcode = Object.entries(opcodes).find(
+  if (!params?.mode && ['jmp', 'jsr'].includes(opcode.toLowerCase())) {
+    addressingMode = 'ABS'
+  }
+
+  if (params?.label && variables[params.label]) {
+    addressingMode = params?.mode ?? variables[params.label].mode
+    defaultValue = variables[params.label].value
+  }
+
+  if (params?.offsetRegister) {
+    addressingMode = `${addressingMode.slice(0, 2)}${params.offsetRegister}`
+  }
+
+  const opcodeNumber = Object.entries(opcodes).find(
     ([, value]) =>
-      value.name.toLowerCase() === instruction &&
+      value.name.toLowerCase() === opcode.toLowerCase() &&
       value.addressingName === addressingMode
   )
 
-  return [Number(opcode[0]), ...params]
-}
+  let result
 
-export function labelLines(lines) {
-  const result = []
-  let offset = 0
+  if (addressingMode === 'IMP') result = [Number(opcodeNumber[0])]
+  else
+    result = [
+      Number(opcodeNumber[0]),
+      ...(params?.value ? params.value : defaultValue)
+    ]
 
-  const determineByteLength = (instruction) => {
-    let byteLength = 1
-    const operator = instruction.split(/\s+/)
-
-    if (operator[0].toLowerCase() === 'jmp' && !/\(.+?\)/.test(operator[1])) {
-      byteLength = 3
-    } else if (branchingOperators.includes(operator[0].toLowerCase())) {
-      byteLength = 2
-    } else {
-      byteLength = assembleLine(instruction).length
-    }
-
-    return byteLength
+  let length = result.length
+  if (!params?.mode && ['jmp', 'jsr'].includes(opcode.toLowerCase())) {
+    length += 2
+  } else if (branchingOperators.includes(opcode.toLowerCase())) {
+    length += 1
   }
 
-  for (let i = 0; i < lines.length; i++) {
-    const currentLine = lines[i]
-    const label = /\s*(.+?):\s*(.+)?$/.exec(currentLine.trim())
+  return {
+    result,
+    length,
+    label,
+    opcode,
+    addressingMode,
+    ...(params?.label ? { labelTarget: params.label } : {}),
+    ...(startBinary ? { startBinary } : {})
+  }
+}
 
-    if (label) {
-      if (i + 1 === lines.length && !label[2]) {
-        throw new Error('Label without associated instruction')
-      }
+function word(low, high) {
+  return (high << 8) | low
+}
 
-      if (!label[2]) {
-        i += 1
-      }
+export default function compile(string) {
+  const parseTree = parser.parse(string.trim().replace(/(;|\/\/).+/g, ''))
+  const labels = []
+  const data = []
+  const variables = {}
+  let i = 0
+  let pc = null
+  let currPc = null
+  const reset = { address: 0xfffc }
+  const nmi = { address: 0xfffa }
+  const irq = { address: 0xfffe }
 
-      const instruction = label[2]?.trim() ?? lines[i]
-      const byteLength = determineByteLength(instruction)
+  const slicePoints = []
 
-      result.push([offset, instruction, label[1]])
-      offset += byteLength
+  while (i < parseTree.length) {
+    const currData = parseTree[i]
+    if (currData.data) {
+      data.push(currData)
+      parseTree.splice(i, 1)
+    } else if (currData.varName) {
+      variables[currData.varName] = currData.value
+      parseTree.splice(i, 1)
+    } else if (currData.reset) {
+      reset.data = currData.reset
+      parseTree.splice(i, 1)
+    } else if (currData.nmi) {
+      nmi.data = currData.nmi
+      parseTree.splice(i, 1)
+    } else if (currData.irq) {
+      irq.data = currData.irq
+      parseTree.splice(i, 1)
+    } else if (currData.pc) {
+      pc = word(...currData.pc)
+      currPc = pc
+      parseTree.splice(i, 1)
+    } else if (currData.label) {
+      labels.push({ ...currData, offset: i, pc: currPc ?? 0 })
+      parseTree.splice(i, 1)
     } else {
-      const byteLength = determineByteLength(currentLine)
+      if (pc !== null) {
+        currData.startBinary = pc
+        slicePoints.push(i)
+        pc = null
+      }
 
-      result.push([offset, currentLine, undefined])
-      offset += byteLength
+      if (labels.length > 0) {
+        currData.label = labels.pop()
+      }
+
+      i++
     }
   }
 
-  return result
-}
+  const newTree = parseTree.map((e) => assembleLine(e, variables))
 
-export function compileLabelToAddress(lines, pc = 0) {
-  const labels = {}
+  const slicedArray = []
 
-  lines.forEach(([lineNo, , label]) => {
-    if (label) {
-      labels[label] = lineNo
-    }
+  if (slicePoints.length === 0) slicePoints.push(0)
+
+  slicePoints.forEach((point, idx, arr) => {
+    const nextPoint = arr?.[idx + 1] ?? newTree.length
+    slicedArray.push(newTree.slice(point, nextPoint))
   })
 
-  const result = []
+  const preprocess = (tree) => {
+    tree.reduce((acc, length, idx, arr) => {
+      const newLength = acc + arr[idx].length
+      arr[idx].totalLength = newLength
+      arr[idx].pos = acc
+      return newLength
+    }, 0)
 
-  lines.forEach(([lineNo, instruction, label]) => {
-    const [operator, params] = instruction.split(/\s+/)
-    if (labels[params] != null) {
-      if (branchingOperators.includes(operator.toLowerCase())) {
-        const relativeAddress = new Uint8Array([labels[params] - lineNo - 2])[0]
-        instruction = `${operator} $${toHex(relativeAddress).toLowerCase()}`
-      } else {
-        const absoluteAddress = pc + labels[params]
-        instruction = `${operator} $${toHex(absoluteAddress, {
-          length: 4
-        }).toLowerCase()}`
-      }
-    }
-    result.push([lineNo, instruction, label])
+    tree
+      .filter((e) => e.labelTarget)
+      .forEach((e) => {
+        const target = tree.find((en) => {
+          return en.label?.label === e.labelTarget
+        })
+
+        if (target) {
+          if (e.addressingMode === 'ABS') {
+            const targetAddress = target.label.pc + target.pos
+            const lo = targetAddress & 0xff
+            const hi = (targetAddress >> 8) & 0xff
+            e.result.push(lo)
+            e.result.push(hi)
+          } else {
+            const offset = target.totalLength - e.totalLength - target.length
+
+            e.result.push(offset & 0xff)
+          }
+        }
+      })
+  }
+
+  slicedArray.map(preprocess)
+
+  const image = [...Array(0x10000).keys()].map(() => 0)
+
+  for (let i = 0; i < 0x10000; i++) {
+    image[i] = image[i] ?? 0
+  }
+
+  slicedArray.forEach((array) => {
+    const startBinary = array[0].startBinary ?? 0
+    const result = array
+      .map((e) => e.result)
+      .reduce((acc, arr) => [...acc, ...arr], [])
+    image.splice(startBinary, result.length, ...result)
   })
 
-  return result
-}
+  data.forEach((d) => {
+    image.splice(d.address, d.data.length, ...d.data)
+  })
+  ;[reset, nmi, irq].forEach((interrupt) => {
+    if (interrupt.data) image.splice(interrupt.address, 2, ...interrupt.data)
+  })
 
-export function assemble(string, pc = 0) {
-  let lines = string
-    .trim()
-    .split('\n')
-    .map((e) => e.trim())
-  lines = labelLines(lines)
-  lines = compileLabelToAddress(lines, pc)
-  lines = lines.map((e) => assembleLine(e[1]))
-
-  return lines.reduce((acc, arr) => [...acc, ...arr], [])
-}
-
-export default function assembler(
-  { memorySize, PC } = { memorySize: 0x600, PC: 0x600 }
-) {
-  return function compile(string) {
-    const ram = new Uint8Array([...new Array(memorySize)].map((_) => 0))
-
-    const compiled = assemble(string[0], PC)
-
-    for (let i = PC; i < PC + compiled.length; i++) {
-      ram[i] = compiled[i - PC]
-    }
-
-    return ram
-  }
+  return image
 }
