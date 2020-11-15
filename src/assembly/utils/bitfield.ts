@@ -69,6 +69,14 @@ export default class BitfieldTemplate {
     this.value = (this.value & reset) | value
   }
 
+  inc(name: string): void {
+    this.set(name, this.get(name) + 1)
+  }
+
+  dec(name: string): void {
+    this.set(name, this.get(name) - 1)
+  }
+
   setAsBoolean(name: string, value: bool): void {
     this.set(name, value ? 1 : 0)
   }

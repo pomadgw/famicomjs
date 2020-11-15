@@ -84,10 +84,10 @@ class Pixel {
 class BgShifter {
   private ppu: PPU | null
 
-  private patternLo: u8
-  private patternHi: u8
-  private attribLo: u8
-  private attribHi: u8
+  private patternLo: u16
+  private patternHi: u16
+  private attribLo: u16
+  private attribHi: u16
 
   constructor() {
     this.ppu = null
@@ -112,21 +112,23 @@ class BgShifter {
   }
 
   loadBgShifter(): void {
-    if (this.ppu) {
-      this.patternLo = (this.patternLo & 0xff00) | this.ppu.bgNextTileLsb
-      this.patternHi = (this.patternHi & 0xff00) | this.ppu.bgNextTileMsb
+    const ppu = this.ppu
+    if (ppu) {
+      this.patternLo = (this.patternLo & 0xff00) | ppu.bgNextTileLsb
+      this.patternHi = (this.patternHi & 0xff00) | ppu.bgNextTileMsb
 
       this.attribLo =
         (this.attribLo & 0xff00) |
-        ((this.ppu.bgNextTileAttrib & 0x01) > 0 ? 0xff : 0)
+        ((ppu.bgNextTileAttrib & 0x01) > 0 ? 0xff : 0)
       this.attribHi =
         (this.attribHi & 0xff00) |
-        ((this.ppu.bgNextTileAttrib & 0x02) > 0 ? 0xff : 0)
+        (((ppu.bgNextTileAttrib & 0x02) > 0 ? 0xff : 0) as u16)
     }
   }
 
   updateShifter(): void {
-    if (this.ppu && this.ppu.maskReg.getAsBoolean('bRenderBg')) {
+    const ppu = this.ppu
+    if (ppu && ppu.maskReg.getAsBoolean('bRenderBg')) {
       this.patternLo <<= 1
       this.patternHi <<= 1
 
@@ -136,17 +138,21 @@ class BgShifter {
   }
 
   yieldBgPixel(): Pixel {
-    if (!this.ppu || !this.ppu.maskReg.getAsBoolean('bRenderBg')) {
+    const ppu = this.ppu
+    if (!ppu || !ppu.maskReg.getAsBoolean('bRenderBg')) {
       return { pixel: 0, palette: 0 }
     }
 
-    const bitmux: u16 = 0x8000 >> this.ppu.fineX
+    const bitmux: u16 = 0x8000 >> ppu.fineX
     const p0Pixel = (this.patternLo & bitmux) > 0 ? 1 : 0
     const p1Pixel = (this.patternHi & bitmux) > 0 ? 1 : 0
     const bgPal0 = (this.attribLo & bitmux) > 0 ? 1 : 0
     const bgPal1 = (this.attribHi & bitmux) > 0 ? 1 : 0
 
-    return { pixel: (p1Pixel << 1) | p0Pixel, palette: (bgPal1 << 1) | bgPal0 }
+    return {
+      pixel: ((p1Pixel << 1) | p0Pixel) as u8,
+      palette: ((bgPal1 << 1) | bgPal0) as u8
+    }
   }
 }
 
@@ -154,7 +160,7 @@ export default class PPU {
   public cartridge: Cartridge | null
   public screen: Screen
   public cycle: u32
-  public scanline: u32
+  public scanline: i32
   public isFrameComplete: bool
   public nmi: bool
 
@@ -277,7 +283,178 @@ export default class PPU {
     return this.controlReg.get('incrementMode') === 1 ? 32 : 1
   }
 
-  clock(): void {}
+  clock(): void {
+    const isRenderSomthing =
+      this.maskReg.getAsBoolean('renderBg') ||
+      this.maskReg.getAsBoolean('renderSprites')
+
+    const incrementScrollX = (rootThis: PPU, isRenderSomthing: bool): void => {
+      if (isRenderSomthing) {
+        if (rootThis.vramAddress.get('coarseX') === 31) {
+          rootThis.vramAddress.set('coarseX', 0)
+          rootThis.vramAddress.set(
+            'nametableX',
+            ~rootThis.vramAddress.get('nametableX')
+          )
+        } else {
+          rootThis.vramAddress.inc('coarseX')
+        }
+      }
+    }
+
+    const incrementScrollY = (rootThis: PPU, isRenderSomthing: bool): void => {
+      if (isRenderSomthing) {
+        if (rootThis.vramAddress.get('fineY') < 7) {
+          rootThis.vramAddress.inc('fineY')
+        } else {
+          rootThis.vramAddress.set('fineY', 0)
+          if (rootThis.vramAddress.get('coarseY') === 29) {
+            rootThis.vramAddress.set('coarseY', 0)
+            rootThis.vramAddress.set(
+              'nametableY',
+              ~rootThis.vramAddress.get('nametableY')
+            )
+          } else if (rootThis.vramAddress.get('coarseY') === 31) {
+            rootThis.vramAddress.set('coarseY', 0)
+          } else {
+            rootThis.vramAddress.inc('coarseY')
+          }
+        }
+      }
+    }
+
+    const transferAddressX = (rootThis: PPU, isRenderSomthing: bool): void => {
+      if (isRenderSomthing) {
+        rootThis.vramAddress.set(
+          'nametableX',
+          rootThis.tramAddress.get('nametableX')
+        )
+        rootThis.vramAddress.set('coarseX', rootThis.tramAddress.get('coarseX'))
+      }
+    }
+
+    const transferAddressY = (rootThis: PPU, isRenderSomthing: bool): void => {
+      if (isRenderSomthing) {
+        rootThis.vramAddress.set('fineY', rootThis.tramAddress.get('fineY'))
+        rootThis.vramAddress.set(
+          'nametableY',
+          rootThis.tramAddress.get('nametableY')
+        )
+        rootThis.vramAddress.set('coarseY', rootThis.tramAddress.get('coarseY'))
+      }
+    }
+
+    if (this.scanline >= -1 && this.scanline < 240) {
+      if (this.scanline === -1 && this.cycle === 1) {
+        this.statusReg.set('verticalBlank', 0)
+      }
+
+      if (
+        (this.cycle > 1 && this.cycle < 258) ||
+        (this.cycle > 320 && this.cycle < 338)
+      ) {
+        this.bgShifter.updateShifter()
+
+        switch ((this.cycle - 1) % 8) {
+          case 0:
+            this.bgShifter.loadBgShifter()
+            this.bgNextTileId = this.ppuRead(
+              (0x2000 | (this.vramAddress.value & 0x0fff)) as u16
+            )
+            break
+          case 2:
+            this.bgNextTileAttrib = this.ppuRead(
+              (0x23c0 |
+                (this.vramAddress.get('nametableY') << 11) |
+                (this.vramAddress.get('nametableX') << 10) |
+                ((this.vramAddress.get('coarseY') >> 2) << 3) |
+                (this.vramAddress.get('coarseX') >> 2)) as u16
+            )
+            if ((this.vramAddress.get('coarseY') & 0x02) > 0) {
+              this.bgNextTileAttrib >>= 4
+            }
+            if ((this.vramAddress.get('coarseX') & 0x02) > 0) {
+              this.bgNextTileAttrib >>= 2
+            }
+            this.bgNextTileAttrib &= 0x03
+            break
+          case 4:
+            this.bgNextTileLsb = this.ppuRead(
+              ((this.controlReg.get('patternBg') << 12) +
+                (this.bgNextTileId << 4) +
+                this.vramAddress.get('fineY') +
+                0) as u16
+            )
+            break
+          case 6:
+            this.bgNextTileMsb = this.ppuRead(
+              ((this.controlReg.get('patternBg') << 12) +
+                (this.bgNextTileId << 4) +
+                this.vramAddress.get('fineY') +
+                8) as u16
+            )
+            break
+          case 7:
+            incrementScrollX(this, isRenderSomthing)
+            break
+          default:
+            break
+        }
+      }
+
+      if (this.cycle === 256) {
+        incrementScrollY(this, isRenderSomthing)
+      }
+
+      if (this.cycle === 257) {
+        this.bgShifter.loadBgShifter()
+        transferAddressX(this, isRenderSomthing)
+      }
+
+      if (this.cycle === 338 || this.cycle === 340) {
+        this.bgNextTileId = this.ppuRead(
+          (0x2000 | (this.vramAddress.value & 0x0fff)) as u16
+        )
+      }
+
+      if (this.scanline === -1 && this.cycle >= 280 && this.cycle < 305) {
+        transferAddressY(this, isRenderSomthing)
+      }
+    }
+
+    if (this.scanline === 240) {
+      // Nothing is real...new
+      // nothing happens here
+    }
+
+    if (this.scanline === 241 && this.cycle === 1) {
+      this.statusReg.set('verticalBlank', 1)
+
+      if (this.controlReg.get('enablenmi') === 1) {
+        this.nmi = true
+      }
+    }
+
+    const pixel = this.bgShifter.yieldBgPixel()
+
+    this.screen.setColor(
+      this.cycle - 1,
+      this.scanline,
+      this.getColorFromPaletteRAM(pixel.palette, pixel.pixel)
+    )
+
+    this.cycle += 1
+
+    if (this.cycle >= 341) {
+      this.cycle = 0
+      this.scanline += 1
+
+      if (this.scanline >= 261) {
+        this.scanline = -1
+        this.isFrameComplete = true
+      }
+    }
+  }
 
   getColorFromPaletteRAM(palette: u8, pixel: u8): RGB {
     const paletteId = this.ppuRead(0x3f00 + (palette << 2) + pixel)
