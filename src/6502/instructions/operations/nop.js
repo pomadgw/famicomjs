@@ -1,3 +1,0 @@
-export function NOP(cpu) {
-  return [0x1c, 0x3c, 0x5c, 0x7c, 0xdc, 0xfc].includes(cpu.opcode) ? 1 : 0
-}
