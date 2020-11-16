@@ -57,21 +57,24 @@
   Object.entries(controllers).forEach(([button, target]) => {
     document.addEventListener('keydown', (e) => {
       if (e.code === button) {
+        emulationMode = false
         console.log(target)
         myWorker.postMessage({
           type: 'keydown',
           value: target
         })
+        emulationMode = true
       }
-        // this.setButtonState(target, true)
     })
 
     document.addEventListener('keyup', (e) => {
       if (e.code === button) {
+        emulationMode = false
         myWorker.postMessage({
           type: 'keyup',
           value: target
         })
+        emulationMode = true
       }
     })
   })

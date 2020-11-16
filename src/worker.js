@@ -4,13 +4,11 @@ import Bus from './bus'
 import CPU from './6502'
 import PPU from './ppu'
 
-const nes = new Bus(new CPU(), new PPU(), {
-  onRender: (imageData) => {
-    self.postMessage({
-      type: 'rendered',
-      value: imageData
-    })
-  }
+const nes = new Bus(new CPU(), new PPU(), (imageData) => {
+  self.postMessage({
+    type: 'rendered',
+    value: imageData
+  })
 })
 
 let run = false
@@ -38,8 +36,6 @@ onmessage = async (e) => {
   // console.log('received message', e.data)
   const { type, value } = e.data
 
-  // console.log({ type, value })
-
   if (type === 'setCart') {
     const cart = new Cartridge()
 
@@ -57,10 +53,12 @@ onmessage = async (e) => {
   } else if (type === 'requestFrame') {
     requestFrame()
   } else if (type === 'keydown') {
+    console.log({ type, value })
+
     nes.controllers[0].setButtonState(value, true)
-    requestFrame()
+    // requestFrame()
   } else if (type === 'keyup') {
     nes.controllers[0].setButtonState(value, false)
-    requestFrame()
+    // requestFrame()
   }
 }

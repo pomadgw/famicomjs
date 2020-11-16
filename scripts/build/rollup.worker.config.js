@@ -1,34 +1,47 @@
 /* eslint-disable camelcase */
 import node_resolve from 'rollup-plugin-node-resolve'
 import commonjs from 'rollup-plugin-commonjs'
-import static_files from 'rollup-plugin-static-files'
+// import static_files from 'rollup-plugin-static-files'
 import { terser } from 'rollup-plugin-terser'
 import babel from '@rollup/plugin-babel'
 import json from '@rollup/plugin-json'
 import svelte from 'rollup-plugin-svelte'
 
-let plugins = [node_resolve(), commonjs(), babel(), json(), svelte()]
+const extensions = ['.js', '.jsx', '.ts', '.tsx']
 
-if (process.env.NODE_ENV === 'production') {
-  plugins = plugins.concat([
-    static_files({
-      include: ['./public']
-    }),
-    terser()
-  ])
+const pluginsFactory = () => {
+  let plugins = [
+    node_resolve({ extensions }),
+    commonjs(),
+    babel({ extensions }),
+    json(),
+    svelte()
+  ]
+
+  if (process.env.NODE_ENV === 'production') {
+    plugins = plugins.concat([
+      // static_files({
+      //   include: ['./public']
+      // }),
+      terser()
+    ])
+  }
+
+  return plugins
 }
 
-console.log(plugins)
-
-const config = {
-  input: './src/worker.js',
-  output: {
-    dir: 'worker',
-    format: 'iife',
-    entryFileNames: '[name].js',
-    assetFileNames: '[name][extname]'
-  },
-  plugins
-}
+const config = [
+  {
+    input: './src/worker.js',
+    output: {
+      sourcemap: true,
+      dir: 'worker',
+      format: 'iife',
+      entryFileNames: '[name].js',
+      assetFileNames: '[name][extname]'
+    },
+    plugins: pluginsFactory()
+  }
+]
 
 export default config
