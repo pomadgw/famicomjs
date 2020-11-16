@@ -8,7 +8,7 @@ Lines "lines"
 	= a:LineWithNewline b:LineWithNewline*  { return [a, ...b].filter(e => e !== '') }
 
 LineWithNewline
-	= _ line:Line _N { return line }  
+	= _ line:Line _N { return line }
 
 Line "line"
 	= LabelDeclaration / Program / ProgramCounter / DataLine / ResetInterrupt / NMIInterrupt / IRQInterrupt / Variable
@@ -39,7 +39,7 @@ ResetInterrupt
 
 IRQInterrupt
 	= '.irq' _ address:AbsoluteAddress  { return { irq: address.value } }
-    
+
 NMIInterrupt
 	= '.nmi' _ address:AbsoluteAddress  { return { nmi: address.value } }
 

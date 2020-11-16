@@ -24,8 +24,10 @@
     "@babel/eslint-parser": "^7.11.4",
     "@babel/generator": "^7.11.4",
     "@babel/node": "^7.12.6",
+    "@babel/plugin-transform-modules-commonjs": "^7.12.1",
     "@babel/plugin-transform-runtime": "^7.11.0",
     "@babel/preset-env": "^7.11.0",
+    "@babel/preset-typescript": "^7.12.1",
     "@rollup/plugin-babel": "^5.2.0",
     "@rollup/plugin-commonjs": "^15.1.0",
     "@rollup/plugin-html": "^0.2.0",
@@ -72,7 +74,8 @@
     "shx": "^0.3.2",
     "snowpack": "^2.9.3",
     "svelte": "^3.29.0",
-    "svelte-check": "^1.0.0"
+    "svelte-check": "^1.0.0",
+    "typescript": "^4.0.5"
   },
   "jest": {
     "verbose": true,
@@ -81,8 +84,10 @@
     ],
     "collectCoverageFrom": [
       "src/**/*.js",
+      "src/**/*.ts",
       "!src/index.js",
       "!src/6502/assembler.js",
+      "!src/6502/opcodes.ts",
       "!src/6502/assembler/parser.js",
       "!src/6502/instructions/index.js"
     ]

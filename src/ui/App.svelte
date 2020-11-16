@@ -27,7 +27,7 @@
 
   let disassembled
 
-  nes = new Bus(new CPU(), new PPU(), { onRender: render })
+  nes = new Bus(new CPU(), new PPU(), render )
 
   function toggleEmulation() {
     emulationMode = !emulationMode
@@ -46,9 +46,9 @@
     nes.insertCartridge(cart)
     nes.reset()
 
-    offsetStart = nes.cpu.registers.PC
-    nesPC = nes.cpu.registers.PC
-    registers = nes.cpu.registers
+    offsetStart = nes.cpu.PC
+    nesPC = nes.cpu.PC
+    registers = nes.cpu
 
     disassembleRAM()
     emulationMode = true
@@ -56,9 +56,9 @@
 
   function resetNES() {
     nes.reset()
-    offsetStart = nes.cpu.registers.PC
-    nesPC = nes.cpu.registers.PC
-    registers = nes.cpu.registers
+    offsetStart = nes.cpu.PC
+    nesPC = nes.cpu.PC
+    registers = nes.cpu
   }
 
   function stepNES() {
@@ -70,8 +70,8 @@
       nes.clock()
     } while (nes.cpu.isComplete)
 
-    nesPC = nes.cpu.registers.PC
-    registers = nes.cpu.registers
+    nesPC = nes.cpu.PC
+    registers = nes.cpu
 
     render(nes.ppu.getScreen().imageData)
   }
@@ -101,8 +101,8 @@
     } while (nes.cpu.isComplete)
     nes.ppu.isFrameComplete = false
 
-    nesPC = nes.cpu.registers.PC
-    registers = nes.cpu.registers
+    nesPC = nes.cpu.PC
+    registers = nes.cpu
   }
 
   function runEmulation(timestamp) {
@@ -117,8 +117,8 @@
         } while (!nes.ppu.isFrameComplete)
         nes.ppu.isFrameComplete = false
 
-        nesPC = nes.cpu.registers.PC
-        registers = nes.cpu.registers
+        nesPC = nes.cpu.PC
+        registers = nes.cpu
       }
 
       requestAnimationFrame(runEmulation)

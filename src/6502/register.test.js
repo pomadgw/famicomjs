@@ -1,6 +1,7 @@
 import RegisterStatus from './register'
+import { Flags } from './flags'
 
-describe('RegisterStatus', () => {
+describe('6502 CPU (wasm): RegisterStatus', () => {
   describe('#valueOf', () => {
     it('should return correct value', () => {
       const status = new RegisterStatus(0b00000001)
@@ -12,38 +13,26 @@ describe('RegisterStatus', () => {
   it('should fetch correct value', () => {
     const status = new RegisterStatus(0b00000001)
 
-    expect(status.getStatus('C')).toBe(true)
+    expect(status.getStatus(Flags.C)).toBe(true)
 
     status.status = 0b0000010
-    expect(status.getStatus('C')).toBe(false)
-    expect(status.getStatus('Z')).toBe(true)
+    expect(status.getStatus(Flags.C)).toBe(false)
+    expect(status.getStatus(Flags.Z)).toBe(true)
   })
 
   it('should set value into correct status', () => {
     const status = new RegisterStatus(0b01000000)
 
-    status.setStatus('C', true)
+    status.setStatus(Flags.C, true)
     expect(status.status).toBe(0b01000001)
 
-    status.setStatus('C', false)
+    status.setStatus(Flags.C, false)
     expect(status.status).toBe(0b01000000)
 
-    status.setStatus('N', true)
+    status.setStatus(Flags.N, true)
     expect(status.status).toBe(0b11000000)
 
-    status.setStatus('N', false)
+    status.setStatus(Flags.N, false)
     expect(status.status).toBe(0b01000000)
-  })
-
-  it('should create a proxy', () => {
-    const status = RegisterStatus.create(0b01000000)
-    expect(status.V).toBe(true)
-
-    status.C = true
-    expect(status.status).toBe(0b01000001)
-
-    status.status = 0b11000000
-    expect(status.C).toBe(false)
-    expect(status.N).toBe(true)
   })
 })
