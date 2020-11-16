@@ -25,7 +25,17 @@ export default class CPU {
 
   constructor() {
     this.bus = null
-    this.STATUS = new RegisterStatus(0)
+    this.A = 0
+    this.X = 0
+    this.Y = 0
+    this.SP = 0xfd
+    this.PC = 0
+    this.fetchedData = 0
+    this.STATUS = new RegisterStatus(0x24)
+    this.isImplicitInvoked = false
+    this.opcode = 0
+    this.debugCurrentOpsPC = 0
+    this.debugCycles = 0
 
     this.reset()
 

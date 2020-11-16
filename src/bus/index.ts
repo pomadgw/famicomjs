@@ -1,4 +1,4 @@
-import cartridge from '../cartridge'
+import Cartridge from '../cartridge'
 import Controller from '../controllers'
 import CPU from '../6502'
 import PPU from '../ppu'
@@ -6,7 +6,7 @@ import PPU from '../ppu'
 type RenderFn = (imageData: ImageData) => void
 
 export default class Bus {
-  public cartridge: cartridge
+  public cartridge: Cartridge | null
   public cpu: CPU
   public ppu: PPU
   public ram: Uint8Array
@@ -14,10 +14,10 @@ export default class Bus {
   public controllers: Controller[]
   public globalSystemClockNumber: number
   public _on: {
-    render: RenderFn
+    render?: RenderFn
   }
 
-  constructor(cpu, ppu, onRender?: RenderFn) {
+  constructor(cpu: CPU, ppu: PPU, onRender?: RenderFn) {
     this.cpu = cpu
     this.ppu = ppu
 
@@ -46,6 +46,7 @@ export default class Bus {
     ]
 
     this.isReadOnly = false
+    this.cartridge = null
   }
 
   cpuRead(address: number): number {
@@ -84,7 +85,7 @@ export default class Bus {
     return cpuRAM
   }
 
-  insertCartridge(cartridge) {
+  insertCartridge(cartridge: Cartridge) {
     this.cartridge = cartridge
     this.ppu.insertCartridge(cartridge)
   }
@@ -110,7 +111,8 @@ export default class Bus {
     this.globalSystemClockNumber += 1
 
     if (this.ppu.isFrameComplete) {
-      this._on.render(this.ppu.getScreen().imageData)
+      if (this._on.render)
+        this._on.render(this.ppu.getScreen().imageData)
     }
   }
 }
