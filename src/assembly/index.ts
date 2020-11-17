@@ -5,10 +5,13 @@ import Bus from './bus'
 import { NES } from './bus'
 import Cartridge from './cartridge'
 import Bitfield from './utils/bitfield'
+import Screen from './utils/screen'
 import Controller from './controller'
 import { Button } from './controller'
 
-export { Bus, NES, CPU, PPU, Cartridge, Bitfield, Controller, Button }
+export { Bus, NES, CPU, PPU, Cartridge, Bitfield, Controller, Button, Screen }
+
+export const Uint8Array_ID = idof<Uint8Array>()
 
 export default function createBus(): Bus {
   const cpu = new CPU()

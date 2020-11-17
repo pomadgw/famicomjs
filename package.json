@@ -19,8 +19,8 @@
     "test": "jest --coverage",
     "download-nes-test": "wget -c http://nickmass.com/images/nestest.nes",
     "remove-nes-test": "rm -fv nestest.nes",
-    "asbuild:untouched": "asc -b wasm/nes-debug.wasm src/assembly/index.ts --target debug",
-    "asbuild:optimized": "asc -b wasm/nes.wasm src/assembly/index.ts --target release",
+    "asbuild:untouched": "asc --sourceMap --initialMemory 8 -b wasm/nes-debug.wasm src/assembly/index.ts --target debug",
+    "asbuild:optimized": "asc --sourceMap --initialMemory 8 -b wasm/nes.wasm src/assembly/index.ts --target release",
     "asbuild": "npm run asbuild:untouched && npm run asbuild:optimized"
   },
   "devDependencies": {

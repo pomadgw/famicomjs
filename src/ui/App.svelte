@@ -27,7 +27,7 @@
 
   let disassembled
 
-  const { NES, CPU, PPU, Cartridge } = window.NES
+  const { __getUint8ClampedArray, NES, CPU, PPU, Cartridge, Uint8Array_ID, __newArray, __retain, __release } = window.NES
 
   nes = new NES(new CPU(), new PPU(), { onRender: render })
 
@@ -41,10 +41,21 @@
 
   async function readFile(event) {
     const file = event.target.files[0]
-    const cart = new Cartridge()
-    await cart.parse(file)
+    const reader = new FileReader()
+    const data = await new Promise((resolve, reject) => {
+      reader.addEventListener('load', (event) => {
+        resolve(event.target.result)
+      })
 
-    nes.cartridge = cart
+      reader.readAsArrayBuffer(file)
+    })
+    const view = new Uint8Array(data)
+    const arrPtr = __retain(__newArray(Uint8Array_ID, view))
+    const cart = new Cartridge(arrPtr)
+
+    cart.parse()
+
+    // nes.cartridge = cart
     nes.insertCartridge(cart)
     nes.reset()
 
@@ -53,7 +64,7 @@
     // registers = nes.cpu.registers
 
     // disassembleRAM()
-    emulationMode = true
+    emulationMode = false
   }
 
   function resetNES() {
@@ -77,7 +88,13 @@
     // nesPC = nes.cpu.registers.PC
     // registers = nes.cpu.registers
 
-    imageData = new ImageData(nes.ppu.screen, nes.ppu.screen.width)
+    const ppu = window.NES.PPU.wrap(nes.ppu)
+    const screen = window.NES.Screen.wrap(ppu.screen)
+    const screenWidth = screen.width
+    const imagePtr = window.NES.Screen.wrap(screen.image)
+    const image = __getUint8ClampedArray(imagePtr)
+    imageData = new ImageData(image, screenWidth)
+    __release(imagePtr)
     render(imageData)
   }
 
@@ -86,10 +103,10 @@
     ctx.putImageData(imageData, 0, 0)
     zoomCtx.drawImage(canvas, 0, 0, 256, 240, 0, 0, 512, 480)
 
-    if (showDebug) {
-      drawPalette()
-      drawTableName()
-    }
+    // if (showDebug) {
+    //   drawPalette()
+    //   drawTableName()
+    // }
   }
 
   // function drawTableName() {
@@ -112,6 +129,7 @@
 
   function runEmulation(timestamp) {
     if (emulationMode) {
+      const ppu = window.NES.PPU.wrap(nes.ppu)
       if (!startFrame) startFrame = timestamp
 
       if (timestamp - startFrame >= 1000 / 60) {
@@ -119,11 +137,18 @@
 
         do {
           nes.clock()
-        } while (!nes.ppu.isFrameComplete)
-        nes.ppu.isFrameComplete = false
+        } while (!ppu.isFrameComplete)
+        ppu.isFrameComplete = false
 
-        nesPC = nes.cpu.registers.PC
-        registers = nes.cpu.registers
+        const screen = window.NES.Screen.wrap(ppu.screen)
+        const screenWidth = screen.width
+        const imagePtr = window.NES.Screen.wrap(screen.image)
+        const image = __getUint8ClampedArray(imagePtr)
+        imageData = new ImageData(image, screenWidth)
+        __release(imagePtr)
+        render(imageData)
+        // nesPC = nes.cpu.registers.PC
+        // registers = nes.cpu.registers
       }
 
       requestAnimationFrame(runEmulation)

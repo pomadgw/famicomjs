@@ -11,10 +11,10 @@ export default class Cartridge {
   public prgMemory: Uint8Array
   public chrMemory: Uint8Array
 
-  private romData: ArrayBuffer
+  private romData: Uint8Array
   private mapper: Mapper
 
-  constructor(romData: ArrayBuffer) {
+  constructor(romData: Uint8Array) {
     this.romData = romData
     this.mapperId = 0
     this.prgBankNumber = 0
@@ -26,7 +26,7 @@ export default class Cartridge {
   }
 
   parse(): Result<string, bool> {
-    const view = Uint8Array.wrap(this.romData)
+    const view = this.romData
     const header = view.slice(0, 4)
     const compareHeader = [0x4e, 0x45, 0x53, 0x1a]
 

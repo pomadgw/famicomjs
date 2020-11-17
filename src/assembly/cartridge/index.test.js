@@ -33,7 +33,7 @@ function generateCart() {
   view.set([0xfe], 0x11)
   view.set([0xfd], 16 + 16384 + 1)
 
-  const cart = new Cartridge(buffer)
+  const cart = new Cartridge(view)
   cart.parse()
   return { cart, view }
 }

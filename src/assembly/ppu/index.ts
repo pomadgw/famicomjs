@@ -441,11 +441,18 @@ export default class PPU {
 
     const pixel = this.bgShifter.yieldBgPixel()
 
-    this.screen.setColor(
-      this.cycle - 1,
-      this.scanline,
-      this.getColorFromPaletteRAM(pixel.palette, pixel.pixel)
-    )
+    if (
+      this.scanline > -1 &&
+      this.scanline < 240 &&
+      this.cycle >= 0 &&
+      this.cycle < 256
+    ) {
+      this.screen.setColor(
+        this.cycle,
+        this.scanline,
+        this.getColorFromPaletteRAM(pixel.palette, pixel.pixel)
+      )
+    }
 
     this.cycle += 1
 

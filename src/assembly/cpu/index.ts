@@ -40,11 +40,15 @@ export default class CPU {
     this.X = 0
     this.Y = 0
     this.SP = 0xfd
-    this.PC = 0
     this.fetchedData = 0
     this.STATUS = new RegisterStatus(0x24)
     this.isImplicitInvoked = false
     this.opcode = 0
+
+    const startPCAddress: u16 = 0xfffc
+    const loPC = this.read(startPCAddress) as u16
+    const hiPC = this.read(startPCAddress + 1) as u16
+    this.PC = (hiPC << 8) | loPC
   }
 
   read(address: u16): u8 {
