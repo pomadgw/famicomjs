@@ -12,12 +12,14 @@ export default function bitfield(structure, arrayedNumber) {
     )
   }
 
+  let _value = arrayedNumber[0]
+
   Object.defineProperty(result, 'value', {
     get() {
-      return arrayedNumber[0]
+      return _value
     },
     set(value) {
-      arrayedNumber[0] = value
+      _value = value
     }
   })
 
@@ -27,7 +29,7 @@ export default function bitfield(structure, arrayedNumber) {
 
     Object.defineProperty(result, field, {
       get() {
-        return (arrayedNumber[0] >> posStart) & ((1 << size) - 1)
+        return (_value >> posStart) & ((1 << size) - 1)
       },
       set(value) {
         const resetBits = (1 << size) - 1
@@ -35,7 +37,7 @@ export default function bitfield(structure, arrayedNumber) {
 
         value = value & resetBits
         value = value << posStart
-        arrayedNumber[0] = (arrayedNumber[0] & reset) | value
+        _value = (_value & reset) | value
       }
     })
 
