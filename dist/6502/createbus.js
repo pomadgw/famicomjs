@@ -1,0 +1,1 @@
+import u from"./index.js";export default function c(){var r={ram:new Uint8Array(32768),cpuRead:function(n){return this.ram[n]},cpuWrite:function(n,t){this.ram[n]=t},cpu:new u()};return r.cpu.connect(r),r}

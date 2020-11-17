@@ -1,1 +1,0 @@
-function t(e,n){var r=e.registers[n]-e.fetched;return e.registers.STATUS.C=r>=0,e.registers.STATUS.Z=r===0,e.registers.STATUS.N=r<0,1}export var CMP=function(e){return t(e,"A")},CPX=function(e){return t(e,"X")},CPY=function(e){return t(e,"Y")};

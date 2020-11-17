@@ -1,0 +1,1 @@
+export default function g(a){var t=arguments.length>1&&arguments[1]!==void 0?arguments[1]:{},e=t.length,n=e===void 0?2:e,r=t.withPrefix,o=r===void 0?!1:r,i=o?"$":"";return"".concat(i).concat(a.toString(16).toUpperCase().padStart(n,"0"))}
