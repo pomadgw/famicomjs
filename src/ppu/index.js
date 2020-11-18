@@ -549,6 +549,12 @@ export default class PPU {
     return data
   }
 
+  writeToOAM(address, value) {
+    const oamId = (address / 4) >> 0
+    const oamAttrib = address % 4
+    this.oam[oamId].values[oamAttrib] = value
+  }
+
   cpuWrite(addr, value) {
     // TODO: implement this later
     switch (addr) {
@@ -567,11 +573,7 @@ export default class PPU {
         this.oamAddress = value
         break
       case 0x0004: // OAM Data
-        {
-          const oamId = (this.oamAddress / 4) >> 0
-          const oamAttrib = this.oamAddress % 4
-          this.oam[oamId].values[oamAttrib] = value
-        }
+        this.writeToOAM(this.oamAddress, value)
         break
       case 0x0005: // Scroll
         if (this.addressLatch === 0) {
