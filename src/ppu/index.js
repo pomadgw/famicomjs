@@ -72,12 +72,53 @@ export const palScreen = [
   { r: 0, g: 0, b: 0 }
 ]
 
+class OAM {
+  constructor(x = 0, y = 0, id = 0, attrib = 0) {
+    this.x = x
+    this.y = y
+    this.id = id
+    this.attrib = attrib
+  }
+
+  get values() {
+    const array = [this.y, this.id, this.attrib, this.x]
+
+    return new Proxy(array, {
+      get: (target, addr) => target[addr],
+      set: (target, addr, value) => {
+        target[addr] = value
+
+        switch (addr) {
+          case '0':
+            this.y = value
+            break
+          case '1':
+            this.id = value
+            break
+          case '2':
+            this.attrib = value
+            break
+          case '3':
+            this.x = value
+            break
+          default:
+            break
+        }
+
+        return true
+      }
+    })
+  }
+}
+
 export default class PPU {
   // eslint-disable-next-line no-useless-constructor
   constructor() {
     this.tableName = [new Uint8Array(1024), new Uint8Array(1024)]
     this.tablePattern = [new Uint8Array(4096), new Uint8Array(4096)]
     this.tablePalette = new Uint8Array(32)
+    this.oam = [...Array(64).keys()].map(() => new OAM())
+    this.oamAddress = 0x0000
 
     this.screen = new Screen(256, 240)
     // for debugging purposes
@@ -242,6 +283,7 @@ export default class PPU {
     this.addressLatch = 0x00
     this.ppuDataBuffer = 0x00
     this.ppuAddress = 0x0000
+    this.oamAddress = 0x0000
 
     this.statusReg.value = 0
     this.controlReg.value = 0
@@ -484,6 +526,7 @@ export default class PPU {
       case 0x0003: // OAM Address
         break
       case 0x0004: // OAM Data
+        data = this.oam[(this.oamAddress / 4) >> 0].values[this.oamAddress % 4]
         break
       case 0x0005: // Scroll
         break
@@ -521,8 +564,14 @@ export default class PPU {
         this.statusReg.value = value
         break
       case 0x0003: // OAM Address
+        this.oamAddress = value
         break
       case 0x0004: // OAM Data
+        {
+          const oamId = (this.oamAddress / 4) >> 0
+          const oamAttrib = this.oamAddress % 4
+          this.oam[oamId].values[oamAttrib] = value
+        }
         break
       case 0x0005: // Scroll
         if (this.addressLatch === 0) {
