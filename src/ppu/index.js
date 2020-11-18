@@ -483,7 +483,7 @@ export default class PPU {
           let tileMSB = this.ppuRead(i * 0x1000 + offset + row + 8)
 
           for (let col = 0; col < 8; col++) {
-            const pixel = (tileLSB & 0x01) + (tileMSB & 0x01)
+            const pixel = ((tileLSB & 0x01) << 1) | (tileMSB & 0x01)
 
             tileLSB >>= 1
             tileMSB >>= 1
