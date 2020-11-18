@@ -311,53 +311,6 @@ export default class PPU {
   }
 
   clock() {
-    // const isRenderSomthing =
-    //   this.maskReg.bRenderBg || this.maskReg.bRenderSprites
-
-    // const incrementScrollX = () => {
-    //   if (isRenderSomthing) {
-    //     if (this.vramAddress.coarseX === 31) {
-    //       this.vramAddress.coarseX = 0
-    //       this.vramAddress.nametableX = ~this.vramAddress.nametableX
-    //     } else {
-    //       this.vramAddress.coarseX++
-    //     }
-    //   }
-    // }
-
-    // const incrementScrollY = () => {
-    //   if (isRenderSomthing) {
-    //     if (this.vramAddress.fineY < 7) {
-    //       this.vramAddress.fineY++
-    //     } else {
-    //       this.vramAddress.fineY = 0
-    //       if (this.vramAddress.coarseY === 29) {
-    //         this.vramAddress.coarseY = 0
-    //         this.vramAddress.nametableY = ~this.vramAddress.nametableY
-    //       } else if (this.vramAddress.coarseY === 31) {
-    //         this.vramAddress.coarseY = 0
-    //       } else {
-    //         this.vramAddress.coarseY++
-    //       }
-    //     }
-    //   }
-    // }
-
-    // const transferAddressX = () => {
-    //   if (isRenderSomthing) {
-    //     this.vramAddress.nametableX = this.tramAddress.nametableX
-    //     this.vramAddress.coarseX = this.tramAddress.coarseX
-    //   }
-    // }
-
-    // const transferAddressY = () => {
-    //   if (isRenderSomthing) {
-    //     this.vramAddress.fineY = this.tramAddress.fineY
-    //     this.vramAddress.nametableY = this.tramAddress.nametableY
-    //     this.vramAddress.coarseY = this.tramAddress.coarseY
-    //   }
-    // }
-
     if (this.scanline >= -1 && this.scanline < 240) {
       if (this.scanline === -1 && this.cycle === 1) {
         this.statusReg.verticalBlank = 0
