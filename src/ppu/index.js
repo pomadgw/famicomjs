@@ -216,73 +216,138 @@ export default class PPU {
       msb: 0
     }
 
-    this.spriteShifter = {
-      patternLo: [0, 0, 0, 0, 0, 0, 0, 0],
-      patternHi: [0, 0, 0, 0, 0, 0, 0, 0]
-    }
-
     const rootThis = this
 
-    this.bgShifter = {
-      pattern: {
+    this.shifter = {
+      bgPattern: {
         lo: 0,
         hi: 0
       },
-      attrib: {
+      bgAttrib: {
         lo: 0,
         hi: 0
       },
+      spritePatternLo: [0, 0, 0, 0, 0, 0, 0, 0],
+      spritePatternHi: [0, 0, 0, 0, 0, 0, 0, 0],
       reset() {
-        this.pattern = {
+        this.bgPattern = {
           lo: 0,
           hi: 0
         }
 
-        this.attrib = {
+        this.bgAttrib = {
           lo: 0,
           hi: 0
+        }
+      },
+      resetSpriteShifter() {
+        for (let i = 0; i < 8; i++) {
+          this.spritePatternLo[i] = 0
+          this.spritePatternHi[i] = 0
         }
       },
       loadBgShifter() {
-        this.pattern.lo = (this.pattern.lo & 0xff00) | rootThis.bgNextTile.lsb
-        this.pattern.hi = (this.pattern.hi & 0xff00) | rootThis.bgNextTile.msb
+        this.bgPattern.lo =
+          (this.bgPattern.lo & 0xff00) | rootThis.bgNextTile.lsb
+        this.bgPattern.hi =
+          (this.bgPattern.hi & 0xff00) | rootThis.bgNextTile.msb
 
-        this.attrib.lo =
-          (this.attrib.lo & 0xff00) |
+        this.bgAttrib.lo =
+          (this.bgAttrib.lo & 0xff00) |
           ((rootThis.bgNextTile.attrib & 0x01) > 0 ? 0xff : 0)
-        this.attrib.hi =
-          (this.attrib.hi & 0xff00) |
+        this.bgAttrib.hi =
+          (this.bgAttrib.hi & 0xff00) |
           ((rootThis.bgNextTile.attrib & 0x02) > 0 ? 0xff : 0)
       },
       updateShifter() {
         if (rootThis.maskReg.bRenderBg) {
-          this.pattern.lo <<= 1
-          this.pattern.hi <<= 1
-          this.attrib.lo <<= 1
-          this.attrib.hi <<= 1
+          this.bgPattern.lo <<= 1
+          this.bgPattern.hi <<= 1
+          this.bgAttrib.lo <<= 1
+          this.bgAttrib.hi <<= 1
+        }
+
+        if (
+          rootThis.maskReg.bRenderSprites &&
+          rootThis.cycle >= 1 &&
+          rootThis.cycle < 258
+        ) {
+          for (let i = 0; i < rootThis.spriteCount; i++) {
+            if (rootThis.spriteScanline[i].x > 0) {
+              rootThis.spriteScanline[i].x--
+            } else {
+              this.spritePatternLo[i] <<= 1
+              this.spritePatternHi[i] <<= 1
+            }
+          }
         }
       },
-      yieldBgPixel() {
-        if (!rootThis.maskReg.bRenderBg)
-          return {
-            bgPixel: 0,
-            bgPalette: 0
+      yieldPixel() {
+        let bgPixel = 0
+        let bgPalette = 0
+
+        if (rootThis.maskReg.bRenderBg) {
+          const bitmux = 0x8000 >> rootThis.fineX
+
+          const [p0Pixel, p1Pixel] = [
+            (this.bgPattern.lo & bitmux) > 0 ? 1 : 0,
+            (this.bgPattern.hi & bitmux) > 0 ? 1 : 0
+          ]
+
+          const [bgPal0, bgPal1] = [
+            (this.bgAttrib.lo & bitmux) > 0 ? 1 : 0,
+            (this.bgAttrib.hi & bitmux) > 0 ? 1 : 0
+          ]
+
+          bgPixel = (p1Pixel << 1) | p0Pixel
+          bgPalette = (bgPal1 << 1) | bgPal0
+        }
+
+        let fgPixel = 0
+        let fgPalette = 0
+        let fgPriority = false
+
+        if (rootThis.maskReg.bRenderSprites) {
+          for (let i = 0; i < rootThis.spriteCount; i++) {
+            if (rootThis.spriteScanline[i].x === 0) {
+              const fgPixelLo = (this.spritePatternLo[i] & 0x80) > 0 ? 1 : 0
+              const fgPixelHi = (this.spritePatternHi[i] & 0x80) > 0 ? 1 : 0
+              fgPixel = (fgPixelHi << 1) | fgPixelLo
+              fgPalette = (rootThis.spriteScanline[i].attrib & 0x03) + 0x04
+              fgPriority = (rootThis.spriteScanline[i].attrib & 0x20) === 0
+
+              if (fgPixel !== 0) {
+                break
+              }
+            }
           }
-        const bitmux = 0x8000 >> rootThis.fineX
+        }
 
-        const [p0Pixel, p1Pixel] = [
-          (this.pattern.lo & bitmux) > 0 ? 1 : 0,
-          (this.pattern.hi & bitmux) > 0 ? 1 : 0
-        ]
+        let pixel = 0
+        let palette = 0
 
-        const [bgPal0, bgPal1] = [
-          (this.attrib.lo & bitmux) > 0 ? 1 : 0,
-          (this.attrib.hi & bitmux) > 0 ? 1 : 0
-        ]
+        if (bgPixel === 0 && fgPixel === 0) {
+          pixel = 0
+          palette = 0
+        } else if (bgPixel === 0 && fgPixel > 0) {
+          pixel = fgPixel
+          palette = fgPalette
+        } else if (bgPixel >= 0 && fgPixel === 0) {
+          pixel = bgPixel
+          palette = bgPalette
+        } else {
+          if (fgPriority) {
+            pixel = fgPixel
+            palette = fgPalette
+          } else {
+            pixel = bgPixel
+            palette = bgPalette
+          }
+        }
 
         return {
-          bgPixel: (p1Pixel << 1) | p0Pixel,
-          bgPalette: (bgPal1 << 1) | bgPal0
+          pixel,
+          palette
         }
       }
     }
@@ -313,7 +378,7 @@ export default class PPU {
     this.vramAddress.value = 0
     this.tramAddress.value = 0
 
-    this.bgShifter.reset()
+    this.shifter.reset()
     this.fineX = 0
 
     this.nmi = false
@@ -378,17 +443,19 @@ export default class PPU {
     if (this.scanline >= -1 && this.scanline < 240) {
       if (this.scanline === -1 && this.cycle === 1) {
         this.statusReg.verticalBlank = 0
+        this.statusReg.spriteOverflow = 0
+        this.shifter.resetSpriteShifter()
       }
 
       if (
         (this.cycle > 1 && this.cycle < 258) ||
         (this.cycle > 320 && this.cycle < 338)
       ) {
-        this.bgShifter.updateShifter()
+        this.shifter.updateShifter()
 
         switch ((this.cycle - 1) % 8) {
           case 0:
-            this.bgShifter.loadBgShifter()
+            this.shifter.loadBgShifter()
             this.bgNextTile.id = this.ppuRead(
               0x2000 | (this.vramAddress.value & 0x0fff)
             )
@@ -438,7 +505,7 @@ export default class PPU {
       }
 
       if (this.cycle === 257) {
-        this.bgShifter.loadBgShifter()
+        this.shifter.loadBgShifter()
         this.transferAddressX()
       }
 
@@ -478,18 +545,11 @@ export default class PPU {
       }
 
       // Extract the sprite data
-      if (this.clock === 340) {
+      if (this.cycle === 340) {
         for (let i = 0; i < this.spriteCount; i++) {
-          // eslint-disable-next-line
-          let spritePatternBitLo
-          // eslint-disable-next-line
-          let spritePatternBitHi
-          // eslint-disable-next-line
           let spritePatternAddressLo
-          // eslint-disable-next-line
-          let spritePatternAddressHi
 
-          if (!this.controlReg.bspriteSize) {
+          if (!this.controlReg.bSpriteSize) {
             // 8x8 sprite mode
             if (!((this.spriteScanline[i].attrib & 0x80) > 0)) {
               // Sprite is normal, not flipped
@@ -539,6 +599,32 @@ export default class PPU {
               }
             }
           }
+
+          // eslint-disable-next-line
+          const spritePatternAddressHi = spritePatternAddressLo + 8
+          // eslint-disable-next-line
+          let spritePatternBitLo = this.ppuRead(spritePatternAddressLo)
+          // eslint-disable-next-line
+          let spritePatternBitHi = this.ppuRead(spritePatternAddressHi)
+
+          const isFlippedHorizontally =
+            (this.spriteScanline[i].attrib & 0x40) > 0
+
+          if (isFlippedHorizontally) {
+            //
+            const flipByte = (b) => {
+              b = ((b & 0xf0) >> 4) | ((b & 0x0f) << 4)
+              b = ((b & 0xcc) >> 2) | ((b & 0x33) << 2)
+              b = ((b & 0xaa) >> 1) | ((b & 0x55) << 1)
+              return b
+            }
+
+            spritePatternBitLo = flipByte(spritePatternBitLo)
+            spritePatternBitHi = flipByte(spritePatternBitHi)
+          }
+
+          this.shifter.spritePatternLo[i] = spritePatternBitLo
+          this.shifter.spritePatternHi[i] = spritePatternBitHi
         }
       }
     }
@@ -556,12 +642,12 @@ export default class PPU {
       }
     }
 
-    const { bgPixel, bgPalette } = this.bgShifter.yieldBgPixel()
+    const { pixel, palette } = this.shifter.yieldPixel()
 
     this.screen.setColor(
       this.cycle - 1,
       this.scanline,
-      this.getColorFromPaletteRAM(bgPalette, bgPixel)
+      this.getColorFromPaletteRAM(palette, pixel)
     )
 
     this.cycle += 1
