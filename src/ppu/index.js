@@ -137,6 +137,9 @@ export default class PPU {
     this.spriteCount = 0
     this.oamAddress = 0x0000
 
+    this.bSpriteZeroHitPossible = false
+    this.bSpriteZeroBeingRendered = false
+
     this.screen = new Screen(256, 240)
     // for debugging purposes
     this.screenTableName = [new Screen(256, 240), new Screen(256, 240)]
@@ -389,6 +392,9 @@ export default class PPU {
       lsb: 0,
       msb: 0
     }
+
+    this.bSpriteZeroHitPossible = false
+    this.bSpriteZeroBeingRendered = false
   }
 
   get isRenderSomthing() {
