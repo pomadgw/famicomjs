@@ -109,6 +109,20 @@ class OAM {
       }
     })
   }
+
+  transfer(otherOAM) {
+    this.x = otherOAM.x
+    this.y = otherOAM.y
+    this.id = otherOAM.id
+    this.attrib = otherOAM.attrib
+  }
+
+  reset() {
+    this.x = 0xff
+    this.y = 0xff
+    this.id = 0xff
+    this.attrib = 0xff
+  }
 }
 
 export default class PPU {
@@ -117,7 +131,10 @@ export default class PPU {
     this.tableName = [new Uint8Array(1024), new Uint8Array(1024)]
     this.tablePattern = [new Uint8Array(4096), new Uint8Array(4096)]
     this.tablePalette = new Uint8Array(32)
+
     this.oam = [...Array(64).keys()].map(() => new OAM())
+    this.spriteScanline = [...Array(8).keys()].map(() => new OAM())
+    this.spriteCount = 0
     this.oamAddress = 0x0000
 
     this.screen = new Screen(256, 240)
@@ -197,6 +214,11 @@ export default class PPU {
       attrib: 0,
       lsb: 0,
       msb: 0
+    }
+
+    this.spriteShifter = {
+      patternLo: [0, 0, 0, 0, 0, 0, 0, 0],
+      patternHi: [0, 0, 0, 0, 0, 0, 0, 0]
     }
 
     const rootThis = this
@@ -428,6 +450,96 @@ export default class PPU {
 
       if (this.scanline === -1 && this.cycle >= 280 && this.cycle < 305) {
         this.transferAddressY()
+      }
+
+      // Render the foreground (sprites!)
+      // This part is different from what the actual PPU is doing
+
+      // First find sprites needed to be rendered
+      if (this.cycle === 257 && this.scanline >= 0) {
+        this.spriteScanline.forEach((oam) => oam.reset())
+        this.spriteCount = 0
+
+        let oamEntry = 0
+        while (oamEntry < 64 && this.spriteCount < 9) {
+          const diff = this.scanline - this.oam[oamEntry].y
+
+          if (diff >= 0 && diff < (this.controlReg.bSpriteSize ? 16 : 8)) {
+            if (this.spriteCount < 8) {
+              this.spriteScanline[this.spriteCount].transfer(this.oam[oamEntry])
+              this.spriteCount++
+            }
+          }
+
+          oamEntry++
+        }
+
+        this.statusReg.bSpriteOverflow = this.spriteCount > 8
+      }
+
+      // Extract the sprite data
+      if (this.clock === 340) {
+        for (let i = 0; i < this.spriteCount; i++) {
+          // eslint-disable-next-line
+          let spritePatternBitLo
+          // eslint-disable-next-line
+          let spritePatternBitHi
+          // eslint-disable-next-line
+          let spritePatternAddressLo
+          // eslint-disable-next-line
+          let spritePatternAddressHi
+
+          if (!this.controlReg.bspriteSize) {
+            // 8x8 sprite mode
+            if (!((this.spriteScanline[i].attrib & 0x80) > 0)) {
+              // Sprite is normal, not flipped
+              spritePatternAddressLo =
+                (this.controlReg.patternSprite << 12) | // in 0k or 4k range
+                (this.spriteScanline[i].id << 4) | // each tile is 16 bytes in size
+                (this.scanline - this.spriteScanline[i].y)
+            } else {
+              // The sprite is flipped vertically
+              spritePatternAddressLo =
+                (this.controlReg.patternSprite << 12) | // in 0k or 4k range
+                (this.spriteScanline[i].id << 4) | // each tile is 16 bytes in size
+                (7 - (this.scanline - this.spriteScanline[i].y))
+            }
+          } else {
+            // 8x16 sprite mode
+            if (!((this.spriteScanline[i].attrib & 0x80) > 0)) {
+              // Sprite is normal, not flipped
+              if (this.scanline - this.spriteScanline[i].y < 8) {
+                // reading top half
+                spritePatternAddressLo =
+                  ((this.spriteScanline[i].id & 0x01) << 12) |
+                  ((this.spriteScanline[i].id & 0xfe) << 4) |
+                  ((this.scanline - this.spriteScanline[i].y) & 0x07)
+              } else {
+                // reading bottom half
+                spritePatternAddressLo =
+                  ((this.spriteScanline[i].id & 0x01) << 12) |
+                  (((this.spriteScanline[i].id & 0xfe) + 1) << 4) |
+                  ((this.scanline - this.spriteScanline[i].y) & 0x07)
+              }
+            } else {
+              // The sprite is flipped vertically
+              if (this.scanline - this.spriteScanline[i].y < 8) {
+                // reading top half
+                spritePatternAddressLo =
+                  ((this.spriteScanline[i].id & 0x01) << 12) |
+                  ((this.spriteScanline[i].id & 0xfe) << 4) |
+                  (7 - ((this.scanline - this.spriteScanline[i].y) & 0x07))
+              } else {
+                // reading bottom half
+                // eslint-disable-next-line
+                spritePatternAddressLo =
+                  ((this.spriteScanline[i].id & 0x01) << 12) |
+                  (((this.spriteScanline[i].id & 0xfe) + 1) << 4) |
+                  (7 - ((this.scanline - this.spriteScanline[i].y) & 0x07))
+              }
+            }
+          }
+        }
       }
     }
 
