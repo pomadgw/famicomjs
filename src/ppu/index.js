@@ -311,6 +311,8 @@ export default class PPU {
         let fgPriority = false
 
         if (rootThis.maskReg.bRenderSprites) {
+          rootThis.bSpriteZeroBeingRendered = false
+
           for (let i = 0; i < rootThis.spriteCount; i++) {
             if (rootThis.spriteScanline[i].x === 0) {
               const fgPixelLo = (this.spritePatternLo[i] & 0x80) > 0 ? 1 : 0
@@ -320,6 +322,7 @@ export default class PPU {
               fgPriority = (rootThis.spriteScanline[i].attrib & 0x20) === 0
 
               if (fgPixel !== 0) {
+                if (i === 0) rootThis.bSpriteZeroBeingRendered = true
                 break
               }
             }
@@ -345,6 +348,29 @@ export default class PPU {
           } else {
             pixel = bgPixel
             palette = bgPalette
+          }
+
+          // Detect sprite zero hit
+          if (
+            rootThis.bSpriteZeroHitPossible &&
+            rootThis.bSpriteZeroBeingRendered
+          ) {
+            if (rootThis.maskReg.bRenderBg && rootThis.maskReg.bRenderSprites) {
+              if (
+                ~(
+                  rootThis.maskReg.renderBgLeft |
+                  rootThis.maskReg.renderSpritesLeft
+                ) > 0
+              ) {
+                if (rootThis.cycle >= 9 && rootThis.cycle < 258) {
+                  rootThis.statusReg.spriteZeroHit = 1
+                }
+              } else {
+                if (rootThis.cycle >= 1 && rootThis.cycle < 258) {
+                  rootThis.statusReg.spriteZeroHit = 1
+                }
+              }
+            }
           }
         }
 
@@ -450,6 +476,8 @@ export default class PPU {
       if (this.scanline === -1 && this.cycle === 1) {
         this.statusReg.verticalBlank = 0
         this.statusReg.spriteOverflow = 0
+        this.statusReg.spriteZeroHit = 0
+
         this.shifter.resetSpriteShifter()
       }
 
@@ -534,11 +562,13 @@ export default class PPU {
         this.spriteCount = 0
 
         let oamEntry = 0
+        this.bSpriteZeroHitPossible = false
         while (oamEntry < 64 && this.spriteCount < 9) {
           const diff = this.scanline - this.oam[oamEntry].y
 
           if (diff >= 0 && diff < (this.controlReg.bSpriteSize ? 16 : 8)) {
             if (this.spriteCount < 8) {
+              if (oamEntry === 0) this.bSpriteZeroHitPossible = true
               this.spriteScanline[this.spriteCount].transfer(this.oam[oamEntry])
               this.spriteCount++
             }
