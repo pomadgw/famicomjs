@@ -563,6 +563,7 @@ export default class PPU {
       if (this.cycle === 257 && this.scanline >= 0) {
         this.spriteScanline.forEach((oam) => oam.reset())
         this.spriteCount = 0
+        this.shifter.resetSpriteShifter()
 
         let oamEntry = 0
         this.bSpriteZeroHitPossible = false
@@ -585,6 +586,7 @@ export default class PPU {
         }
 
         if (this.spriteCount > 8) {
+          this.status &= ~STATUS.SPRITE_OVERFLOW
           this.status |= STATUS.SPRITE_OVERFLOW
           this.spriteCount = 8
         }
@@ -815,7 +817,7 @@ export default class PPU {
         this.mask = value
         break
       case 0x0002: // Status
-        this.status = value
+        // this.status = value
         break
       case 0x0003: // OAM Address
         this.oamAddress = value
@@ -837,7 +839,7 @@ export default class PPU {
       case 0x0006: // PPU Address
         if (this.addressLatch === 0) {
           this.tramAddress.value =
-            (this.tramAddress.value & 0x00ff) | (value << 8)
+            (this.tramAddress.value & 0x00ff) | ((value & 0x3f) << 8)
           this.addressLatch = 1
         } else {
           this.tramAddress.value = (this.tramAddress.value & 0xff00) | value
