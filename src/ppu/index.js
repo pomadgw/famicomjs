@@ -570,8 +570,9 @@ export default class PPU {
             if (this.spriteCount < 8) {
               if (oamEntry === 0) this.bSpriteZeroHitPossible = true
               this.spriteScanline[this.spriteCount].transfer(this.oam[oamEntry])
-              this.spriteCount++
             }
+
+            this.spriteCount++
           }
 
           oamEntry++
