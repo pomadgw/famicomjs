@@ -178,45 +178,8 @@ export default class PPU {
     this.scanline = 0
     this.cycle = 0
 
-    this.statusReg = bitfield(
-      [
-        ['_unused', 5],
-        ['spriteOverflow', 1],
-        ['spriteZeroHit', 1],
-        ['verticalBlank', 1]
-      ],
-      new Uint8Array([0])
-    )
     this.status = 0
-
-    this.maskReg = bitfield(
-      [
-        ['grayscale', 1],
-        ['renderBgLeft', 1],
-        ['renderSpritesLeft', 1],
-        ['renderBg', 1],
-        ['renderSprites', 1],
-        ['enhanceRed', 1],
-        ['enhanceGreen', 1],
-        ['enhanceBlue', 1]
-      ],
-      new Uint8Array([0])
-    )
     this.mask = 0
-
-    this.controlReg = bitfield(
-      [
-        ['nametableX', 1],
-        ['nametableY', 1],
-        ['incrementMode', 1],
-        ['patternSprite', 1],
-        ['patternBg', 1],
-        ['spriteSize', 1],
-        ['slaveMode', 1], // unused
-        ['enablenmi', 1]
-      ],
-      new Uint8Array([0])
-    )
     this.control = 0
 
     this.addressLatch = 0x00
@@ -294,7 +257,7 @@ export default class PPU {
           ((rootThis.bgNextTile.attrib & 0x02) > 0 ? 0xff : 0)
       },
       updateShifter() {
-        if (rootThis.maskReg.bRenderBg) {
+        if ((rootThis.mask & MASK.RENDER_BG) > 0) {
           this.bgPattern.lo <<= 1
           this.bgPattern.hi <<= 1
           this.bgAttrib.lo <<= 1
@@ -302,7 +265,7 @@ export default class PPU {
         }
 
         if (
-          rootThis.maskReg.bRenderSprites &&
+          (rootThis.mask & MASK.RENDER_SPRITES) > 0 &&
           rootThis.cycle >= 1 &&
           rootThis.cycle < 258
         ) {
@@ -320,7 +283,7 @@ export default class PPU {
         let bgPixel = 0
         let bgPalette = 0
 
-        if (rootThis.maskReg.bRenderBg) {
+        if ((rootThis.mask & MASK.RENDER_BG) > 0) {
           const bitmux = 0x8000 >> rootThis.fineX
 
           const [p0Pixel, p1Pixel] = [
@@ -341,7 +304,7 @@ export default class PPU {
         let fgPalette = 0
         let fgPriority = false
 
-        if (rootThis.maskReg.bRenderSprites) {
+        if ((rootThis.mask & MASK.RENDER_SPRITES) > 0) {
           rootThis.bSpriteZeroBeingRendered = false
 
           for (let i = 0; i < rootThis.spriteCount; i++) {
@@ -386,19 +349,22 @@ export default class PPU {
             rootThis.bSpriteZeroHitPossible &&
             rootThis.bSpriteZeroBeingRendered
           ) {
-            if (rootThis.maskReg.bRenderBg && rootThis.maskReg.bRenderSprites) {
+            if (
+              (rootThis.mask & MASK.RENDER_BG) > 0 &&
+              (rootThis.mask & MASK.RENDER_SPRITES) > 0
+            ) {
               if (
-                ~(
-                  rootThis.maskReg.renderBgLeft |
-                  rootThis.maskReg.renderSpritesLeft
-                ) > 0
+                !(
+                  (rootThis.mask & MASK.RENDER_BG_LEFT) > 0 ||
+                  (rootThis.mask & MASK.RENDER_SPRITES_LEFT) > 0
+                )
               ) {
                 if (rootThis.cycle >= 9 && rootThis.cycle < 258) {
-                  rootThis.statusReg.spriteZeroHit = 1
+                  rootThis.status |= STATUS.SPRITE_ZERO_HIT
                 }
               } else {
                 if (rootThis.cycle >= 1 && rootThis.cycle < 258) {
-                  rootThis.statusReg.spriteZeroHit = 1
+                  rootThis.status |= STATUS.SPRITE_ZERO_HIT
                 }
               }
             }
@@ -414,7 +380,7 @@ export default class PPU {
   }
 
   get incrementValue() {
-    return this.controlReg.incrementMode === 1 ? 32 : 1
+    return (this.control & CONTROL.INCREMENT_MODE) > 0 ? 32 : 1
   }
 
   insertCartridge(cartridge) {
@@ -432,9 +398,6 @@ export default class PPU {
     this.ppuAddress = 0x0000
     this.oamAddress = 0x0000
 
-    this.statusReg.value = 0
-    this.controlReg.value = 0
-    this.maskReg.value = 0
     this.status = 0
     this.mask = 0
     this.control = 0
@@ -459,7 +422,9 @@ export default class PPU {
   }
 
   get isRenderSomthing() {
-    return this.maskReg.bRenderBg || this.maskReg.bRenderSprites
+    return (
+      (this.mask & MASK.RENDER_BG) > 0 || (this.mask & MASK.RENDER_SPRITES) > 0
+    )
   }
 
   incrementScrollX() {
@@ -509,9 +474,11 @@ export default class PPU {
   clock() {
     if (this.scanline >= -1 && this.scanline < 240) {
       if (this.scanline === -1 && this.cycle === 1) {
-        this.statusReg.verticalBlank = 0
-        this.statusReg.spriteOverflow = 0
-        this.statusReg.spriteZeroHit = 0
+        this.status &= ~(
+          STATUS.VERTICAL_BLANK |
+          STATUS.SPRITE_OVERFLOW |
+          STATUS.SPRITE_ZERO_HIT
+        )
 
         this.shifter.resetSpriteShifter()
       }
@@ -522,6 +489,7 @@ export default class PPU {
       ) {
         this.shifter.updateShifter()
 
+        const patternBg = (this.control & CONTROL.PATTERN_BG) > 0 ? 1 : 0
         switch ((this.cycle - 1) % 8) {
           case 0:
             this.shifter.loadBgShifter()
@@ -547,7 +515,7 @@ export default class PPU {
             break
           case 4:
             this.bgNextTile.lsb = this.ppuRead(
-              (this.controlReg.patternBg << 12) +
+              (patternBg << 12) +
                 (this.bgNextTile.id << 4) +
                 this.vramAddress.fineY +
                 0
@@ -555,7 +523,7 @@ export default class PPU {
             break
           case 6:
             this.bgNextTile.msb = this.ppuRead(
-              (this.controlReg.patternBg << 12) +
+              (patternBg << 12) +
                 (this.bgNextTile.id << 4) +
                 this.vramAddress.fineY +
                 8
@@ -601,7 +569,10 @@ export default class PPU {
         while (oamEntry < 64 && this.spriteCount < 9) {
           const diff = this.scanline - this.oam[oamEntry].y
 
-          if (diff >= 0 && diff < (this.controlReg.bSpriteSize ? 16 : 8)) {
+          if (
+            diff >= 0 &&
+            diff < ((this.control & CONTROL.SPRITE_SIZE) > 0 ? 16 : 8)
+          ) {
             if (this.spriteCount < 8) {
               if (oamEntry === 0) this.bSpriteZeroHitPossible = true
               this.spriteScanline[this.spriteCount].transfer(this.oam[oamEntry])
@@ -614,7 +585,7 @@ export default class PPU {
         }
 
         if (this.spriteCount > 8) {
-          this.statusReg.bSpriteOverflow = true
+          this.status |= STATUS.SPRITE_OVERFLOW
           this.spriteCount = 8
         }
       }
@@ -624,18 +595,20 @@ export default class PPU {
         for (let i = 0; i < this.spriteCount; i++) {
           let spritePatternAddressLo
 
-          if (!this.controlReg.bSpriteSize) {
+          const patternSprite =
+            (this.control & CONTROL.PATTERN_SPRITE) > 0 ? 1 : 0
+          if ((this.control & CONTROL.SPRITE_SIZE) === 0) {
             // 8x8 sprite mode
             if (!((this.spriteScanline[i].attrib & 0x80) > 0)) {
               // Sprite is normal, not flipped
               spritePatternAddressLo =
-                (this.controlReg.patternSprite << 12) | // in 0k or 4k range
+                (patternSprite << 12) | // in 0k or 4k range
                 (this.spriteScanline[i].id << 4) | // each tile is 16 bytes in size
                 (this.scanline - this.spriteScanline[i].y)
             } else {
               // The sprite is flipped vertically
               spritePatternAddressLo =
-                (this.controlReg.patternSprite << 12) | // in 0k or 4k range
+                (patternSprite << 12) | // in 0k or 4k range
                 (this.spriteScanline[i].id << 4) | // each tile is 16 bytes in size
                 (7 - (this.scanline - this.spriteScanline[i].y))
             }
@@ -710,9 +683,9 @@ export default class PPU {
     }
 
     if (this.scanline === 241 && this.cycle === 1) {
-      this.statusReg.verticalBlank = 1
+      this.status |= STATUS.VERTICAL_BLANK
 
-      if (this.controlReg.enablenmi === 1) {
+      if ((this.control & CONTROL.ENABLENMI) > 0) {
         this.nmi = true
       }
     }
@@ -790,9 +763,9 @@ export default class PPU {
       case 0x0001: // Mask
         break
       case 0x0002: // Status
-        data = (this.statusReg.value & 0xe0) | (this.ppuDataBuffer & 0x1f)
+        data = (this.status & 0xe0) | (this.ppuDataBuffer & 0x1f)
         if (!isReadOnly) {
-          this.statusReg.verticalBlank = 0
+          this.status &= ~STATUS.VERTICAL_BLANK
           this.addressLatch = 0
         }
         break
@@ -832,15 +805,17 @@ export default class PPU {
     // TODO: implement this later
     switch (addr) {
       case 0x0000: // Control
-        this.controlReg.value = value
-        this.tramAddress.nametableX = this.controlReg.nametableX
-        this.tramAddress.nametableY = this.controlReg.nametableY
+        this.control = value
+        this.tramAddress.nametableX =
+          (this.control & CONTROL.NAMETABLE_X) > 0 ? 1 : 0
+        this.tramAddress.nametableY =
+          (this.control & CONTROL.NAMETABLE_Y) > 0 ? 1 : 0
         break
       case 0x0001: // Mask
-        this.maskReg.value = value
+        this.mask = value
         break
       case 0x0002: // Status
-        this.statusReg.value = value
+        this.status = value
         break
       case 0x0003: // OAM Address
         this.oamAddress = value
