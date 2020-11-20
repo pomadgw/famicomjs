@@ -255,6 +255,24 @@ describe('PPU', () => {
       expect(ppu.statusReg.verticalBlank).toBe(0)
       expect(ppu.addressLatch).toBe(0)
     })
+
+    it('should be able to read oam data', () => {
+      ppu.oam[0].y = 1
+      ppu.oam[0].id = 2
+      ppu.oam[0].attrib = 3
+      ppu.oam[0].x = 4
+      ppu.oam[1].y = 5
+
+      ppu.oamAddress = 0x0000
+      let fetched = ppu.cpuRead(0x0004)
+      expect(fetched).toEqual(1)
+      ppu.oamAddress = 0x0001
+      fetched = ppu.cpuRead(0x0004)
+      expect(fetched).toEqual(2)
+      ppu.oamAddress = 0x0004
+      fetched = ppu.cpuRead(0x0004)
+      expect(fetched).toEqual(5)
+    })
   })
 
   describe('#cpuWrite', () => {
@@ -314,6 +332,24 @@ describe('PPU', () => {
       ppu.cpuWrite(0x0007, 0x1f)
       expect(ppu.ppuWrite).toHaveBeenCalledWith(0x1110, 0x1f)
       expect(ppu.vramAddress.value).toBe(0x1110 + 0x20)
+    })
+
+    it('should be able to write oam data', () => {
+      ppu.cpuWrite(0x0003, 0x00)
+      ppu.cpuWrite(0x0004, 0x01)
+      expect(ppu.oam[0].y).toBe(0x01)
+      ppu.cpuWrite(0x0003, 0x01)
+      ppu.cpuWrite(0x0004, 0x02)
+      expect(ppu.oam[0].id).toBe(0x02)
+      ppu.cpuWrite(0x0003, 0x02)
+      ppu.cpuWrite(0x0004, 0x03)
+      expect(ppu.oam[0].attrib).toBe(0x03)
+      ppu.cpuWrite(0x0003, 0x03)
+      ppu.cpuWrite(0x0004, 0x04)
+      expect(ppu.oam[0].x).toBe(0x04)
+      ppu.cpuWrite(0x0003, 0x04)
+      ppu.cpuWrite(0x0004, 0x05)
+      expect(ppu.oam[1].y).toBe(0x05)
     })
   })
 })

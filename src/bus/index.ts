@@ -17,6 +17,12 @@ export default class Bus {
     render?: RenderFn
   }
 
+  public dmaPage: number
+  public dmaAddress: number
+  public dmaData: number
+  public isInDMATransfer: boolean
+  private dmaDummy: boolean
+
   constructor(cpu: CPU, ppu: PPU, onRender?: RenderFn) {
     this.cpu = cpu
     this.ppu = ppu
@@ -26,6 +32,12 @@ export default class Bus {
     this.ram = new Uint8Array(0x2000)
 
     this.globalSystemClockNumber = 0
+
+    this.dmaPage = 0x00
+    this.dmaAddress = 0x00
+    this.dmaData = 0x00
+    this.isInDMATransfer = false
+    this.dmaDummy = true
 
     this._on = {
       render: onRender
@@ -66,6 +78,11 @@ export default class Bus {
     else if (address < 0x2000) this.ram[address & 0x07ff] = value
     else if (address < 0x4000) {
       this.ppu.cpuWrite(address & 0x0007, value)
+    } else if (address === 0x4014) {
+      // DMA stuffs happen here
+      this.dmaPage = value
+      this.dmaAddress = 0x00
+      this.isInDMATransfer = true
     } else if (address === 0x4016 || address === 0x4017) {
       this.controllers[address & 0x1].write(value)
     }
@@ -94,11 +111,39 @@ export default class Bus {
     this.cpu.reset()
     this.ppu.reset()
     this.globalSystemClockNumber = 0
+
+    this.dmaPage = 0x00
+    this.dmaAddress = 0x00
+    this.dmaData = 0x00
+    this.isInDMATransfer = false
+    this.dmaDummy = true
   }
 
   clock() {
     if (this.globalSystemClockNumber % 3 === 0) {
-      this.cpu.clock()
+      if (this.isInDMATransfer) {
+        // do something
+        if (this.dmaDummy) {
+          if (this.globalSystemClockNumber % 2 === 1) {
+            this.dmaDummy = false
+          }
+        } else {
+          if (this.globalSystemClockNumber % 2 === 0) {
+            // read from cpu
+            this.dmaData = this.cpuRead(this.dmaPage << 8 | this.dmaAddress)
+          } else {
+            this.ppu.writeToOAM(this.dmaAddress, this.dmaData)
+            this.dmaAddress++
+            this.dmaAddress %= 256
+            if (this.dmaAddress === 0) {
+              this.isInDMATransfer = false
+              this.dmaDummy = true
+            }
+          }
+        }
+      } else {
+        this.cpu.clock()
+      }
     }
 
     this.ppu.clock()

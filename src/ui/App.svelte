@@ -18,10 +18,11 @@
   let emulationMode = false
   let ctx
   let startFrame
-  let showDebug = false
+  let showDebug = true
   let offsetStart = 0x8000
   let nesPC = 0x8000
   let registers
+  let oams = []
   let selectedPalette = 0x00
   let selectedTable = new Uint8Array(1024)
 
@@ -51,6 +52,7 @@
     registers = nes.cpu
 
     disassembleRAM()
+    oams = nes.ppu.oam
     emulationMode = true
   }
 
@@ -103,6 +105,7 @@
 
     nesPC = nes.cpu.PC
     registers = nes.cpu
+    oams = nes.ppu.oam
   }
 
   function runEmulation(timestamp) {
@@ -119,6 +122,7 @@
 
         nesPC = nes.cpu.PC
         registers = nes.cpu
+        oams = nes.ppu.oam
       }
 
       requestAnimationFrame(runEmulation)
@@ -128,14 +132,6 @@
   function drawPalette() {
     const pCtx = paletteCanvas.getContext('2d')
     const pCtx2 = paletteCanvas2.getContext('2d')
-    // pCtx.imageSmoothingEnabled = false
-    // pCtx.mozImageSmoothingEnabled = false
-    // pCtx.webkitImageSmoothingEnabled = false
-    // pCtx.msImageSmoothingEnabled = false
-    // pCtx2.imageSmoothingEnabled = false
-    // pCtx2.mozImageSmoothingEnabled = false
-    // pCtx2.webkitImageSmoothingEnabled = false
-    // pCtx2.msImageSmoothingEnabled = false
 
     pCtx.putImageData(nes.ppu.getPatternTable(0, selectedPalette).imageData, 0, 0)
     pCtx2.putImageData(nes.ppu.getPatternTable(1, selectedPalette).imageData, 0, 0)
@@ -166,11 +162,6 @@
     ctx = canvas.getContext('2d')
 
     const zoomCtx = zoomCanvas.getContext('2d')
-
-    // zoomCtx.imageSmoothingEnabled = false
-    // zoomCtx.mozImageSmoothingEnabled = false
-    // zoomCtx.webkitImageSmoothingEnabled = false
-    // zoomCtx.msImageSmoothingEnabled = false
   })
 </script>
 
@@ -229,7 +220,28 @@
         <canvas class="ml-2 m-auto border-2 border-blue-400" style="width: 256px" width="128" height="128" bind:this={paletteCanvas2}></canvas>
       </div>
     </div>
-    <div class="ml-4 flex-1 flex flex-col">
+    <div class="mt-4 overflow-y-scroll" style="height: 300px">
+      <div class="text-xl text-center mb-4 font-bold">OAMs</div>
+      <table class="table text-gray-200">
+        <tr>
+          <th></th>
+          <th>x</th>
+          <th>y</th>
+          <th>ID</th>
+          <th>Attrib.</th>
+        </tr>
+        {#each oams as oam, index}
+        <tr>
+          <td>{index.toString(16).padStart(2, '0')}</td>
+          <td>{oam.x}</td>
+          <td>{oam.y}</td>
+          <td>{oam.id.toString(16).padStart(2, '0')}</td>
+          <td>{oam.attrib}</td>
+        </tr>
+        {/each}
+      </table>
+    </div>
+    <div class="mt-4 flex-1 flex flex-col">
       <div>
         PC: <span class="font-mono">{toHex(nesPC, { withPrefix: true, length: 4 })}</span>
       </div>
