@@ -578,7 +578,10 @@ export default class PPU {
           oamEntry++
         }
 
-        this.statusReg.bSpriteOverflow = this.spriteCount > 8
+        if (this.spriteCount > 8) {
+          this.statusReg.bSpriteOverflow = true
+          this.spriteCount = 8
+        }
       }
 
       // Extract the sprite data
