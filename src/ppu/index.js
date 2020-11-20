@@ -125,6 +125,34 @@ class OAM {
   }
 }
 
+export const STATUS = {
+  VERTICAL_BLANK: 1 << 7,
+  SPRITE_ZERO_HIT: 1 << 6,
+  SPRITE_OVERFLOW: 1 << 5
+}
+
+export const MASK = {
+  GRAYSCALE: 1,
+  RENDER_BG_LEFT: 1 << 1,
+  RENDER_SPRITES_LEFT: 1 << 2,
+  RENDER_BG: 1 << 3,
+  RENDER_SPRITES: 1 << 4,
+  ENHANCE_RED: 1 << 5,
+  ENHANCE_GREEN: 1 << 6,
+  ENHANCE_BLUE: 1 << 7
+}
+
+export const CONTROL = {
+  NAMETABLE_X: 1,
+  NAMETABLE_Y: 1 << 1,
+  INCREMENT_MODE: 1 << 2,
+  PATTERN_SPRITE: 1 << 3,
+  PATTERN_BG: 1 << 4,
+  SPRITE_SIZE: 1 << 5,
+  SLAVE_MODE: 1 << 6, // unused
+  ENABLENMI: 1 << 7
+}
+
 export default class PPU {
   // eslint-disable-next-line no-useless-constructor
   constructor() {
@@ -159,6 +187,7 @@ export default class PPU {
       ],
       new Uint8Array([0])
     )
+    this.status = 0
 
     this.maskReg = bitfield(
       [
@@ -173,6 +202,7 @@ export default class PPU {
       ],
       new Uint8Array([0])
     )
+    this.mask = 0
 
     this.controlReg = bitfield(
       [
@@ -187,6 +217,7 @@ export default class PPU {
       ],
       new Uint8Array([0])
     )
+    this.control = 0
 
     this.addressLatch = 0x00
     this.ppuDataBuffer = 0x00
@@ -404,6 +435,10 @@ export default class PPU {
     this.statusReg.value = 0
     this.controlReg.value = 0
     this.maskReg.value = 0
+    this.status = 0
+    this.mask = 0
+    this.control = 0
+
     this.vramAddress.value = 0
     this.tramAddress.value = 0
 
