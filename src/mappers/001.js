@@ -6,7 +6,6 @@ export default class MapperMMC1 extends Mapper {
     super(prgBankNumber, chrBankNumber)
 
     this.ram = new Uint8Array(0x2000)
-    this.vram = new Uint8Array(0x2000)
 
     this.shiftReg = 0
     this.shiftTimer = 0
@@ -149,9 +148,7 @@ export default class MapperMMC1 extends Mapper {
 
     let mappedAddress = address
     if (this.chrBankNumber === 0) {
-      const value = this.vram[address]
-
-      return { status: true, mappedAddress, value }
+      return { status: true, mappedAddress }
     }
 
     const use4kbCHRBankMode = (this.controlReg & 0b0001_0000) > 0
@@ -176,8 +173,7 @@ export default class MapperMMC1 extends Mapper {
     const mappedAddress = address
 
     if (this.chrBankNumber === 0) {
-      this.vram[address] = value
-      return { status: true, mappedAddress, value: true }
+      return { status: true, mappedAddress, write: true }
     } else {
       return { status: true, mappedAddress }
     }

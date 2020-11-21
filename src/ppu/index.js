@@ -903,6 +903,7 @@ export default class PPU {
   }
 
   ppuWrite(addr, value) {
+    addr = addr & 0x3fff
     if (this.cartridge.ppuWrite(addr, value)) {
       // TODO: implement this later
     } else if (addr < 0x2000) {

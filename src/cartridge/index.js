@@ -36,10 +36,14 @@ export default class Cartridge {
         seekPosition + this.prgBankNumber * 16384
       )
       seekPosition += this.prgBankNumber * 16384
-      this.chrMemory = view.slice(
-        seekPosition,
-        seekPosition + this.chrBankNumber * 8192
-      )
+      if (this.chrBankNumber === 0) {
+        this.chrMemory = new Uint8Array(0x2000)
+      } else {
+        this.chrMemory = view.slice(
+          seekPosition,
+          seekPosition + this.chrBankNumber * 8192
+        )
+      }
     } else if (nFileType === 2) {
     }
 
@@ -89,25 +93,23 @@ export default class Cartridge {
   }
 
   ppuRead(addr) {
-    const { status, mappedAddress, value } = this.mapper.ppuMapRead(addr)
+    const { status, mappedAddress } = this.mapper.ppuMapRead(addr)
 
     if (status) {
-      return value ?? this.chrMemory[mappedAddress]
+      return this.chrMemory[mappedAddress]
     }
 
     return null
   }
 
   ppuWrite(addr, value) {
-    const {
-      status,
-      mappedAddress,
-      value: isInternalChanged
-    } = this.mapper.ppuMapWrite(addr, value)
+    const { status, mappedAddress, write } = this.mapper.ppuMapWrite(
+      addr,
+      value
+    )
 
     if (status) {
-      if (isInternalChanged) return true
-      this.chrMemory[mappedAddress] = value
+      if (write) this.chrMemory[mappedAddress] = value
       return true
     }
 
