@@ -8,6 +8,8 @@ export default class Mapper {
     return null
   }
 
+  reset() {}
+
   cpuMapRead(addr) {
     return {
       status: false,

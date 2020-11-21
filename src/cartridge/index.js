@@ -62,6 +62,10 @@ export default class Cartridge {
     }
   }
 
+  reset() {
+    if (this.mapper) this.mapper.reset()
+  }
+
   get mirrorMode() {
     const mirrorMode = this.mapper?.mirror()
     if (mirrorMode) return mirrorMode

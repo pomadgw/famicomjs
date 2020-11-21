@@ -22,6 +22,20 @@ export default class MapperMMC1 extends Mapper {
     this.usePrgRam = false
   }
 
+  reset() {
+    this.shiftReg = 0
+    this.shiftTimer = 0
+
+    this.controlReg = this.controlReg | 0x0c
+
+    this.prgRom32kBankNumber = 0
+    this.prgRom16kLowBankNumber = 0
+    this.prgRom16kHighBankNumber = this.prgBankNumber - 1
+    this.chrRom8kBankNumber = 0
+    this.chrRom4k0BankNumber = 0
+    this.chrRom4k1BankNumber = 0
+  }
+
   shift(address, data) {
     if ((data & 0x80) > 0) {
       this.shiftTimer = 0
