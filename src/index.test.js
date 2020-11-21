@@ -13,25 +13,11 @@ const nesTestFile = resolve(__dirname, '../nestest.nes')
 
 jest.setTimeout(120000)
 
-async function mockNES({
-  filename,
-  name = 'file.nes',
-  type = 'application/octet-stream',
-  lastModified = new Date()
-} = {}) {
-  const data = fs.readFileSync(filename)
-  const blob = new Blob([data], { type })
-
-  blob.lastModifiedDate = lastModified
-
-  return new File([blob], name)
-}
-
 test('NES test', async () => {
   const nes = new Bus(new CPU(), new PPU(), () => {})
   const cart = new Cartridge()
-  const cartFile = await mockNES({ filename: nesTestFile })
-  await cart.parse(cartFile)
+  const cartFile = fs.readFileSync(nesTestFile)
+  cart.parse(cartFile)
   nes.insertCartridge(cart)
   nes.reset()
 
@@ -105,80 +91,78 @@ test('NES test', async () => {
   // expect(nes.cpu.ram[0x0003]).toBe(0) // for implementing undefined opcodes
 })
 
-const roms = fs.readdirSync(
-  resolve(__dirname, '../roms/instr_test-v5/rom_singles')
-)
+// const roms = fs.readdirSync(
+//   resolve(__dirname, '../roms/instr_test-v5/rom_singles')
+// )
 
-console.log(roms)
+// roms.forEach((romFileName) => {
+//   const filename = resolve(
+//     __dirname,
+//     '../roms/instr_test-v5/rom_singles',
+//     romFileName
+//   )
 
-roms.forEach((romFileName) => {
-  const filename = resolve(
-    __dirname,
-    '../roms/instr_test-v5/rom_singles',
-    romFileName
-  )
+//   test(`NES test: ${romFileName}`, async () => {
+//     const nes = new Bus(new CPU(), new PPU(), () => {})
+//     const cart = new Cartridge()
+//     const cartFile = fs.readFileSync(filename)
+//     cart.parse(cartFile)
+//     nes.insertCartridge(cart)
+//     nes.reset()
 
-  test(`NES test: ${romFileName}`, async () => {
-    const nes = new Bus(new CPU(), new PPU(), () => {})
-    const cart = new Cartridge()
-    const cartFile = await mockNES({
-      filename
-    })
-    await cart.parse(cartFile)
-    nes.insertCartridge(cart)
-    nes.reset()
+//     const statuses = []
 
-    const statuses = []
+//     console.log('stating testing', romFileName)
+//     let i = 0
+//     while (true) {
+//       nes.clock()
+//       nes.isReadOnly = true
+//       const status = nes.cpuRead(0x0000)
+//       const array = [
+//         nes.cpuRead(0x0001),
+//         nes.cpuRead(0x0002),
+//         nes.cpuRead(0x0003)
+//       ]
+//       console.log({ status, array })
 
-    console.log('stating testing', romFileName)
-    for (let i = 0; i < 3 * 1000000; i++) {
-      nes.clock()
-      const text = []
-      let pos = 0x6004
+//       if (isEqual(array, [0xde, 0xb0, 0x61])) {
+//         const text = []
+//         let pos = 0x0004
 
-      while (true) {
-        const data = nes.cpuRead(pos)
-        if (data === 0) break
-        text.push(String.fromCharCode(data))
-        pos++
-      }
+//         while (true) {
+//           const data = nes.cpuRead(pos)
+//           if (data === 0) break
+//           text.push(String.fromCharCode(data))
+//           pos++
+//         }
 
-      if (text.length > 0) statuses.push(text.join(''))
-    }
+//         if (text.length > 0) statuses.push(text.join(''))
+//         break
+//       }
+//       i++
+//       nes.isReadOnly = false
+//       if (i > 3 * 1000) break
+//     }
 
-    while (nes.cpuRead(0x6000) >= 0x80) {
-      nes.clock()
-      const text = []
-      let pos = 0x6004
+//     console.log(statuses)
 
-      while (true) {
-        const data = nes.cpuRead(pos)
-        if (data === 0) break
-        text.push(String.fromCharCode(data))
-        pos++
-      }
-
-      if (text.length > 0) statuses.push(text.join(''))
-    }
-
-    console.log(statuses)
-
-    expect(nes.cpuRead(0x6000)).toBe(0)
-  })
-})
+//     expect(nes.cpuRead(0x6000)).toBe(0)
+//   })
+// })
 
 test('NES test 2', async () => {
   const nes = new Bus(new CPU(), new PPU(), () => {})
   const cart = new Cartridge()
-  const cartFile = await mockNES({
-    filename: resolve(__dirname, '../roms/instr_test-v5/official_only.nes')
-  })
-  await cart.parse(cartFile)
+  const cartFile = fs.readFileSync(
+    resolve(__dirname, '../roms/instr_test-v5/official_only.nes')
+  )
+  cart.parse(cartFile)
   nes.insertCartridge(cart)
   nes.reset()
 
-  const statuses = []
+  let lastText = ''
 
+  process.stdout.write('Start....')
   for (let i = 0; i < 3 * 1000000; i++) {
     nes.clock()
     const text = []
@@ -191,25 +175,25 @@ test('NES test 2', async () => {
       pos++
     }
 
-    if (text.length > 0) statuses.push(text.join(''))
+    if (text.length > 0) lastText = text.join('')
   }
 
   while (nes.cpuRead(0x6000) === 0x80) {
     nes.clock()
-    const text = []
-    let pos = 0x6004
-
-    while (true) {
-      const data = nes.cpuRead(pos)
-      if (data === 0) break
-      text.push(String.fromCharCode(data))
-      pos++
-    }
-
-    if (text.length > 0) statuses.push(text.join(''))
   }
 
-  console.log(statuses[statuses.length - 1])
+  const text = []
+  let pos = 0x6004
+
+  while (true) {
+    const data = nes.cpuRead(pos)
+    if (data === 0) break
+    text.push(String.fromCharCode(data))
+    pos++
+  }
+
+  if (text.length > 0) lastText = text.join('')
+  process.stdout.write(lastText)
 
   expect(nes.cpuRead(0x6000)).toBe(0)
 })
