@@ -5,7 +5,8 @@ export default class Screen {
 
     this.image = new Uint8ClampedArray(width * height * 4)
 
-    this.imageData = new ImageData(this.image, width)
+    if (typeof ImageData !== 'undefined')
+      this.imageData = new ImageData(this.image, width)
   }
 
   setColor(x, y, { r, g, b }) {
