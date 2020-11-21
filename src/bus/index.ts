@@ -158,8 +158,9 @@ export default class Bus {
     this.globalSystemClockNumber += 1
 
     if (this.ppu.isFrameComplete) {
-      if (this._on.render)
-        this._on.render(this.ppu.getScreen().imageData)
+      const { imageData } = this.ppu.getScreen()
+      if (this._on.render && imageData)
+        this._on.render(imageData)
     }
   }
 }

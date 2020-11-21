@@ -16,9 +16,11 @@ export default class MapperMMC1 extends Mapper {
     this.prgRom32kBankNumber = 0
     this.prgRom16kLowBankNumber = 0
     this.prgRom16kHighBankNumber = this.prgBankNumber - 1
+
     this.chrRom8kBankNumber = 0
     this.chrRom4k0BankNumber = 0
     this.chrRom4k1BankNumber = 0
+
     this.usePrgRam = false
   }
 
@@ -26,7 +28,7 @@ export default class MapperMMC1 extends Mapper {
     this.shiftReg = 0
     this.shiftTimer = 0
 
-    this.controlReg = this.controlReg | 0x0c
+    this.controlReg = 0x1c
 
     this.prgRom32kBankNumber = 0
     this.prgRom16kLowBankNumber = 0
@@ -41,6 +43,7 @@ export default class MapperMMC1 extends Mapper {
       this.shiftTimer = 0
       this.shiftReg = 0
       this.controlReg |= 0x0c
+      return
     }
 
     let result = (data & 0x01) << 4
@@ -69,7 +72,7 @@ export default class MapperMMC1 extends Mapper {
         }
       } else {
         // target === 3
-        this.usePrgRam = (this.controlReg & 0b0001_0000) > 0
+        this.usePrgRam = (this.controlReg & 0b0001_0000) === 0
         const prgBankMode = (this.controlReg & 0b0000_1100) >> 2
 
         if (prgBankMode === 0 || prgBankMode === 1) {
@@ -130,7 +133,7 @@ export default class MapperMMC1 extends Mapper {
     if (this.usePrgRam && address >= 0x6000 && address < 0x8000) {
       this.ram[address & 0x1fff] = value
 
-      return { status: true, mappedAddress: address, value }
+      return { status: true, mappedAddress: address, value: true }
     }
 
     if (address >= 0x8000) {
@@ -144,14 +147,14 @@ export default class MapperMMC1 extends Mapper {
   ppuMapRead(address) {
     if (address >= 0x2000) return { status: false }
 
+    let mappedAddress = address
     if (this.chrBankNumber === 0) {
       const value = this.vram[address]
 
-      return { status: true, mappedAddress: address, value }
+      return { status: true, mappedAddress, value }
     }
 
     const use4kbCHRBankMode = (this.controlReg & 0b0001_0000) > 0
-    let mappedAddress = 0
 
     if (use4kbCHRBankMode) {
       const newAddress = address & 0x0fff
@@ -174,7 +177,7 @@ export default class MapperMMC1 extends Mapper {
 
     if (this.chrBankNumber === 0) {
       this.vram[address] = value
-      return { status: true, mappedAddress, value }
+      return { status: true, mappedAddress, value: true }
     } else {
       return { status: true, mappedAddress }
     }
