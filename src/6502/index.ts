@@ -167,7 +167,7 @@ export default class CPU {
 
     const absoluteAddress = (hi << 8) | lo
 
-    this.absoluteAddress = absoluteAddress
+    this.absoluteAddress = absoluteAddress & 0xffff
     this.clocks += 0
   }
 
@@ -637,8 +637,7 @@ export default class CPU {
     const temp = this.A - this.fetchedData
 
     this.STATUS.setStatus(Flags.C, temp >= 0)
-    this.STATUS.setStatus(Flags.Z, temp === 0)
-    this.STATUS.setStatus(Flags.N, temp < 0 || temp >= 0x80)
+    this.setZN(temp & 0xff)
 
     this.clocks += 1
   }
@@ -647,8 +646,7 @@ export default class CPU {
     const temp = this.X - this.fetchedData
 
     this.STATUS.setStatus(Flags.C, temp >= 0)
-    this.STATUS.setStatus(Flags.Z, temp === 0)
-    this.STATUS.setStatus(Flags.N, temp < 0 || temp >= 0x80)
+    this.setZN(temp & 0xff)
 
     this.clocks += 1
   }
@@ -657,8 +655,7 @@ export default class CPU {
     const temp = this.Y - this.fetchedData
 
     this.STATUS.setStatus(Flags.C, temp >= 0)
-    this.STATUS.setStatus(Flags.Z, temp === 0)
-    this.STATUS.setStatus(Flags.N, temp < 0 || temp >= 0x80)
+    this.setZN(temp & 0xff)
 
     this.clocks += 1
   }
