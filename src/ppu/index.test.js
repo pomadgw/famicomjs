@@ -1,4 +1,4 @@
-import PPU from '.'
+import PPU, { STATUS, CONTROL } from '.'
 
 const createDummyCartridge = (defaultValue = null) => ({
   cpuRead: jest.fn(() => defaultValue),
@@ -64,29 +64,29 @@ describe('PPU', () => {
       ppu.scanline = 241
       ppu.clock()
 
-      expect(ppu.statusReg.verticalBlank).toBe(1)
+      expect(ppu.status & STATUS.VERTICAL_BLANK).toBe(STATUS.VERTICAL_BLANK)
     })
 
     it('should set vertical blank to 0 at cycle 1, scanline -1', () => {
-      ppu.statusReg.verticalBlank = 1
+      ppu.statusReg |= STATUS.VERTICAL_BLANK
       ppu.cycle = 1
       ppu.scanline = -1
       ppu.clock()
 
-      expect(ppu.statusReg.verticalBlank).toBe(0)
+      expect(ppu.status & STATUS.VERTICAL_BLANK).toBe(0)
     })
 
     it('should set nmi at cycle 1, scanline 241 if nmi control is set', () => {
       ppu.cycle = 1
       ppu.scanline = 241
-      ppu.controlReg.enablenmi = 1
+      ppu.control |= CONTROL.ENABLENMI
       ppu.clock()
 
       expect(ppu.nmi).toBe(true)
 
       ppu.cycle = 1
       ppu.scanline = 241
-      ppu.controlReg.enablenmi = 0
+      ppu.control &= ~CONTROL.ENABLENMI
       ppu.nmi = false
       ppu.clock()
 
@@ -247,12 +247,12 @@ describe('PPU', () => {
     it('should be able to read status', () => {
       const data = 0xf4
       const expected = data & 0xe0
-      ppu.statusReg.value = data
+      ppu.status = data
       ppu.addressLatch = 1
 
       const fetched = ppu.cpuRead(0x0002)
       expect(fetched & 0xe0).toBe(expected)
-      expect(ppu.statusReg.verticalBlank).toBe(0)
+      expect(ppu.status & STATUS.VERTICAL_BLANK).toBe(0)
       expect(ppu.addressLatch).toBe(0)
     })
 
@@ -279,7 +279,7 @@ describe('PPU', () => {
     describe('control register', () => {
       it('should be able to write to control register', () => {
         ppu.cpuWrite(0x0000, 0x10)
-        expect(ppu.controlReg.value).toBe(0x10)
+        expect(ppu.control).toBe(0x10)
       })
 
       it('should be able to set nametables', () => {
@@ -291,12 +291,7 @@ describe('PPU', () => {
 
     it('should be able to write to mask register', () => {
       ppu.cpuWrite(0x0001, 0x10)
-      expect(ppu.maskReg.value).toBe(0x10)
-    })
-
-    it('should be able to write to status register', () => {
-      ppu.cpuWrite(0x0002, 0x10)
-      expect(ppu.statusReg.value).toBe(0x10)
+      expect(ppu.mask).toBe(0x10)
     })
 
     it('should be able to write to scroll-related registers', () => {
@@ -324,7 +319,7 @@ describe('PPU', () => {
 
     it('should be able to write to ppu (increment mode = 1)', () => {
       jest.spyOn(ppu, 'ppuWrite')
-      ppu.controlReg.incrementMode = 1
+      ppu.control |= CONTROL.INCREMENT_MODE
       ppu.cpuWrite(0x0006, 0x11)
       ppu.cpuWrite(0x0006, 0x10)
       expect(ppu.vramAddress.value).toBe(0x1110)

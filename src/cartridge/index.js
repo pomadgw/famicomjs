@@ -58,7 +58,7 @@ export default class Cartridge {
     if (MapperClass)
       this.mapper = new MapperClass(this.prgBankNumber, this.chrBankNumber)
     else {
-      throw new Error(`Unsupported mapper: ${this.mapperId}`)
+      // throw new Error(`Unsupported mapper: ${this.mapperId}`)
     }
   }
 
