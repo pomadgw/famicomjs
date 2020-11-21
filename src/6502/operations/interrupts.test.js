@@ -37,7 +37,7 @@ describe('instructions: interrupts', () => {
     })
 
     it('should save status flags', () => {
-      const expectedStatus = 0x24 | Flags.I | Flags.B
+      const expectedStatus = 0x24 | Flags.I | Flags.B | Flags.U
       expect(cpu.bus.ram[0x100 + stackPosition - 2]).toBe(expectedStatus)
     })
 

@@ -608,8 +608,10 @@ export default class CPU {
     this.STATUS.setStatus(Flags.I, true)
 
     this.STATUS.setStatus(Flags.B, true)
+    this.STATUS.setStatus(Flags.U, true)
     this.pushStack(this.STATUS.status)
     this.STATUS.setStatus(Flags.B, false)
+    this.STATUS.setStatus(Flags.U, false)
 
     const newPCLo: number = this.read(0xfffe)
     const newPCHi: number = this.read(0xffff)
