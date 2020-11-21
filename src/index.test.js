@@ -11,14 +11,15 @@ import toHex from './utils/tohex'
 
 const nesTestFile = resolve(__dirname, '../nestest.nes')
 
-jest.setTimeout(60000)
+jest.setTimeout(120000)
 
 async function mockNES({
+  filename,
   name = 'file.nes',
   type = 'application/octet-stream',
   lastModified = new Date()
 } = {}) {
-  const data = fs.readFileSync(nesTestFile)
+  const data = fs.readFileSync(filename)
   const blob = new Blob([data], { type })
 
   blob.lastModifiedDate = lastModified
@@ -29,7 +30,7 @@ async function mockNES({
 test('NES test', async () => {
   const nes = new Bus(new CPU(), new PPU(), () => {})
   const cart = new Cartridge()
-  const cartFile = await mockNES()
+  const cartFile = await mockNES({ filename: nesTestFile })
   await cart.parse(cartFile)
   nes.insertCartridge(cart)
   nes.reset()
@@ -102,4 +103,51 @@ test('NES test', async () => {
 
   expect(nes.cpuRead(0x0002)).toBe(0)
   // expect(nes.cpu.ram[0x0003]).toBe(0) // for implementing undefined opcodes
+})
+
+test('NES test 2', async () => {
+  const nes = new Bus(new CPU(), new PPU(), () => {})
+  const cart = new Cartridge()
+  const cartFile = await mockNES({
+    filename: resolve(__dirname, '../roms/instr_test-v5/official_only.nes')
+  })
+  await cart.parse(cartFile)
+  nes.insertCartridge(cart)
+  nes.reset()
+
+  const statuses = []
+
+  for (let i = 0; i < 3 * 1000000; i++) {
+    nes.clock()
+    const text = []
+    let pos = 0x6004
+
+    while (true) {
+      const data = nes.cpuRead(pos)
+      if (data === 0) break
+      text.push(String.fromCharCode(data))
+      pos++
+    }
+
+    if (text.length > 0) statuses.push(text.join(''))
+  }
+
+  while (nes.cpuRead(0x6000) === 0x80) {
+    nes.clock()
+    const text = []
+    let pos = 0x6004
+
+    while (true) {
+      const data = nes.cpuRead(pos)
+      if (data === 0) break
+      text.push(String.fromCharCode(data))
+      pos++
+    }
+
+    if (text.length > 0) statuses.push(text.join(''))
+  }
+
+  console.log(statuses[statuses.length - 1])
+
+  expect(nes.cpuRead(0x6000)).toBe(0)
 })
