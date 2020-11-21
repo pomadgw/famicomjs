@@ -108,6 +108,7 @@ export default class Bus {
   }
 
   reset() {
+    this.ram = new Uint8Array(0x2000)
     this.cpu.reset()
     this.ppu.reset()
     this.cartridge?.reset()
