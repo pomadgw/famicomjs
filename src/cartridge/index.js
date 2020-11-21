@@ -11,17 +11,7 @@ export default class Cartridge {
     this.chrBankNumber = 0
   }
 
-  async parse(fileObj) {
-    const reader = new FileReader()
-    const data = await new Promise((resolve, reject) => {
-      reader.addEventListener('load', (event) => {
-        resolve(event.target.result)
-      })
-
-      reader.readAsArrayBuffer(fileObj)
-    })
-    const view = new Uint8Array(data)
-
+  parse(view) {
     const mapper1 = view[6]
     const mapper2 = view[7]
 

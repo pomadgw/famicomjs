@@ -25,6 +25,7 @@
   let oams = []
   let selectedPalette = 0x00
   let selectedTable = new Uint8Array(1024)
+  let ram
 
   let disassembled
 
@@ -35,13 +36,27 @@
   }
 
   function disassembleRAM() {
-    disassembled = disassember(nes.getRAMSnapshot(), { binaryStart: 0 })
+    if (showDebug) {
+      ram = nes.getRAMSnapshot()
+      disassembled = disassember(ram, { binaryStart: 0 })
+    }
   }
 
   async function readFile(event) {
     const file = event.target.files[0]
+
+    const reader = new FileReader()
+    const data = await new Promise((resolve, reject) => {
+      reader.addEventListener('load', (event) => {
+        resolve(event.target.result)
+      })
+
+      reader.readAsArrayBuffer(file)
+    })
+    const view = new Uint8Array(data)
+
     const cart = new Cartridge()
-    await cart.parse(file)
+    cart.parse(view)
 
     nes.cartridge = cart
     nes.insertCartridge(cart)
@@ -53,7 +68,7 @@
 
     disassembleRAM()
     oams = nes.ppu.oam
-    emulationMode = true
+    emulationMode = false
   }
 
   function resetNES() {
@@ -61,6 +76,7 @@
     offsetStart = nes.cpu.PC
     nesPC = nes.cpu.PC
     registers = nes.cpu
+    disassembleRAM()
   }
 
   function stepNES() {
@@ -74,6 +90,7 @@
 
     nesPC = nes.cpu.PC
     registers = nes.cpu
+    disassembleRAM()
 
     render(nes.ppu.getScreen().imageData)
   }
@@ -106,6 +123,7 @@
     nesPC = nes.cpu.PC
     registers = nes.cpu
     oams = nes.ppu.oam
+    disassembleRAM()
   }
 
   function runEmulation(timestamp) {
@@ -123,6 +141,7 @@
         nesPC = nes.cpu.PC
         registers = nes.cpu
         oams = nes.ppu.oam
+        disassembleRAM()
       }
 
       requestAnimationFrame(runEmulation)
@@ -251,6 +270,10 @@
       {#if nes.cartridge && showDebug}
       <div class="mt-4">
         <RAM ram={disassembled} offsetStart={offsetStart} length={0x10} pc={nesPC} on:change={updateOffset} />
+      </div>
+      <div class="mt-4">
+        <table class="table">
+        </table>
       </div>
       {/if}
     </div>

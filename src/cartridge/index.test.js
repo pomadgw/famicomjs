@@ -1,18 +1,5 @@
 import Cartridge from '.'
 
-function mockNES({
-  name = 'file.nes',
-  type = 'application/octet-stream',
-  lastModified = new Date(),
-  data = []
-}) {
-  const blob = new Blob([data], { type })
-
-  blob.lastModifiedDate = lastModified
-
-  return new File([blob], name)
-}
-
 async function generateCart() {
   const buffer = new ArrayBuffer(16 + 1 * 16384 + 1 * 8192)
   const view = new Uint8Array(buffer)
@@ -41,12 +28,8 @@ async function generateCart() {
   view.set([0xfe], 0x11)
   view.set([0xfd], 16 + 16384 + 1)
 
-  const file = mockNES({
-    data: buffer
-  })
-
   const cart = new Cartridge()
-  await cart.parse(file)
+  cart.parse(view)
   return { cart, view }
 }
 
@@ -76,12 +59,8 @@ describe('Cartridge', () => {
       0
     ])
 
-    const file = mockNES({
-      data: buffer
-    })
-
     const cart = new Cartridge()
-    await cart.parse(file)
+    cart.parse(view)
 
     const expectedMapperId = ((mapper2 >> 4) << 4) | (mapper1 >> 4)
 
@@ -119,12 +98,8 @@ describe('Cartridge', () => {
       ...Array(256).keys()
     ])
 
-    const file = mockNES({
-      data: buffer
-    })
-
     const cart = new Cartridge()
-    await cart.parse(file)
+    cart.parse(view)
 
     expect(cart.prgMemory[1]).toBe(0)
   })
