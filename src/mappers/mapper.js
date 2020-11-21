@@ -4,6 +4,10 @@ export default class Mapper {
     this.chrBankNumber = chrBankNumber
   }
 
+  mirror() {
+    return null
+  }
+
   cpuMapRead(addr) {
     return {
       status: false,

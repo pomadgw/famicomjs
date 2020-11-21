@@ -26,7 +26,7 @@ export default class Cartridge {
     const mapper2 = view[7]
 
     this.mapperId = ((mapper2 >> 4) << 4) | (mapper1 >> 4)
-    this.mirrorMode =
+    this._mirrorMode =
       (mapper1 & 0x01) > 0 ? MIRROR_MODE.VERTICAL : MIRROR_MODE.HORIZONTAL
 
     let seekPosition = 16
@@ -62,19 +62,30 @@ export default class Cartridge {
     }
   }
 
+  get mirrorMode() {
+    const mirrorMode = this.mapper?.mirror()
+    if (mirrorMode) return mirrorMode
+    return this._mirrorMode
+  }
+
   cpuRead(addr) {
-    const { status, mappedAddress } = this.mapper.cpuMapRead(addr)
+    const { status, mappedAddress, value } = this.mapper.cpuMapRead(addr)
 
     if (status) {
-      return this.prgMemory[mappedAddress]
+      return value ?? this.prgMemory[mappedAddress]
     }
 
     return null
   }
 
   cpuWrite(addr, value) {
-    const { status, mappedAddress } = this.mapper.cpuMapWrite(addr)
+    const {
+      status,
+      mappedAddress,
+      value: isInternalChanged
+    } = this.mapper.cpuMapWrite(addr, value)
 
+    if (isInternalChanged) return true
     if (status) {
       this.prgMemory[mappedAddress] = value
       return true
@@ -84,18 +95,23 @@ export default class Cartridge {
   }
 
   ppuRead(addr) {
-    const { status, mappedAddress } = this.mapper.ppuMapRead(addr)
+    const { status, mappedAddress, value } = this.mapper.ppuMapRead(addr)
 
     if (status) {
-      return this.chrMemory[mappedAddress]
+      return value ?? this.chrMemory[mappedAddress]
     }
 
     return null
   }
 
   ppuWrite(addr, value) {
-    const { status, mappedAddress } = this.mapper.ppuMapWrite(addr)
+    const {
+      status,
+      mappedAddress,
+      value: isInternalChanged
+    } = this.mapper.ppuMapWrite(addr, value)
 
+    if (isInternalChanged) return true
     if (status) {
       this.chrMemory[mappedAddress] = value
       return true
