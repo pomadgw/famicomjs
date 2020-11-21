@@ -110,6 +110,7 @@ export default class Bus {
   reset() {
     this.cpu.reset()
     this.ppu.reset()
+    this.cartridge?.reset()
     this.globalSystemClockNumber = 0
 
     this.dmaPage = 0x00
