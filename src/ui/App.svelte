@@ -82,14 +82,15 @@
   function stepNES() {
     do {
       nes.clock()
-    } while (!nes.cpu.isComplete)
+    } while (nes.cpu.clocks !== 0)
 
     do {
       nes.clock()
-    } while (nes.cpu.isComplete)
+    } while (nes.cpu.clocks === 0)
 
     nesPC = nes.cpu.PC
     registers = nes.cpu
+    oams = nes.ppu.oam
     disassembleRAM()
 
     render(nes.ppu.getScreen().imageData)
@@ -216,7 +217,7 @@
     </div>
   </div>
   {#if showDebug}
-  <div class="ml-4">
+  <div class="ml-4 p-2" style="max-height: 90vh; overflow-y: scroll;">
     <div class="text-xl text-center">Debug</div>
     <div class="mt-4">
       <div>
