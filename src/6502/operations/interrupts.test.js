@@ -22,8 +22,8 @@ describe('instructions: interrupts', () => {
       cpu.bus.ram[0xfffe] = 0x34
       cpu.bus.ram[0xffff] = 0x12
       stackPosition = cpu.SP
-      cpu.fetch()
-      cpu.STATUS.setStatus(Flags.I, false)
+      // cpu.fetch()
+      cpu.STATUS.status = 0x24
       cpu.BRK()
     })
 

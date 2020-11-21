@@ -135,11 +135,12 @@ export default class CPU {
     this.pushStack(((PC >> 8) & 0xff))
     this.pushStack((PC & 0xff))
 
-    this.STATUS.setStatus(Flags.B, false)
+    this.STATUS.setStatus(Flags.B, true)
     this.STATUS.setStatus(Flags.U, true)
-    this.STATUS.setStatus(Flags.I, true)
 
     this.pushStack(this.STATUS.status)
+
+    this.STATUS.setStatus(Flags.I, true)
 
     this.absoluteAddress = targetAddress
 
@@ -600,23 +601,19 @@ export default class CPU {
   BRK(): void {
     this.nextPC()
 
-    const pc = this.PC
+    // const pc = this.PC
 
-    this.pushStack(((pc >> 8) & 0xff))
-    this.pushStack((pc & 0xff))
+    // this.pushStack(((pc >> 8) & 0xff))
+    // this.pushStack((pc & 0xff))
 
-    this.STATUS.setStatus(Flags.I, true)
+    // this.STATUS.setStatus(Flags.I, true)
 
-    this.STATUS.setStatus(Flags.B, true)
-    this.STATUS.setStatus(Flags.U, true)
-    this.pushStack(this.STATUS.status)
-    this.STATUS.setStatus(Flags.B, false)
-    this.STATUS.setStatus(Flags.U, false)
-
-    const newPCLo: number = this.read(0xfffe)
-    const newPCHi: number = this.read(0xffff)
-
-    this.PC = (newPCHi << 8) | newPCLo
+    // this.STATUS.setStatus(Flags.B, true)
+    // this.STATUS.setStatus(Flags.U, true)
+    // this.pushStack(this.STATUS.status)
+    // this.STATUS.setStatus(Flags.B, false)
+    // this.STATUS.setStatus(Flags.U, false)
+    this.interrupt(0xfffe)
   }
 
   RTI(): void {
