@@ -1,5 +1,4 @@
 import fs from 'fs'
-import path from 'path'
 
 import Cartridge from './src/cartridge'
 import Bus from './src/bus'
@@ -24,7 +23,6 @@ nes.reset()
 
 const argsParam = argParamsGenerator(nes.cpu.PC)
 
-const logTestFilename = path.resolve(__dirname, './log.log')
 let logTempData = ''
 const map = []
 
@@ -51,11 +49,20 @@ for (let i = 0; i < clockNumbers; i++) {
   nes.clock()
 
   if (nes.cpu.clocks === 0 && nes.globalSystemClockNumber % 3 === 0) {
-    // process.stderr.clearLine()
-    // process.stderr.cursorTo(0)
-    // process.stderr.write(
-    //   `Cycle ${i.toString().padStart(7, ' ')} of ${clockNumbers}\n`
-    // )
+    if (nes.globalSystemClockNumber % 10000 === 0) {
+      process.stderr.clearLine()
+      process.stderr.cursorTo(0)
+      process.stderr.write(
+        `Cycle ${i
+          .toString()
+          .padStart(
+            7,
+            ' '
+          )} of ${clockNumbers} (CPU clock: ${nes.cpu.debugCycles
+          .toString()
+          .padStart(7, ' ')})\n`
+      )
+    }
 
     const disassembled = disassember(nes.cpu.debugCurrentOps, {
       binaryStart: prevPC,
@@ -90,21 +97,5 @@ for (let i = 0; i < clockNumbers; i++) {
   }
 }
 
-const temp = map.map((e) => e[2]) // []
-
-// let prevPC
-// for (let i = 0; i < map.length; i++) {
-//   const curr = map[i]
-//   if (curr[1].trim() === '-') {
-//     continue
-//   }
-//   if (!prevPC || prevPC !== curr[0]) {
-//     temp.push(curr[2])
-//   }
-
-//   prevPC = curr[0]
-// }
-
+const temp = map.map((e) => e[2])
 logTempData = temp.join('')
-
-fs.writeFileSync(logTestFilename, logTempData)
