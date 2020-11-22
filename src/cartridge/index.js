@@ -1,5 +1,6 @@
 import mappers from '../mappers'
 import MIRROR_MODE from '../ppu/mirror-mode'
+import * as myConsole from '../utils/debug'
 
 export default class Cartridge {
   constructor() {
@@ -95,7 +96,7 @@ export default class Cartridge {
   ppuRead(addr) {
     const { status, mappedAddress } = this.mapper.ppuMapRead(addr)
     if (status) {
-      process.stdout.write(
+      myConsole.log(
         `cart: read from PPU from ${mappedAddress}: ${this.chrMemory[
           mappedAddress
         ]
@@ -114,11 +115,11 @@ export default class Cartridge {
       value
     )
 
-    process.stderr.write(`cart: write to PPU ${status}\n`)
+    myConsole.error(`cart: write to PPU ${status}\n`)
 
     if (status) {
       if (write) {
-        process.stdout.write(
+        myConsole.log(
           `cart: write to PPU ${mappedAddress}: ${value
             .toString(16)
             .padStart(2, '0')}\n`

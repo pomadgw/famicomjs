@@ -1,6 +1,7 @@
 import Mapper from './mapper'
 import MirrorMode from '../ppu/mirror-mode'
 import toHex from '../utils/tohex'
+import * as myConsole from '../utils/debug'
 
 export default class MapperMMC1 extends Mapper {
   constructor(prgBankNumber, chrBankNumber) {
@@ -55,7 +56,7 @@ export default class MapperMMC1 extends Mapper {
 
     if (this.shiftTimer === 5) {
       const target = (address >> 13) & 0x03
-      process.stdout.write(
+      myConsole.log(
         `mmc1: target: ${target}, value: ${toHex(this.shiftReg)} \n`
       )
 
@@ -79,26 +80,26 @@ export default class MapperMMC1 extends Mapper {
         // target === 3
         this.usePrgRam = (this.controlReg & 0b0001_0000) === 0
         const prgBankMode = (this.controlReg & 0b0000_1100) >> 2
-        process.stdout.write(`mmc1: prgBankMode: ${prgBankMode}\n`)
+        myConsole.log(`mmc1: prgBankMode: ${prgBankMode}\n`)
 
         if (prgBankMode === 0 || prgBankMode === 1) {
           this.prgRom32kBankNumber = (this.shiftReg & 0b0000_1110) >> 1
         } else if (prgBankMode === 2) {
           this.prgRom16kLowBankNumber = 0
           this.prgRom16kHighBankNumber = this.shiftReg & 0b0000_1111
-          process.stdout.write(
+          myConsole.log(
             `mmc1: prgRom16kLowBankNumber: ${this.prgRom16kLowBankNumber}\n`
           )
-          process.stdout.write(
+          myConsole.log(
             `mmc1: prgRom16kHighBankNumber: ${this.prgRom16kHighBankNumber}\n`
           )
         } else {
           this.prgRom16kLowBankNumber = this.shiftReg & 0b0000_1111
           this.prgRom16kHighBankNumber = this.prgBankNumber - 1
-          process.stdout.write(
+          myConsole.log(
             `mmc1: prgRom16kLowBankNumber: ${this.prgRom16kLowBankNumber}\n`
           )
-          process.stdout.write(
+          myConsole.log(
             `mmc1: prgRom16kHighBankNumber: ${this.prgRom16kHighBankNumber}\n`
           )
         }
