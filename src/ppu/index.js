@@ -761,13 +761,13 @@ export default class PPU {
     if (isReadOnly) {
       switch (addr) {
         case 0x0000: // Control
-          data = this.control
+          data = 0xff // this.control
           break
         case 0x0001: // Mask
-          data = this.mask
+          data = 0xff // this.mask
           break
         case 0x0002: // Status
-          data = this.status
+          data = 0xff // this.status
           break
         case 0x0003: // OAM Address
           break

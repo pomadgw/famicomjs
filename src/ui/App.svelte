@@ -35,9 +35,9 @@
     emulationMode = !emulationMode
   }
 
-  function disassembleRAM() {
-    if (showDebug) {
-      ram = nes.getRAMSnapshot()
+  function disassembleRAM(force = false) {
+    if (showDebug || force) {
+      ram = nes.getRAMSnapshot(0x0000)
       disassembled = disassember(ram, { binaryStart: 0 })
     }
   }
@@ -94,6 +94,16 @@
     disassembleRAM()
 
     render(nes.ppu.getScreen().imageData)
+  }
+
+  function dumpPPU() {
+    console.log('tablePattern', nes.ppu.tablePattern)
+    console.log('chr memory', nes.cartridge.chrMemory)
+  }
+
+  function dumpCPUMemory() {
+    disassembleRAM(true)
+    console.log('ram value', ram)
   }
 
   function render(imageData) {
@@ -212,6 +222,8 @@
       </label>
       <button class="mt-2" on:click={resetNES}>Reset</button>
       <button class="mt-2" on:click={stepNES}>Execute Code Step-by-Step</button>
+      <button class="mt-2" on:click={dumpCPUMemory}>Dump RAM into Console</button>
+      <button class="mt-2" on:click={dumpPPU}>Dump PPU memory into Console</button>
       <button class="mt-2" on:click={renderSingleFrame}>Execute Code for Whole Frame</button>
       <button class="mt-2" on:click={toggleEmulation}>{emulationMode ? 'Pause' : 'Run'}</button>
     </div>
