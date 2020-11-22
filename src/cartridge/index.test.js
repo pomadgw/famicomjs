@@ -131,7 +131,11 @@ describe('Cartridge', () => {
     expect(cart.ppuWrite(0x7fff)).toBeNull()
     const oldFn = cart.mapper.ppuMapWrite
     // mock ppuMapWrite
-    cart.mapper.ppuMapWrite = () => ({ status: true, mappedAddress: 0x01 })
+    cart.mapper.ppuMapWrite = () => ({
+      status: true,
+      mappedAddress: 0x01,
+      write: true
+    })
 
     expect(cart.ppuWrite(0x0001, 0x01)).toBe(true)
     expect(cart.chrMemory[0x01]).toBe(0x01)

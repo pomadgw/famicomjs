@@ -109,7 +109,9 @@ export default class Cartridge {
     )
 
     if (status) {
-      if (write) this.chrMemory[mappedAddress] = value
+      if (write) {
+        this.chrMemory[mappedAddress] = value
+      }
       return true
     }
 

@@ -33,9 +33,21 @@ test('NES test', async () => {
   let prevCycle
   for (let i = 0; i < 3 * 30000; i++) {
     logValue = ''
-    nes.clock()
+
     const prevPC = nes.cpu.debugCurrentOpsPC
     prevCycle = nes.cpu.debugCycles
+
+    let prevRegsAdnCycles = ''
+    prevRegsAdnCycles += `  A:${toHex(nes.cpu.A)}`
+    prevRegsAdnCycles += ` X:${toHex(nes.cpu.X)}`
+    prevRegsAdnCycles += ` Y:${toHex(nes.cpu.Y)}`
+    prevRegsAdnCycles += ` P:${(+nes.cpu.STATUS).toString(2).padStart(8, '0')}`
+    prevRegsAdnCycles += ` SP:${toHex(nes.cpu.SP)}`
+    prevRegsAdnCycles += ` PPU:${nes.ppu.scanline.toString().padStart(3, ' ')}`
+    prevRegsAdnCycles += `,${(nes.ppu.cycle - 1).toString().padStart(3, ' ')}`
+    prevRegsAdnCycles += ` CYC:${prevCycle}`
+
+    nes.clock()
 
     const disassembled = disassember(nes.cpu.debugCurrentOps, {
       binaryStart: prevPC
@@ -55,14 +67,7 @@ test('NES test', async () => {
       .join(' ')
       .padEnd(8, ' ')}`
     logValue += `  ${disassembledInstruction}`
-    logValue += `  A:${toHex(nes.cpu.A)}`
-    logValue += ` X:${toHex(nes.cpu.X)}`
-    logValue += ` Y:${toHex(nes.cpu.Y)}`
-    logValue += ` P:${(+nes.cpu.STATUS).toString(2).padStart(8, '0')}`
-    logValue += ` SP:${toHex(nes.cpu.SP)}`
-    logValue += ` PPU:${nes.ppu.scanline.toString().padStart(3, ' ')}`
-    logValue += `,${(nes.ppu.cycle - 1).toString().padStart(3, ' ')}`
-    logValue += ` CYC:${prevCycle}`
+    logValue += prevRegsAdnCycles
     logValue += '\n'
     map.push([prevPC, disassembledInstruction, logValue])
     // }

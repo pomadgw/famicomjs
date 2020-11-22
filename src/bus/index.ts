@@ -136,7 +136,7 @@ export default class Bus {
           } else {
             this.ppu.writeToOAM(this.dmaAddress, this.dmaData)
             this.dmaAddress++
-            this.dmaAddress %= 256
+            this.dmaAddress &= 0xff
             if (this.dmaAddress === 0) {
               this.isInDMATransfer = false
               this.dmaDummy = true
