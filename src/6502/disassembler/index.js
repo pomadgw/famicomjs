@@ -14,55 +14,53 @@ function getContent(name, params, length, ram, registers, offsetReg, mode) {
   const offset = offsetReg ? registers[offsetReg] : 0
   let content = ''
 
-  if (['LDA', 'LDX', 'LDY', 'STA', 'STX', 'STY'].includes(name)) {
-    let targetAddress = (address + offset) & 0xffff
-    content = ram[targetAddress]
+  let targetAddress = address
 
-    if (mode === 'abx' || mode === 'aby') {
-      const offsetedTargetAddress = (targetAddress + offset) & 0xffff
+  if (mode === 'abs') {
+    const realContent = ram[targetAddress]
+    content = ` = ${toHexOriginal(realContent, { length: 2 })}`
+  } else if (mode === 'zp0') {
+    const realContent = ram[targetAddress]
+    content = ` = ${toHexOriginal(realContent, { length: 2 })}`
+  } else if (['abx', 'aby'].includes(mode)) {
+    const offsetedTargetAddress = (targetAddress + offset) & 0xffff
 
-      const realContent = ram[offsetedTargetAddress]
-      content = ` = ${toHexOriginal(targetAddress, {
-        length: 4
-      })} @ ${toHexOriginal(offsetedTargetAddress, {
-        length: 4
-      })} = ${toHexOriginal(realContent)}`
-    } else if (mode === 'xpx' || mode === 'xpy') {
-      const offsetedTargetAddress = (targetAddress + offset) & 0xff
+    const realContent = ram[offsetedTargetAddress]
+    content = ` @ ${toHexOriginal(offsetedTargetAddress, {
+      length: 4
+    })} = ${toHexOriginal(realContent)}`
+  } else if (mode === 'zpx' || mode === 'zpy') {
+    const offsetedTargetAddress = (targetAddress + offset) & 0xff
 
-      const realContent = ram[offsetedTargetAddress]
-      content = ` = ${toHexOriginal(targetAddress, {
-        length: 2
-      })} @ ${toHexOriginal(offsetedTargetAddress, {
-        length: 2
-      })} = ${toHexOriginal(realContent)}`
-    } else if (mode === 'izx') {
-      targetAddress =
-        (ram[(address + offset) & 0xff] << 8) |
-        ram[(address + offset + 1) & 0xff]
+    const realContent = ram[offsetedTargetAddress]
+    content = ` @ ${toHexOriginal(offsetedTargetAddress, {
+      length: 2
+    })} = ${toHexOriginal(realContent)}`
+  } else if (mode === 'izx') {
+    targetAddress =
+      (ram[(address + offset) & 0xff] << 8) | ram[(address + offset + 1) & 0xff]
 
-      const realContent = ram[targetAddress]
+    const realContent = ram[targetAddress]
 
-      content = ` @ ${toHexOriginal(
-        content & 0xff
-      )} = ${toHexOriginal(targetAddress, { length: 4 })} = ${toHexOriginal(
-        realContent
-      )}`
-    } else if (mode === 'izy') {
-      const targetAddressLo = ram[address + 0]
-      const targetAddressHi = ram[(address + 1) & 0xff]
-      targetAddress = (targetAddressHi << 8) | targetAddressLo
-      const offsetedTargetAddress = (targetAddress + offset) & 0xffff
+    content = ` @ ${toHexOriginal(
+      content & 0xff
+    )} = ${toHexOriginal(targetAddress, { length: 4 })} = ${toHexOriginal(
+      realContent
+    )}`
+  } else if (mode === 'izy') {
+    const targetAddressLo = ram[address + 0]
+    const targetAddressHi = ram[(address + 1) & 0xff]
+    targetAddress = (targetAddressHi << 8) | targetAddressLo
+    const offsetedTargetAddress = (targetAddress + offset) & 0xffff
 
-      const realContent = ram[offsetedTargetAddress]
-      content = ` = ${toHexOriginal(targetAddress, {
-        length: 4
-      })} @ ${toHexOriginal(offsetedTargetAddress, {
-        length: 4
-      })} = ${toHexOriginal(realContent)}`
-    } else {
-      content = ` = ${toHexOriginal(content)}`
-    }
+    const realContent = ram[offsetedTargetAddress]
+    content = ` = ${toHexOriginal(targetAddress, {
+      length: 4
+    })} @ ${toHexOriginal(offsetedTargetAddress, {
+      length: 4
+    })} = ${toHexOriginal(realContent)}`
+  } else {
+    content = ` = ${toHexOriginal(content)}`
   }
 
   return content
@@ -79,7 +77,7 @@ export const argParamsGenerator = (
     stringify: (name, params) => {
       let result = `${name} ${toHex(twoUint8ToUint16(...params), 4)}`
       if (nintendulatorFormat) {
-        result += `${getContent(name, params, 2, ram, registers)}`
+        result += `${getContent(name, params, 2, ram, registers, null, 'abs')}`
       }
 
       return result
@@ -169,7 +167,7 @@ export const argParamsGenerator = (
     stringify: (name, params) => {
       let result = `${name} ${toHex(params[0])}`
       if (nintendulatorFormat) {
-        result += `${getContent(name, params, 1, ram, registers)}`
+        result += `${getContent(name, params, 1, ram, registers, null, 'zp0')}`
       }
 
       return result
@@ -180,7 +178,7 @@ export const argParamsGenerator = (
     stringify: (name, params) => {
       let result = `${name} ${toHex(params[0])},X`
       if (nintendulatorFormat) {
-        result += `${getContent(name, params, 1, ram, registers, 'X', 'xpz')}`
+        result += `${getContent(name, params, 1, ram, registers, 'X', 'zpx')}`
       }
 
       return result
@@ -191,7 +189,7 @@ export const argParamsGenerator = (
     stringify: (name, params) => {
       let result = `${name} ${toHex(params[0])},Y`
       if (nintendulatorFormat) {
-        result += `${getContent(name, params, 1, ram, registers, 'Y', 'xpy')}`
+        result += `${getContent(name, params, 1, ram, registers, 'Y', 'zpy')}`
       }
 
       return result
