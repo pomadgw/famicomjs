@@ -761,14 +761,18 @@ export default class PPU {
     // TODO: implement this later
     switch (addr) {
       case 0x0000: // Control
+        if (isReadOnly) data = this.control
         break
       case 0x0001: // Mask
+        if (isReadOnly) data = this.mask
         break
       case 0x0002: // Status
-        data = (this.status & 0xe0) | (this.ppuDataBuffer & 0x1f)
         if (!isReadOnly) {
+          data = (this.status & 0xe0) | (this.ppuDataBuffer & 0x1f)
           this.status &= ~STATUS.VERTICAL_BLANK
           this.addressLatch = 0
+        } else {
+          data = (this.status & 0xe0) | (this.ppuDataBuffer & 0x1f)
         }
         break
       case 0x0003: // OAM Address
@@ -781,14 +785,18 @@ export default class PPU {
       case 0x0006: // PPU Address
         break
       case 0x0007: // PPU Data
-        data = this.ppuDataBuffer
-        this.ppuDataBuffer = this.ppuRead(this.vramAddress.value)
-
-        if (this.vramAddress.value >= 0x3f00) {
+        if (isReadOnly) {
+          data = this.ppuRead(this.vramAddress.value)
+        } else {
           data = this.ppuDataBuffer
-        }
+          this.ppuDataBuffer = this.ppuRead(this.vramAddress.value)
 
-        if (!isReadOnly) this.vramAddress.value += this.incrementValue
+          if (this.vramAddress.value >= 0x3f00) {
+            data = this.ppuDataBuffer
+          }
+
+          this.vramAddress.value += this.incrementValue
+        }
         break
       default:
         break
