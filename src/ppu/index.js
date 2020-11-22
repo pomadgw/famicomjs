@@ -758,36 +758,53 @@ export default class PPU {
     // eslint-disable-next-line prefer-const
     let data = 0
 
-    // TODO: implement this later
-    switch (addr) {
-      case 0x0000: // Control
-        if (isReadOnly) data = this.control
-        break
-      case 0x0001: // Mask
-        if (isReadOnly) data = this.mask
-        break
-      case 0x0002: // Status
-        if (!isReadOnly) {
+    if (isReadOnly) {
+      switch (addr) {
+        case 0x0000: // Control
+          data = this.control
+          break
+        case 0x0001: // Mask
+          data = this.mask
+          break
+        case 0x0002: // Status
+          data = this.status
+          break
+        case 0x0003: // OAM Address
+          break
+        case 0x0004: // OAM Data
+          break
+        case 0x0005: // Scroll
+          break
+        case 0x0006: // PPU Address
+          break
+        case 0x0007: // PPU Data
+          break
+        default:
+          break
+      }
+    } else {
+      switch (addr) {
+        case 0x0000: // Control
+          break
+        case 0x0001: // Mask
+          break
+        case 0x0002: // Status
           data = (this.status & 0xe0) | (this.ppuDataBuffer & 0x1f)
           this.status &= ~STATUS.VERTICAL_BLANK
           this.addressLatch = 0
-        } else {
-          data = (this.status & 0xe0) | (this.ppuDataBuffer & 0x1f)
-        }
-        break
-      case 0x0003: // OAM Address
-        break
-      case 0x0004: // OAM Data
-        data = this.oam[(this.oamAddress / 4) >> 0].values[this.oamAddress % 4]
-        break
-      case 0x0005: // Scroll
-        break
-      case 0x0006: // PPU Address
-        break
-      case 0x0007: // PPU Data
-        if (isReadOnly) {
-          data = this.ppuRead(this.vramAddress.value)
-        } else {
+          break
+        case 0x0003: // OAM Address
+          break
+        case 0x0004: // OAM Data
+          data = this.oam[(this.oamAddress / 4) >> 0].values[
+            this.oamAddress % 4
+          ]
+          break
+        case 0x0005: // Scroll
+          break
+        case 0x0006: // PPU Address
+          break
+        case 0x0007: // PPU Data
           data = this.ppuDataBuffer
           this.ppuDataBuffer = this.ppuRead(this.vramAddress.value)
 
@@ -796,10 +813,10 @@ export default class PPU {
           }
 
           this.vramAddress.value += this.incrementValue
-        }
-        break
-      default:
-        break
+          break
+        default:
+          break
+      }
     }
 
     return data
@@ -847,7 +864,7 @@ export default class PPU {
       case 0x0006: // PPU Address
         if (this.addressLatch === 0) {
           this.tramAddress.value =
-            (this.tramAddress.value & 0x00ff) | ((value & 0x3f) << 8)
+            ((value & 0x3f) << 8) | (this.tramAddress.value & 0x00ff)
           this.addressLatch = 1
         } else {
           this.tramAddress.value = (this.tramAddress.value & 0xff00) | value
