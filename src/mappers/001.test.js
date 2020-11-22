@@ -75,4 +75,10 @@ describe('mapper: mmc1', () => {
     expect(mapper.prgRom16kLowBankNumber).toBe(x & 0b0000_1111)
     expect(mapper.prgRom16kHighBankNumber).toBe(mapper.prgBankNumber - 1)
   })
+
+  it('should not write anything to rom (obviously)', () => {
+    const mapper = new MapperMMC1(2, 2)
+    const { status } = mapper.cpuMapWrite(0x8000, 0x10)
+    expect(status).toBe(false)
+  })
 })

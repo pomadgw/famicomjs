@@ -157,7 +157,6 @@ export default class MapperMMC1 extends Mapper {
 
     if (address >= 0x8000) {
       this.shift(address, value)
-      return { status: true, mappedAddress: address }
     }
 
     return { status: false, mappedAddress: address }
