@@ -51,11 +51,11 @@ for (let i = 0; i < clockNumbers; i++) {
   nes.clock()
 
   if (nes.cpu.clocks === 0 && nes.globalSystemClockNumber % 3 === 0) {
-    process.stdout.clearLine()
-    process.stdout.cursorTo(0)
-    process.stdout.write(
-      `Cycle ${i.toString().padStart(7, ' ')} of ${clockNumbers}`
-    )
+    // process.stderr.clearLine()
+    // process.stderr.cursorTo(0)
+    // process.stderr.write(
+    //   `Cycle ${i.toString().padStart(7, ' ')} of ${clockNumbers}\n`
+    // )
 
     const disassembled = disassember(nes.cpu.debugCurrentOps, {
       binaryStart: prevPC,
@@ -84,6 +84,7 @@ for (let i = 0; i < clockNumbers; i++) {
     logTempData += prevRegsAdnCycles
     logTempData += '\n'
     map.push([prevPC, disassembledInstruction, logTempData])
+    process.stdout.write(logTempData)
 
     ram = nes.getRAMSnapshot(0)
   }
