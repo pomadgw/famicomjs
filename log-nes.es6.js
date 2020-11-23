@@ -29,26 +29,36 @@ const map = []
 let prevCycle
 let ram
 
+const isProfiling = Boolean(process.argv[4] ?? 'false')
+
 for (let i = 0; i < clockNumbers; i++) {
   logTempData = ''
+  let prevRegsAdnCycles = ''
 
   const prevPC = nes.cpu.debugCurrentOpsPC
   prevCycle = nes.cpu.debugCycles - 1
 
-  let prevRegsAdnCycles = ''
-  prevRegsAdnCycles += `  A:${toHex(nes.cpu.A)}`
-  prevRegsAdnCycles += ` X:${toHex(nes.cpu.X)}`
-  prevRegsAdnCycles += ` Y:${toHex(nes.cpu.Y)}`
-  // prevRegsAdnCycles += ` P:${(+nes.cpu.STATUS).toString(2).padStart(2, '0')}`
-  prevRegsAdnCycles += ` P:${toHex(+nes.cpu.STATUS)}`
-  prevRegsAdnCycles += ` SP:${toHex(nes.cpu.SP)}`
-  prevRegsAdnCycles += ` PPU:${(nes.ppu.cycle - 1).toString().padStart(3, ' ')}`
-  prevRegsAdnCycles += `,${nes.ppu.scanline.toString().padStart(3, ' ')}`
-  prevRegsAdnCycles += ` CYC:${prevCycle}`
+  if (!isProfiling) {
+    prevRegsAdnCycles += `  A:${toHex(nes.cpu.A)}`
+    prevRegsAdnCycles += ` X:${toHex(nes.cpu.X)}`
+    prevRegsAdnCycles += ` Y:${toHex(nes.cpu.Y)}`
+    // prevRegsAdnCycles += ` P:${(+nes.cpu.STATUS).toString(2).padStart(2, '0')}`
+    prevRegsAdnCycles += ` P:${toHex(+nes.cpu.STATUS)}`
+    prevRegsAdnCycles += ` SP:${toHex(nes.cpu.SP)}`
+    prevRegsAdnCycles += ` PPU:${(nes.ppu.cycle - 1)
+      .toString()
+      .padStart(3, ' ')}`
+    prevRegsAdnCycles += `,${nes.ppu.scanline.toString().padStart(3, ' ')}`
+    prevRegsAdnCycles += ` CYC:${prevCycle}`
+  }
 
   nes.clock()
 
-  if (nes.cpu.clocks === 0 && nes.globalSystemClockNumber % 3 === 0) {
+  if (
+    nes.cpu.clocks === 0 &&
+    nes.globalSystemClockNumber % 3 === 0 &&
+    !isProfiling
+  ) {
     if (nes.globalSystemClockNumber % 10000 === 0) {
       process.stderr.clearLine()
       process.stderr.cursorTo(0)
