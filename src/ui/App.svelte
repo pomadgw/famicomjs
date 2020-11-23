@@ -141,7 +141,7 @@
     if (emulationMode) {
       if (!startFrame) startFrame = timestamp
 
-      if (timestamp - startFrame >= 1000 / 60) {
+      // if (timestamp - startFrame >= 1000 / 60) {
         startFrame = timestamp
 
         do {
@@ -153,7 +153,7 @@
         registers = nes.cpu
         oams = nes.ppu.oam
         disassembleRAM()
-      }
+      // }
 
       requestAnimationFrame(runEmulation)
     }
