@@ -1,6 +1,5 @@
 import MIRROR_MODE from './mirror-mode'
 import Screen from '../utils/screen'
-import bitfield from '../utils/bitfield'
 
 export const palScreen = [
   { r: 84, g: 84, b: 84 },
@@ -153,6 +152,49 @@ export const CONTROL = {
   ENABLENMI: 1 << 7
 }
 
+export const LOOPY_REG = {
+  COARSE_X: {
+    flags: 0b0000_0000_0001_1111,
+    length: 5,
+    posStart: 0
+  },
+  COARSE_Y: {
+    flags: 0b0000_0011_1110_0000,
+    length: 5,
+    posStart: 5
+  },
+  NAMETABLE_X: {
+    flags: 0b0000_0100_0000_0000,
+    length: 1,
+    posStart: 10
+  },
+  NAMETABLE_Y: {
+    flags: 0b0000_1000_0000_0000,
+    length: 1,
+    posStart: 11
+  },
+  FINE_Y: {
+    flags: 0b0111_0000_0000_0000,
+    length: 3,
+    posStart: 12
+  }
+}
+
+export function setLoopy(target, value, { flags, length, posStart }) {
+  target &= ~flags
+  if (length === 1) {
+    if (value === 1) target |= flags
+  } else {
+    target |= (value << posStart) & flags
+  }
+
+  return target
+}
+
+export function getLoopy(target, { flags, posStart }) {
+  return (target & flags) >> posStart
+}
+
 export default class PPU {
   // eslint-disable-next-line no-useless-constructor
   constructor() {
@@ -186,21 +228,8 @@ export default class PPU {
     this.ppuDataBuffer = 0x00
     this.ppuAddress = 0x0000
 
-    const loopyRegister = () =>
-      bitfield(
-        [
-          ['coarseX', 5],
-          ['coarseY', 5],
-          ['nametableX', 1],
-          ['nametableY', 1],
-          ['fineY', 3],
-          ['unused', 1]
-        ],
-        new Uint16Array([0])
-      )
-
-    this.vramAddress = loopyRegister()
-    this.tramAddress = loopyRegister()
+    this.vramAddress = 0
+    this.tramAddress = 0
 
     this.fineX = 0
 
@@ -402,8 +431,8 @@ export default class PPU {
     this.mask = 0
     this.control = 0
 
-    this.vramAddress.value = 0
-    this.tramAddress.value = 0
+    this.vramAddress = 0
+    this.tramAddress = 0
 
     this.shifter.reset()
     this.fineX = 0
@@ -429,28 +458,44 @@ export default class PPU {
 
   incrementScrollX() {
     if (this.isRenderSomthing) {
-      if (this.vramAddress.coarseX === 31) {
-        this.vramAddress.coarseX = 0
-        this.vramAddress.nametableX = ~this.vramAddress.nametableX
+      const prevCoarseX = getLoopy(this.vramAddress, LOOPY_REG.COARSE_X)
+
+      if (prevCoarseX === 31) {
+        this.vramAddress = setLoopy(this.vramAddress, 0, LOOPY_REG.COARSE_X)
+        this.vramAddress ^= LOOPY_REG.NAMETABLE_X.flags
       } else {
-        this.vramAddress.coarseX++
+        this.vramAddress = setLoopy(
+          this.vramAddress,
+          prevCoarseX + 1,
+          LOOPY_REG.COARSE_X
+        )
       }
     }
   }
 
   incrementScrollY() {
     if (this.isRenderSomthing) {
-      if (this.vramAddress.fineY < 7) {
-        this.vramAddress.fineY++
+      const prevFineY = getLoopy(this.vramAddress, LOOPY_REG.FINE_Y)
+      const prevCoarseY = getLoopy(this.vramAddress, LOOPY_REG.COARSE_Y)
+      if (prevFineY < 7) {
+        this.vramAddress = setLoopy(
+          this.vramAddress,
+          prevFineY + 1,
+          LOOPY_REG.FINE_Y
+        )
       } else {
-        this.vramAddress.fineY = 0
-        if (this.vramAddress.coarseY === 29) {
-          this.vramAddress.coarseY = 0
-          this.vramAddress.nametableY = ~this.vramAddress.nametableY
-        } else if (this.vramAddress.coarseY === 31) {
-          this.vramAddress.coarseY = 0
+        this.vramAddress = setLoopy(this.vramAddress, 0, LOOPY_REG.FINE_Y)
+        if (prevCoarseY === 29) {
+          this.vramAddress = setLoopy(this.vramAddress, 0, LOOPY_REG.COARSE_Y)
+          this.vramAddress ^= LOOPY_REG.NAMETABLE_Y.flags
+        } else if (prevCoarseY === 31) {
+          this.vramAddress = setLoopy(this.vramAddress, 0, LOOPY_REG.COARSE_Y)
         } else {
-          this.vramAddress.coarseY++
+          this.vramAddress = setLoopy(
+            this.vramAddress,
+            prevCoarseY + 1,
+            LOOPY_REG.COARSE_Y
+          )
         }
       }
     }
@@ -458,16 +503,36 @@ export default class PPU {
 
   transferAddressX() {
     if (this.isRenderSomthing) {
-      this.vramAddress.nametableX = this.tramAddress.nametableX
-      this.vramAddress.coarseX = this.tramAddress.coarseX
+      this.vramAddress = setLoopy(
+        this.vramAddress,
+        getLoopy(this.tramAddress, LOOPY_REG.NAMETABLE_X),
+        LOOPY_REG.NAMETABLE_X
+      )
+      this.vramAddress = setLoopy(
+        this.vramAddress,
+        getLoopy(this.tramAddress, LOOPY_REG.COARSE_X),
+        LOOPY_REG.COARSE_X
+      )
     }
   }
 
   transferAddressY() {
     if (this.isRenderSomthing) {
-      this.vramAddress.fineY = this.tramAddress.fineY
-      this.vramAddress.nametableY = this.tramAddress.nametableY
-      this.vramAddress.coarseY = this.tramAddress.coarseY
+      this.vramAddress = setLoopy(
+        this.vramAddress,
+        getLoopy(this.tramAddress, LOOPY_REG.FINE_Y),
+        LOOPY_REG.FINE_Y
+      )
+      this.vramAddress = setLoopy(
+        this.vramAddress,
+        getLoopy(this.tramAddress, LOOPY_REG.NAMETABLE_Y),
+        LOOPY_REG.NAMETABLE_Y
+      )
+      this.vramAddress = setLoopy(
+        this.vramAddress,
+        getLoopy(this.tramAddress, LOOPY_REG.COARSE_Y),
+        LOOPY_REG.COARSE_Y
+      )
     }
   }
 
@@ -490,43 +555,43 @@ export default class PPU {
         this.shifter.updateShifter()
 
         const patternBg = (this.control & CONTROL.PATTERN_BG) > 0 ? 1 : 0
+        const fineY = getLoopy(this.vramAddress, LOOPY_REG.FINE_Y)
         switch ((this.cycle - 1) % 8) {
           case 0:
             this.shifter.loadBgShifter()
             this.bgNextTile.id = this.ppuRead(
-              0x2000 | (this.vramAddress.value & 0x0fff)
+              0x2000 | (this.vramAddress & 0x0fff)
             )
             break
           case 2:
             this.bgNextTile.attrib = this.ppuRead(
               0x23c0 |
-                (this.vramAddress.nametableY << 11) |
-                (this.vramAddress.nametableX << 10) |
-                ((this.vramAddress.coarseY >> 2) << 3) |
-                (this.vramAddress.coarseX >> 2)
+                // (this.vramAddress.nametableY << 11) |
+                // (this.vramAddress.nametableX << 10) |
+                (this.vramAddress & 0b0000_1100_0000_0000) |
+                // ((this.vramAddress.coarseY >> 2) << 3) |
+                ((this.vramAddress & 0b0000_0011_1000_0000) >> 4) |
+                // (this.vramAddress.coarseX >> 2)
+                ((this.vramAddress >> 2) & 0b111)
             )
-            if ((this.vramAddress.coarseY & 0x02) > 0) {
+            // if ((this.vramAddress.coarseY & 0x02) > 0) {
+            if ((this.vramAddress & 0x40) > 0) {
               this.bgNextTile.attrib >>= 4
             }
-            if ((this.vramAddress.coarseX & 0x02) > 0) {
+            // if ((this.vramAddress.coarseX & 0x02) > 0) {
+            if ((this.vramAddress & 0x02) > 0) {
               this.bgNextTile.attrib >>= 2
             }
             this.bgNextTile.attrib &= 0x03
             break
           case 4:
             this.bgNextTile.lsb = this.ppuRead(
-              (patternBg << 12) +
-                (this.bgNextTile.id << 4) +
-                this.vramAddress.fineY +
-                0
+              (patternBg << 12) + (this.bgNextTile.id << 4) + fineY + 0
             )
             break
           case 6:
             this.bgNextTile.msb = this.ppuRead(
-              (patternBg << 12) +
-                (this.bgNextTile.id << 4) +
-                this.vramAddress.fineY +
-                8
+              (patternBg << 12) + (this.bgNextTile.id << 4) + fineY + 8
             )
             break
           case 7:
@@ -547,9 +612,7 @@ export default class PPU {
       }
 
       if (this.cycle === 338 || this.cycle === 340) {
-        this.bgNextTile.id = this.ppuRead(
-          0x2000 | (this.vramAddress.value & 0x0fff)
-        )
+        this.bgNextTile.id = this.ppuRead(0x2000 | (this.vramAddress & 0x0fff))
       }
 
       if (this.scanline === -1 && this.cycle >= 280 && this.cycle < 305) {
@@ -806,13 +869,13 @@ export default class PPU {
           break
         case 0x0007: // PPU Data
           data = this.ppuDataBuffer
-          this.ppuDataBuffer = this.ppuRead(this.vramAddress.value)
+          this.ppuDataBuffer = this.ppuRead(this.vramAddress)
 
-          if (this.vramAddress.value >= 0x3f00) {
+          if (this.vramAddress >= 0x3f00) {
             data = this.ppuDataBuffer
           }
 
-          this.vramAddress.value += this.incrementValue
+          this.vramAddress += this.incrementValue
           break
         default:
           break
@@ -829,14 +892,18 @@ export default class PPU {
   }
 
   cpuWrite(addr, value) {
-    // TODO: implement this later
     switch (addr) {
       case 0x0000: // Control
         this.control = value
-        this.tramAddress.nametableX =
-          (this.control & CONTROL.NAMETABLE_X) > 0 ? 1 : 0
-        this.tramAddress.nametableY =
-          (this.control & CONTROL.NAMETABLE_Y) > 0 ? 1 : 0
+        // this.tramAddress.nametableX =
+        //   (this.control & CONTROL.NAMETABLE_X) > 0 ? 1 : 0
+        // this.tramAddress.nametableY =
+        //   (this.control & CONTROL.NAMETABLE_Y) > 0 ? 1 : 0
+        this.tramAddress &= ~(
+          LOOPY_REG.NAMETABLE_X.flags | LOOPY_REG.NAMETABLE_Y.flags
+        )
+        this.tramAddress |=
+          (this.control & (CONTROL.NAMETABLE_X | CONTROL.NAMETABLE_Y)) << 10
         break
       case 0x0001: // Mask
         this.mask = value
@@ -853,28 +920,40 @@ export default class PPU {
       case 0x0005: // Scroll
         if (this.addressLatch === 0) {
           this.fineX = value & 0x07
-          this.tramAddress.coarseX = value >> 3
+          // this.tramAddress.coarseX = value >> 3
+          this.tramAddress = setLoopy(
+            this.tramAddress,
+            value >> 3,
+            LOOPY_REG.COARSE_X
+          )
           this.addressLatch = 1
         } else {
-          this.tramAddress.fineY = value & 0x07
-          this.tramAddress.coarseY = value >> 3
+          this.tramAddress = setLoopy(
+            this.tramAddress,
+            value & 0x07,
+            LOOPY_REG.FINE_Y
+          )
+          this.tramAddress = setLoopy(
+            this.tramAddress,
+            value >> 3,
+            LOOPY_REG.COARSE_Y
+          )
           this.addressLatch = 0
         }
         break
       case 0x0006: // PPU Address
         if (this.addressLatch === 0) {
-          this.tramAddress.value =
-            ((value & 0x3f) << 8) | (this.tramAddress.value & 0x00ff)
+          this.tramAddress = ((value & 0x3f) << 8) | (this.tramAddress & 0x00ff)
           this.addressLatch = 1
         } else {
-          this.tramAddress.value = (this.tramAddress.value & 0xff00) | value
-          this.vramAddress.value = this.tramAddress.value
+          this.tramAddress = (this.tramAddress & 0xff00) | value
+          this.vramAddress = this.tramAddress
           this.addressLatch = 0
         }
         break
       case 0x0007: // PPU Data
-        this.ppuWrite(this.vramAddress.value, value)
-        this.vramAddress.value += this.incrementValue
+        this.ppuWrite(this.vramAddress, value)
+        this.vramAddress += this.incrementValue
         break
       default:
         break
