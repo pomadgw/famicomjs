@@ -104,6 +104,7 @@
   function dumpCPUMemory() {
     disassembleRAM(true)
     console.log('ram value', ram)
+    console.log(JSON.stringify(nes))
   }
 
   function render(imageData) {

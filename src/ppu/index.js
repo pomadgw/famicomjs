@@ -1,3 +1,4 @@
+import pick from 'lodash/pick'
 import MIRROR_MODE from './mirror-mode'
 import Screen from '../utils/screen'
 
@@ -194,6 +195,21 @@ export function setLoopy(target, value, { flags, length, posStart }) {
 export function getLoopy(target, { flags, posStart }) {
   return (target & flags) >> posStart
 }
+
+const SERIALIZED_PROPS = [
+  'scanline',
+  'cycle',
+  'status',
+  'mask',
+  'control',
+  'addressLatch',
+  'ppuDataBuffer',
+  'vramAddress',
+  'tramAddress',
+  'fineX',
+  'bgNextTile',
+  'shifter'
+]
 
 export default class PPU {
   // eslint-disable-next-line no-useless-constructor
@@ -406,6 +422,10 @@ export default class PPU {
         }
       }
     }
+  }
+
+  toJSON() {
+    return pick(this, SERIALIZED_PROPS)
   }
 
   get incrementValue() {

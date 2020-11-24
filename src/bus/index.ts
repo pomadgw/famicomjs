@@ -61,6 +61,14 @@ export default class Bus {
     this.cartridge = null
   }
 
+  toJSON() {
+    return {
+      ram: [...this.ram],
+      cpu: this.cpu,
+      ppu: this.ppu
+    }
+  }
+
   cpuRead(address: number): number {
     const checkFromCartridge = this.cartridge?.cpuRead(address)
     if (checkFromCartridge !== null) return checkFromCartridge

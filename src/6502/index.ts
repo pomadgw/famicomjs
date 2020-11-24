@@ -72,6 +72,18 @@ export default class CPU {
     this.clocks = 8
   }
 
+  toJSON() {
+    return {
+      A: this.A,
+      X: this.X,
+      Y: this.Y,
+      SP: this.SP,
+      PC: this.PC,
+      STATUS: this.STATUS.status,
+      clocks: this.clocks
+    }
+  }
+
   read(address: number): number {
     const bus = this.bus
     if (!bus) return 0
