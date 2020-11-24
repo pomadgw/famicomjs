@@ -1,5 +1,6 @@
 <script>
   import { afterUpdate } from 'svelte'
+  import { Flags } from '../6502/flags'
   import toHex from '../utils/tohex'
 
   export let registers
@@ -7,7 +8,7 @@
   let flags = ['N', 'V', 'U', 'B', 'D', 'I', 'Z', 'C']
 
   function checkFlag(flag) {
-    return registers?.STATUS?.[flag] ? 'text-red-500 font-bold' : 'text-black'
+    return registers?.STATUS?.getStatus(Flags[flag]) ? 'text-red-500 font-bold' : 'text-black'
   }
 
   $: flagsClass = flags.map(flag => [flag, checkFlag(flag)])

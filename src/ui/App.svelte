@@ -10,6 +10,8 @@
   import CPU from '../6502'
   import PPU from '../ppu'
 
+  import controller from '../controllers/joystick'
+
   let nes
   let canvas
   let zoomCanvas
@@ -18,30 +20,47 @@
   let emulationMode = false
   let ctx
   let startFrame
-  let showDebug = true
+  let showDebug = false
   let offsetStart = 0x8000
   let nesPC = 0x8000
   let registers
   let oams = []
   let selectedPalette = 0x00
   let selectedTable = new Uint8Array(1024)
+  let ram
 
   let disassembled
 
   nes = new Bus(new CPU(), new PPU(), render )
 
+  nes.controllers[0] = controller()
+
   function toggleEmulation() {
     emulationMode = !emulationMode
   }
 
-  function disassembleRAM() {
-    disassembled = disassember(nes.getRAMSnapshot(), { binaryStart: 0 })
+  function disassembleRAM(force = false) {
+    if (showDebug || force) {
+      ram = nes.getRAMSnapshot(0x0000)
+      disassembled = disassember(ram, { binaryStart: 0 })
+    }
   }
 
   async function readFile(event) {
     const file = event.target.files[0]
+
+    const reader = new FileReader()
+    const data = await new Promise((resolve, reject) => {
+      reader.addEventListener('load', (event) => {
+        resolve(event.target.result)
+      })
+
+      reader.readAsArrayBuffer(file)
+    })
+    const view = new Uint8Array(data)
+
     const cart = new Cartridge()
-    await cart.parse(file)
+    cart.parse(view)
 
     nes.cartridge = cart
     nes.insertCartridge(cart)
@@ -53,7 +72,7 @@
 
     disassembleRAM()
     oams = nes.ppu.oam
-    emulationMode = true
+    emulationMode = !showDebug
   }
 
   function resetNES() {
@@ -61,21 +80,35 @@
     offsetStart = nes.cpu.PC
     nesPC = nes.cpu.PC
     registers = nes.cpu
+    disassembleRAM()
   }
 
   function stepNES() {
     do {
       nes.clock()
-    } while (!nes.cpu.isComplete)
+    } while (nes.cpu.clocks !== 0)
 
     do {
       nes.clock()
-    } while (nes.cpu.isComplete)
+    } while (nes.cpu.clocks === 0)
 
     nesPC = nes.cpu.PC
     registers = nes.cpu
+    oams = nes.ppu.oam
+    disassembleRAM()
 
     render(nes.ppu.getScreen().imageData)
+  }
+
+  function saveSaveState() {
+    window.localStorage.setItem('saveState', JSON.stringify(nes))
+  }
+
+  function loadSaveState() {
+    const state = window.localStorage.getItem('saveState')
+    if (state) {
+      nes.loadState(JSON.parse(state))
+    }
   }
 
   function render(imageData) {
@@ -106,13 +139,14 @@
     nesPC = nes.cpu.PC
     registers = nes.cpu
     oams = nes.ppu.oam
+    disassembleRAM()
   }
 
   function runEmulation(timestamp) {
     if (emulationMode) {
       if (!startFrame) startFrame = timestamp
 
-      if (timestamp - startFrame >= 1000 / 60) {
+      // if (timestamp - startFrame >= 1000 / 60) {
         startFrame = timestamp
 
         do {
@@ -123,7 +157,8 @@
         nesPC = nes.cpu.PC
         registers = nes.cpu
         oams = nes.ppu.oam
-      }
+        disassembleRAM()
+      // }
 
       requestAnimationFrame(runEmulation)
     }
@@ -191,13 +226,17 @@
         Show Debug Tools
       </label>
       <button class="mt-2" on:click={resetNES}>Reset</button>
+      <button class="mt-2" on:click={saveSaveState}>Save State</button>
+      <button class="mt-2" on:click={loadSaveState}>Load State</button>
+      <button class="mt-2" on:click={toggleEmulation}>{emulationMode ? 'Pause' : 'Run'}</button>
+      {#if showDebug}
       <button class="mt-2" on:click={stepNES}>Execute Code Step-by-Step</button>
       <button class="mt-2" on:click={renderSingleFrame}>Execute Code for Whole Frame</button>
-      <button class="mt-2" on:click={toggleEmulation}>{emulationMode ? 'Pause' : 'Run'}</button>
+      {/if}
     </div>
   </div>
   {#if showDebug}
-  <div class="ml-4">
+  <div class="ml-4 p-2" style="max-height: 90vh; overflow-y: scroll;">
     <div class="text-xl text-center">Debug</div>
     <div class="mt-4">
       <div>
@@ -251,6 +290,10 @@
       {#if nes.cartridge && showDebug}
       <div class="mt-4">
         <RAM ram={disassembled} offsetStart={offsetStart} length={0x10} pc={nesPC} on:change={updateOffset} />
+      </div>
+      <div class="mt-4">
+        <table class="table">
+        </table>
       </div>
       {/if}
     </div>

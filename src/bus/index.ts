@@ -61,6 +61,22 @@ export default class Bus {
     this.cartridge = null
   }
 
+  toJSON() {
+    return {
+      ram: [...this.ram],
+      cpu: this.cpu,
+      ppu: this.ppu,
+      cartridge: this.cartridge
+    }
+  }
+
+  loadState(state: any) {
+    this.ram = new Uint8Array(state.ram)
+    this.cpu.loadState(state.cpu)
+    this.ppu.loadState(state.ppu)
+    if (this.cartridge && state.cartridge) this.cartridge.loadState(state.cartridge)
+  }
+
   cpuRead(address: number): number {
     const checkFromCartridge = this.cartridge?.cpuRead(address)
     if (checkFromCartridge !== null) return checkFromCartridge
@@ -108,8 +124,10 @@ export default class Bus {
   }
 
   reset() {
+    this.ram = new Uint8Array(0x2000)
     this.cpu.reset()
     this.ppu.reset()
+    this.cartridge?.reset()
     this.globalSystemClockNumber = 0
 
     this.dmaPage = 0x00
@@ -134,7 +152,7 @@ export default class Bus {
           } else {
             this.ppu.writeToOAM(this.dmaAddress, this.dmaData)
             this.dmaAddress++
-            this.dmaAddress %= 256
+            this.dmaAddress &= 0xff
             if (this.dmaAddress === 0) {
               this.isInDMATransfer = false
               this.dmaDummy = true
@@ -156,8 +174,9 @@ export default class Bus {
     this.globalSystemClockNumber += 1
 
     if (this.ppu.isFrameComplete) {
-      if (this._on.render)
-        this._on.render(this.ppu.getScreen().imageData)
+      const { imageData } = this.ppu.getScreen()
+      if (this._on.render && imageData)
+        this._on.render(imageData)
     }
   }
 }

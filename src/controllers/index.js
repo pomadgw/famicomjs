@@ -16,7 +16,7 @@ export default class Controller {
     this.strobe = false
     this.cursor = 0
 
-    if (buttons) {
+    if (buttons && typeof document !== 'undefined') {
       document.addEventListener('keydown', (e) => {
         const buttonValue = buttons[e.code]
         this.setButtonState(buttonValue, true)

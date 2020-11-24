@@ -22,8 +22,8 @@ describe('instructions: interrupts', () => {
       cpu.bus.ram[0xfffe] = 0x34
       cpu.bus.ram[0xffff] = 0x12
       stackPosition = cpu.SP
-      cpu.fetch()
-      cpu.STATUS.setStatus(Flags.I, false)
+      // cpu.fetch()
+      cpu.STATUS.status = 0x24
       cpu.BRK()
     })
 
@@ -37,7 +37,7 @@ describe('instructions: interrupts', () => {
     })
 
     it('should save status flags', () => {
-      const expectedStatus = 0x24 | Flags.I | Flags.B
+      const expectedStatus = 0x24 | Flags.I | Flags.B | Flags.U
       expect(cpu.bus.ram[0x100 + stackPosition - 2]).toBe(expectedStatus)
     })
 

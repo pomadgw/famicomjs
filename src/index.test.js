@@ -11,26 +11,13 @@ import toHex from './utils/tohex'
 
 const nesTestFile = resolve(__dirname, '../nestest.nes')
 
-jest.setTimeout(60000)
-
-async function mockNES({
-  name = 'file.nes',
-  type = 'application/octet-stream',
-  lastModified = new Date()
-} = {}) {
-  const data = fs.readFileSync(nesTestFile)
-  const blob = new Blob([data], { type })
-
-  blob.lastModifiedDate = lastModified
-
-  return new File([blob], name)
-}
+jest.setTimeout(120000)
 
 test('NES test', async () => {
   const nes = new Bus(new CPU(), new PPU(), () => {})
   const cart = new Cartridge()
-  const cartFile = await mockNES()
-  await cart.parse(cartFile)
+  const cartFile = fs.readFileSync(nesTestFile)
+  cart.parse(cartFile)
   nes.insertCartridge(cart)
   nes.reset()
 
@@ -46,9 +33,21 @@ test('NES test', async () => {
   let prevCycle
   for (let i = 0; i < 3 * 30000; i++) {
     logValue = ''
-    nes.clock()
+
     const prevPC = nes.cpu.debugCurrentOpsPC
     prevCycle = nes.cpu.debugCycles
+
+    let prevRegsAdnCycles = ''
+    prevRegsAdnCycles += `  A:${toHex(nes.cpu.A)}`
+    prevRegsAdnCycles += ` X:${toHex(nes.cpu.X)}`
+    prevRegsAdnCycles += ` Y:${toHex(nes.cpu.Y)}`
+    prevRegsAdnCycles += ` P:${(+nes.cpu.STATUS).toString(2).padStart(8, '0')}`
+    prevRegsAdnCycles += ` SP:${toHex(nes.cpu.SP)}`
+    prevRegsAdnCycles += ` PPU:${nes.ppu.scanline.toString().padStart(3, ' ')}`
+    prevRegsAdnCycles += `,${(nes.ppu.cycle - 1).toString().padStart(3, ' ')}`
+    prevRegsAdnCycles += ` CYC:${prevCycle}`
+
+    nes.clock()
 
     const disassembled = disassember(nes.cpu.debugCurrentOps, {
       binaryStart: prevPC
@@ -68,14 +67,7 @@ test('NES test', async () => {
       .join(' ')
       .padEnd(8, ' ')}`
     logValue += `  ${disassembledInstruction}`
-    logValue += `  A:${toHex(nes.cpu.A)}`
-    logValue += ` X:${toHex(nes.cpu.X)}`
-    logValue += ` Y:${toHex(nes.cpu.Y)}`
-    logValue += ` P:${(+nes.cpu.STATUS).toString(2).padStart(8, '0')}`
-    logValue += ` SP:${toHex(nes.cpu.SP)}`
-    logValue += ` PPU:${nes.ppu.scanline.toString().padStart(3, ' ')}`
-    logValue += `,${(nes.ppu.cycle - 1).toString().padStart(3, ' ')}`
-    logValue += ` CYC:${prevCycle}`
+    logValue += prevRegsAdnCycles
     logValue += '\n'
     map.push([prevPC, disassembledInstruction, logValue])
     // }
@@ -102,4 +94,111 @@ test('NES test', async () => {
 
   expect(nes.cpuRead(0x0002)).toBe(0)
   // expect(nes.cpu.ram[0x0003]).toBe(0) // for implementing undefined opcodes
+})
+
+// const roms = fs.readdirSync(
+//   resolve(__dirname, '../roms/instr_test-v5/rom_singles')
+// )
+
+// roms.forEach((romFileName) => {
+//   const filename = resolve(
+//     __dirname,
+//     '../roms/instr_test-v5/rom_singles',
+//     romFileName
+//   )
+
+//   test(`NES test: ${romFileName}`, async () => {
+//     const nes = new Bus(new CPU(), new PPU(), () => {})
+//     const cart = new Cartridge()
+//     const cartFile = fs.readFileSync(filename)
+//     cart.parse(cartFile)
+//     nes.insertCartridge(cart)
+//     nes.reset()
+
+//     const statuses = []
+
+//     console.log('stating testing', romFileName)
+//     let i = 0
+//     while (true) {
+//       nes.clock()
+//       nes.isReadOnly = true
+//       const status = nes.cpuRead(0x0000)
+//       const array = [
+//         nes.cpuRead(0x0001),
+//         nes.cpuRead(0x0002),
+//         nes.cpuRead(0x0003)
+//       ]
+//       console.log({ status, array })
+
+//       if (isEqual(array, [0xde, 0xb0, 0x61])) {
+//         const text = []
+//         let pos = 0x0004
+
+//         while (true) {
+//           const data = nes.cpuRead(pos)
+//           if (data === 0) break
+//           text.push(String.fromCharCode(data))
+//           pos++
+//         }
+
+//         if (text.length > 0) statuses.push(text.join(''))
+//         break
+//       }
+//       i++
+//       nes.isReadOnly = false
+//       if (i > 3 * 1000) break
+//     }
+
+//     console.log(statuses)
+
+//     expect(nes.cpuRead(0x6000)).toBe(0)
+//   })
+// })
+
+test('NES test 2', async () => {
+  const nes = new Bus(new CPU(), new PPU(), () => {})
+  const cart = new Cartridge()
+  const cartFile = fs.readFileSync(
+    resolve(__dirname, '../roms/instr_test-v5/official_only.nes')
+  )
+  cart.parse(cartFile)
+  nes.insertCartridge(cart)
+  nes.reset()
+
+  let lastText = ''
+
+  process.stdout.write('Start....')
+  for (let i = 0; i < 3 * 1000000; i++) {
+    nes.clock()
+    const text = []
+    let pos = 0x6004
+
+    while (true) {
+      const data = nes.cpuRead(pos)
+      if (data === 0) break
+      text.push(String.fromCharCode(data))
+      pos++
+    }
+
+    if (text.length > 0) lastText = text.join('')
+  }
+
+  while (nes.cpuRead(0x6000) === 0x80) {
+    nes.clock()
+  }
+
+  const text = []
+  let pos = 0x6004
+
+  while (true) {
+    const data = nes.cpuRead(pos)
+    if (data === 0) break
+    text.push(String.fromCharCode(data))
+    pos++
+  }
+
+  if (text.length > 0) lastText = text.join('')
+  process.stdout.write(lastText)
+
+  expect(nes.cpuRead(0x6000)).toBe(0)
 })

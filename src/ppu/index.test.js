@@ -1,4 +1,4 @@
-import PPU from '.'
+import PPU, { STATUS, CONTROL, LOOPY_REG, getLoopy } from '.'
 
 const createDummyCartridge = (defaultValue = null) => ({
   cpuRead: jest.fn(() => defaultValue),
@@ -64,29 +64,29 @@ describe('PPU', () => {
       ppu.scanline = 241
       ppu.clock()
 
-      expect(ppu.statusReg.verticalBlank).toBe(1)
+      expect(ppu.status & STATUS.VERTICAL_BLANK).toBe(STATUS.VERTICAL_BLANK)
     })
 
     it('should set vertical blank to 0 at cycle 1, scanline -1', () => {
-      ppu.statusReg.verticalBlank = 1
+      ppu.statusReg |= STATUS.VERTICAL_BLANK
       ppu.cycle = 1
       ppu.scanline = -1
       ppu.clock()
 
-      expect(ppu.statusReg.verticalBlank).toBe(0)
+      expect(ppu.status & STATUS.VERTICAL_BLANK).toBe(0)
     })
 
     it('should set nmi at cycle 1, scanline 241 if nmi control is set', () => {
       ppu.cycle = 1
       ppu.scanline = 241
-      ppu.controlReg.enablenmi = 1
+      ppu.control |= CONTROL.ENABLENMI
       ppu.clock()
 
       expect(ppu.nmi).toBe(true)
 
       ppu.cycle = 1
       ppu.scanline = 241
-      ppu.controlReg.enablenmi = 0
+      ppu.control &= ~CONTROL.ENABLENMI
       ppu.nmi = false
       ppu.clock()
 
@@ -97,7 +97,7 @@ describe('PPU', () => {
       it('should set bg tile propertied', () => {
         ppu.cycle = 9
         ppu.scanline = 1
-        ppu.vramAddress.value = 0x01ff
+        ppu.vramAddress = 0x01ff
         ppu.ppuRead = jest.fn().mockReturnValue(0x1f)
 
         ppu.clock()
@@ -227,7 +227,7 @@ describe('PPU', () => {
       let data = ppu.cpuRead(0x0007)
       expect(data).toBe(0)
       expect(ppu.ppuRead).toHaveBeenCalledWith(0x1110)
-      expect(ppu.vramAddress.value).toBe(0x1111)
+      expect(ppu.vramAddress).toBe(0x1111)
 
       data = ppu.cpuRead(0x0007)
       expect(data).toBe(0x10)
@@ -247,12 +247,12 @@ describe('PPU', () => {
     it('should be able to read status', () => {
       const data = 0xf4
       const expected = data & 0xe0
-      ppu.statusReg.value = data
+      ppu.status = data
       ppu.addressLatch = 1
 
       const fetched = ppu.cpuRead(0x0002)
       expect(fetched & 0xe0).toBe(expected)
-      expect(ppu.statusReg.verticalBlank).toBe(0)
+      expect(ppu.status & STATUS.VERTICAL_BLANK).toBe(0)
       expect(ppu.addressLatch).toBe(0)
     })
 
@@ -279,59 +279,52 @@ describe('PPU', () => {
     describe('control register', () => {
       it('should be able to write to control register', () => {
         ppu.cpuWrite(0x0000, 0x10)
-        expect(ppu.controlReg.value).toBe(0x10)
+        expect(ppu.control).toBe(0x10)
       })
 
       it('should be able to set nametables', () => {
         ppu.cpuWrite(0x0000, 0x03)
-        expect(ppu.tramAddress.nametableX).toBe(0x1)
-        expect(ppu.tramAddress.nametableY).toBe(0x1)
+        expect(getLoopy(ppu.tramAddress, LOOPY_REG.NAMETABLE_X)).toBe(0x1)
+        expect(getLoopy(ppu.tramAddress, LOOPY_REG.NAMETABLE_Y)).toBe(0x1)
       })
     })
 
     it('should be able to write to mask register', () => {
       ppu.cpuWrite(0x0001, 0x10)
-      expect(ppu.maskReg.value).toBe(0x10)
-    })
-
-    it('should be able to write to status register', () => {
-      ppu.cpuWrite(0x0002, 0x10)
-      expect(ppu.statusReg.value).toBe(0x10)
+      expect(ppu.mask).toBe(0x10)
     })
 
     it('should be able to write to scroll-related registers', () => {
       ppu.addressLatch = 0
       ppu.cpuWrite(0x0005, 0x17)
       expect(ppu.fineX).toBe(0x17 & 0x07)
-      expect(ppu.tramAddress.coarseX).toBe(0x17 >> 3)
-      console.log(ppu.tramAddress.value)
+      expect(getLoopy(ppu.tramAddress, LOOPY_REG.COARSE_X)).toBe(0x17 >> 3)
       ppu.cpuWrite(0x0005, 0x17)
-      console.log(ppu.tramAddress.value)
-      expect(ppu.tramAddress.fineY).toBe(0x17 & 0x07)
-      expect(ppu.tramAddress.coarseY).toBe(0x17 >> 3)
+      expect(getLoopy(ppu.tramAddress, LOOPY_REG.FINE_Y)).toBe(0x17 & 0x07)
+      expect(getLoopy(ppu.tramAddress, LOOPY_REG.COARSE_Y)).toBe(0x17 >> 3)
     })
 
     it('should be able to write to ppu (increment mode = 0)', () => {
       jest.spyOn(ppu, 'ppuWrite')
       ppu.cpuWrite(0x0006, 0x11)
       ppu.cpuWrite(0x0006, 0x10)
-      expect(ppu.tramAddress.value).toBe(0x1110)
+      expect(ppu.tramAddress).toBe(0x1110)
 
       ppu.cpuWrite(0x0007, 0x1f)
       expect(ppu.ppuWrite).toHaveBeenCalledWith(0x1110, 0x1f)
-      expect(ppu.vramAddress.value).toBe(0x1111)
+      expect(ppu.vramAddress).toBe(0x1111)
     })
 
     it('should be able to write to ppu (increment mode = 1)', () => {
       jest.spyOn(ppu, 'ppuWrite')
-      ppu.controlReg.incrementMode = 1
+      ppu.control |= CONTROL.INCREMENT_MODE
       ppu.cpuWrite(0x0006, 0x11)
       ppu.cpuWrite(0x0006, 0x10)
-      expect(ppu.vramAddress.value).toBe(0x1110)
+      expect(ppu.vramAddress).toBe(0x1110)
 
       ppu.cpuWrite(0x0007, 0x1f)
       expect(ppu.ppuWrite).toHaveBeenCalledWith(0x1110, 0x1f)
-      expect(ppu.vramAddress.value).toBe(0x1110 + 0x20)
+      expect(ppu.vramAddress).toBe(0x1110 + 0x20)
     })
 
     it('should be able to write oam data', () => {

@@ -9,61 +9,177 @@ const CPU = (ram) => {
 }
 
 describe('instructions: comparison', () => {
-  const testComparison = (targetRegister) => {
-    const instruction = targetRegister === 'A' ? 'CMP' : `CP${targetRegister}`
-
-    describe(instruction, () => {
-      let cpu
-      beforeEach(() => {
-        cpu = CPU([0, 0, 0])
-      })
-
-      it(`should set carry flag if ${targetRegister} register is more than or equal to compared value`, () => {
-        cpu.bus.ram[1] = 0x10
-        cpu[targetRegister] = 0x20
-
-        cpu.absoluteAddress = 0x0001
-
-        cpu[instruction]()
-
-        expect(cpu.STATUS.getStatus(Flags.C)).toBe(true)
-      })
-
-      it(`should set zero flag if ${targetRegister} register is equal to compared value`, () => {
-        cpu.bus.ram[1] = 0x20
-        cpu[targetRegister] = 0x20
-
-        cpu.absoluteAddress = 0x0001
-
-        cpu[instruction]()
-
-        expect(cpu.STATUS.getStatus(Flags.Z)).toBe(true)
-      })
-
-      it(`should set negative flag if ${targetRegister} register is less than compared value`, () => {
-        cpu.bus.ram[1] = 0x30
-        cpu[targetRegister] = 0x20
-
-        cpu.absoluteAddress = 0x0001
-
-        cpu[instruction]()
-
-        expect(cpu.STATUS.getStatus(Flags.N)).toBe(true)
-
-        cpu.STATUS.setStatus(Flags.N, false)
-        cpu.bus.ram[1] = 0x00
-        cpu[targetRegister] = 0x80
-
-        cpu.absoluteAddress = 0x0001
-
-        cpu[instruction]()
-
-        expect(cpu.STATUS.getStatus(Flags.N)).toBe(true)
-      })
+  describe('CMP', () => {
+    let cpu
+    beforeEach(() => {
+      cpu = CPU([0, 0, 0])
     })
-  }
 
-  testComparison('A')
-  testComparison('X')
-  testComparison('Y')
+    it(`should set carry flag if ${'A'} register is more than or equal to compared value`, () => {
+      cpu.A = 0x20
+      cpu.bus.ram[1] = 0x10
+
+      cpu.absoluteAddress = 0x0001
+
+      cpu.CMP()
+
+      expect(cpu.STATUS.getStatus(Flags.C)).toBe(true)
+      expect(cpu.STATUS.getStatus(Flags.Z)).toBe(false)
+      expect(cpu.STATUS.getStatus(Flags.N)).toBe(false)
+    })
+
+    it(`should set zero flag if ${'A'} register is equal to compared value`, () => {
+      cpu.A = 0x20
+      cpu.bus.ram[1] = 0x20
+
+      cpu.absoluteAddress = 0x0001
+
+      cpu.CMP()
+
+      expect(cpu.STATUS.getStatus(Flags.C)).toBe(true)
+      expect(cpu.STATUS.getStatus(Flags.Z)).toBe(true)
+      expect(cpu.STATUS.getStatus(Flags.N)).toBe(false)
+    })
+
+    it(`should set negative flag if ${'A'} register is less than compared value`, () => {
+      cpu.A = 0x20
+      cpu.bus.ram[1] = 0x30
+
+      cpu.absoluteAddress = 0x0001
+
+      cpu.CMP()
+
+      expect(cpu.STATUS.getStatus(Flags.C)).toBe(false)
+      expect(cpu.STATUS.getStatus(Flags.Z)).toBe(false)
+      expect(cpu.STATUS.getStatus(Flags.N)).toBe(true)
+
+      cpu.STATUS.setStatus(Flags.N, false)
+      cpu.A = 0x80
+      cpu.bus.ram[1] = 0x00
+
+      cpu.absoluteAddress = 0x0001
+
+      cpu.CMP()
+
+      expect(cpu.STATUS.getStatus(Flags.C)).toBe(true)
+      expect(cpu.STATUS.getStatus(Flags.Z)).toBe(false)
+      expect(cpu.STATUS.getStatus(Flags.N)).toBe(true)
+    })
+  })
+
+  describe('CPX', () => {
+    let cpu
+    beforeEach(() => {
+      cpu = CPU([0, 0, 0])
+    })
+
+    it(`should set carry flag if ${'X'} register is more than or equal to compared value`, () => {
+      cpu.X = 0x20
+      cpu.bus.ram[1] = 0x10
+
+      cpu.absoluteAddress = 0x0001
+
+      cpu.CPX()
+
+      expect(cpu.STATUS.getStatus(Flags.C)).toBe(true)
+      expect(cpu.STATUS.getStatus(Flags.Z)).toBe(false)
+      expect(cpu.STATUS.getStatus(Flags.N)).toBe(false)
+    })
+
+    it(`should set zero flag if ${'X'} register is equal to compared value`, () => {
+      cpu.X = 0x20
+      cpu.bus.ram[1] = 0x20
+
+      cpu.absoluteAddress = 0x0001
+
+      cpu.CPX()
+
+      expect(cpu.STATUS.getStatus(Flags.C)).toBe(true)
+      expect(cpu.STATUS.getStatus(Flags.Z)).toBe(true)
+      expect(cpu.STATUS.getStatus(Flags.N)).toBe(false)
+    })
+
+    it(`should set negative flag if ${'X'} register is less than compared value`, () => {
+      cpu.X = 0x20
+      cpu.bus.ram[1] = 0x30
+
+      cpu.absoluteAddress = 0x0001
+
+      cpu.CPX()
+
+      expect(cpu.STATUS.getStatus(Flags.C)).toBe(false)
+      expect(cpu.STATUS.getStatus(Flags.Z)).toBe(false)
+      expect(cpu.STATUS.getStatus(Flags.N)).toBe(true)
+
+      cpu.STATUS.setStatus(Flags.N, false)
+      cpu.X = 0x80
+      cpu.bus.ram[1] = 0x00
+
+      cpu.absoluteAddress = 0x0001
+
+      cpu.CPX()
+
+      expect(cpu.STATUS.getStatus(Flags.C)).toBe(true)
+      expect(cpu.STATUS.getStatus(Flags.Z)).toBe(false)
+      expect(cpu.STATUS.getStatus(Flags.N)).toBe(true)
+    })
+  })
+
+  describe('CPY', () => {
+    let cpu
+    beforeEach(() => {
+      cpu = CPU([0, 0, 0])
+    })
+
+    it(`should set carry flag if ${'Y'} register is more than or equal to compared value`, () => {
+      cpu.Y = 0x20
+      cpu.bus.ram[1] = 0x10
+
+      cpu.absoluteAddress = 0x0001
+
+      cpu.CPY()
+
+      expect(cpu.STATUS.getStatus(Flags.C)).toBe(true)
+      expect(cpu.STATUS.getStatus(Flags.Z)).toBe(false)
+      expect(cpu.STATUS.getStatus(Flags.N)).toBe(false)
+    })
+
+    it(`should set zero flag if ${'Y'} register is equal to compared value`, () => {
+      cpu.Y = 0x20
+      cpu.bus.ram[1] = 0x20
+
+      cpu.absoluteAddress = 0x0001
+
+      cpu.CPY()
+
+      expect(cpu.STATUS.getStatus(Flags.C)).toBe(true)
+      expect(cpu.STATUS.getStatus(Flags.Z)).toBe(true)
+      expect(cpu.STATUS.getStatus(Flags.N)).toBe(false)
+    })
+
+    it(`should set negative flag if ${'Y'} register is less than compared value`, () => {
+      cpu.Y = 0x20
+      cpu.bus.ram[1] = 0x30
+
+      cpu.absoluteAddress = 0x0001
+
+      cpu.CPY()
+
+      expect(cpu.STATUS.getStatus(Flags.C)).toBe(false)
+      expect(cpu.STATUS.getStatus(Flags.Z)).toBe(false)
+      expect(cpu.STATUS.getStatus(Flags.N)).toBe(true)
+
+      cpu.STATUS.setStatus(Flags.N, false)
+      cpu.bus.ram[1] = 0x00
+      cpu.Y = 0x80
+
+      cpu.absoluteAddress = 0x0001
+
+      cpu.CPY()
+
+      expect(cpu.STATUS.getStatus(Flags.C)).toBe(true)
+      expect(cpu.STATUS.getStatus(Flags.Z)).toBe(false)
+      expect(cpu.STATUS.getStatus(Flags.N)).toBe(true)
+    })
+  })
 })

@@ -5059,6 +5059,11 @@ functional-red-black-tree@^1.0.1:
   resolved "https://registry.yarnpkg.com/functional-red-black-tree/-/functional-red-black-tree-1.0.1.tgz#1b0ab3bd553b2a0d6399d29c0e3ea0b252078327"
   integrity sha1-GwqzvVU7Kg1jmdKcDj6gslIHgyc=
 
+gamecontroller.js@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/gamecontroller.js/-/gamecontroller.js-1.5.0.tgz#e657cf78a4d29175d84501df4aa73456772f9520"
+  integrity sha512-P+7UBubMI5VBoWYDEXWCzZI+C7D15YX/VpUuaTzLoW7SXEKlYN5520KpzH06buD85nR1mR1z1NAF65Mc9sqS/Q==
+
 gensync@^1.0.0-beta.1:
   version "1.0.0-beta.1"
   resolved "https://registry.yarnpkg.com/gensync/-/gensync-1.0.0-beta.1.tgz#58f4361ff987e5ff6e1e7a210827aa371eaac269"
