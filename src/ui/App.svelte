@@ -18,7 +18,7 @@
   let emulationMode = false
   let ctx
   let startFrame
-  let showDebug = true
+  let showDebug = false
   let offsetStart = 0x8000
   let nesPC = 0x8000
   let registers
@@ -68,7 +68,7 @@
 
     disassembleRAM()
     oams = nes.ppu.oam
-    emulationMode = false
+    emulationMode = !showDebug
   }
 
   function resetNES() {
@@ -96,14 +96,7 @@
     render(nes.ppu.getScreen().imageData)
   }
 
-  function dumpPPU() {
-    console.log('tablePattern', nes.ppu.tablePattern)
-    console.log('chr memory', nes.cartridge.chrMemory)
-  }
-
-  function dumpCPUMemory() {
-    disassembleRAM(true)
-    console.log('ram value', ram)
+  function saveSaveState() {
     window.localStorage.setItem('saveState', JSON.stringify(nes))
   }
 
@@ -229,12 +222,13 @@
         Show Debug Tools
       </label>
       <button class="mt-2" on:click={resetNES}>Reset</button>
-      <button class="mt-2" on:click={stepNES}>Execute Code Step-by-Step</button>
-      <button class="mt-2" on:click={dumpCPUMemory}>Dump RAM into Console</button>
-      <button class="mt-2" on:click={loadSaveState}>Load RAM into ES</button>
-      <button class="mt-2" on:click={dumpPPU}>Dump PPU memory into Console</button>
-      <button class="mt-2" on:click={renderSingleFrame}>Execute Code for Whole Frame</button>
+      <button class="mt-2" on:click={saveSaveState}>Save State</button>
+      <button class="mt-2" on:click={loadSaveState}>Load State</button>
       <button class="mt-2" on:click={toggleEmulation}>{emulationMode ? 'Pause' : 'Run'}</button>
+      {#if showDebug}
+      <button class="mt-2" on:click={stepNES}>Execute Code Step-by-Step</button>
+      <button class="mt-2" on:click={renderSingleFrame}>Execute Code for Whole Frame</button>
+      {/if}
     </div>
   </div>
   {#if showDebug}
