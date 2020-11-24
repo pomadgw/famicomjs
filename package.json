@@ -103,6 +103,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.11.2",
+    "gamecontroller.js": "^1.5.0",
     "lodash": "^4.17.20",
     "lodash.camelcase": "^4.3.0",
     "regenerator-runtime": "^0.13.7",

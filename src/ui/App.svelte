@@ -10,6 +10,8 @@
   import CPU from '../6502'
   import PPU from '../ppu'
 
+  import controller from '../controllers/joystick'
+
   let nes
   let canvas
   let zoomCanvas
@@ -30,6 +32,8 @@
   let disassembled
 
   nes = new Bus(new CPU(), new PPU(), render )
+
+  nes.controllers[0] = controller()
 
   function toggleEmulation() {
     emulationMode = !emulationMode
