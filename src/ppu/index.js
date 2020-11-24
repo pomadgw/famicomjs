@@ -1,4 +1,5 @@
 import pick from 'lodash/pick'
+import merge from 'lodash/merge'
 import MIRROR_MODE from './mirror-mode'
 import Screen from '../utils/screen'
 
@@ -78,6 +79,15 @@ class OAM {
     this.y = y
     this.id = id
     this.attrib = attrib
+  }
+
+  toJSON() {
+    return {
+      x: this.x,
+      y: this.y,
+      id: this.id,
+      attrib: this.attrib
+    }
   }
 
   get values() {
@@ -208,7 +218,14 @@ const SERIALIZED_PROPS = [
   'tramAddress',
   'fineX',
   'bgNextTile',
-  'shifter'
+  'shifter',
+  'bSpriteZeroHitPossible',
+  'bSpriteZeroBeingRendered',
+  'oam',
+  'spriteScanline',
+  'spriteCount',
+  'screen',
+  'oamAddress'
 ]
 
 export default class PPU {
@@ -425,7 +442,32 @@ export default class PPU {
   }
 
   toJSON() {
-    return pick(this, SERIALIZED_PROPS)
+    return {
+      ...pick(this, SERIALIZED_PROPS),
+      tableName: this.tableName.map((e) => [...e]),
+      tablePattern: this.tablePattern.map((e) => [...e]),
+      tablePalette: [...this.tablePalette]
+    }
+  }
+
+  loadState(state) {
+    SERIALIZED_PROPS.forEach((key) => {
+      if (key === 'screen') return
+      if (key === 'shifter') {
+        merge(this.shifter, state.shifter)
+        return
+      }
+      if (key === 'oam' || key === 'spriteScanline') {
+        this[key] = state[key].map((e) => new OAM(e.x, e.y, e.id, e.attrib))
+      } else {
+        this[key] = state[key]
+      }
+    })
+
+    this.tableName = state.tableName.map((e) => new Uint8Array(e))
+    this.tablePattern = state.tablePattern.map((e) => new Uint8Array(e))
+    this.tablePalette = new Uint8Array(state.tablePalette)
+    this.screen.loadState(state.screen)
   }
 
   get incrementValue() {

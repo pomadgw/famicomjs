@@ -104,7 +104,14 @@
   function dumpCPUMemory() {
     disassembleRAM(true)
     console.log('ram value', ram)
-    console.log(JSON.stringify(nes))
+    window.localStorage.setItem('saveState', JSON.stringify(nes))
+  }
+
+  function loadSaveState() {
+    const state = window.localStorage.getItem('saveState')
+    if (state) {
+      nes.loadState(JSON.parse(state))
+    }
   }
 
   function render(imageData) {
@@ -224,6 +231,7 @@
       <button class="mt-2" on:click={resetNES}>Reset</button>
       <button class="mt-2" on:click={stepNES}>Execute Code Step-by-Step</button>
       <button class="mt-2" on:click={dumpCPUMemory}>Dump RAM into Console</button>
+      <button class="mt-2" on:click={loadSaveState}>Load RAM into ES</button>
       <button class="mt-2" on:click={dumpPPU}>Dump PPU memory into Console</button>
       <button class="mt-2" on:click={renderSingleFrame}>Execute Code for Whole Frame</button>
       <button class="mt-2" on:click={toggleEmulation}>{emulationMode ? 'Pause' : 'Run'}</button>

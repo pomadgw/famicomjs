@@ -84,6 +84,16 @@ export default class CPU {
     }
   }
 
+  loadState(state: any) {
+    this.A = state.A
+    this.X = state.X
+    this.Y = state.Y
+    this.SP = state.SP
+    this.PC = state.PC
+    this.STATUS.status = state.STATUS
+    this.clocks = state.clocks
+  }
+
   read(address: number): number {
     const bus = this.bus
     if (!bus) return 0

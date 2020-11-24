@@ -69,6 +69,12 @@ export default class Bus {
     }
   }
 
+  loadState(state: any) {
+    this.ram = new Uint8Array(state.ram)
+    this.cpu.loadState(state.cpu)
+    this.ppu.loadState(state.ppu)
+  }
+
   cpuRead(address: number): number {
     const checkFromCartridge = this.cartridge?.cpuRead(address)
     if (checkFromCartridge !== null) return checkFromCartridge
