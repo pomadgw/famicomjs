@@ -10,11 +10,11 @@ export default class Mapper {
 
   reset() {}
 
-  getRAM() {
+  toJSON() {
     return null
   }
 
-  loadRAM() {}
+  loadState() {}
 
   cpuMapRead(addr) {
     return {

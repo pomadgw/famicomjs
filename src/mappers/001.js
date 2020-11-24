@@ -1,8 +1,22 @@
+import pick from 'lodash/pick'
+import merge from 'lodash/merge'
 import Mapper from './mapper'
 import MirrorMode from '../ppu/mirror-mode'
 import toHex from '../utils/tohex'
 import * as myConsole from '../utils/debug'
 
+const SERIALIZED_PROPS = [
+  'shiftReg',
+  'shiftTimer',
+  'controlReg',
+  'prgRom32kBankNumber',
+  'prgRom16kLowBankNumber',
+  'prgRom16kHighBankNumber',
+  'chrRom8kBankNumber',
+  'chrRom4k0BankNumber',
+  'chrRom4k1BankNumber',
+  'usePrgRam'
+]
 export default class MapperMMC1 extends Mapper {
   constructor(prgBankNumber, chrBankNumber) {
     super(prgBankNumber, chrBankNumber)
@@ -41,12 +55,18 @@ export default class MapperMMC1 extends Mapper {
     this.chrRom4k1BankNumber = 0
   }
 
-  getRAM() {
-    return this.ram
+  toJSON() {
+    return merge(
+      {
+        ram: [...this.ram]
+      },
+      pick(this, SERIALIZED_PROPS)
+    )
   }
 
-  loadRAM(ram) {
-    this.ram = new Uint8Array(ram)
+  loadState(state) {
+    merge(this, pick(state, SERIALIZED_PROPS))
+    this.ram = new Uint8Array(state.ram)
   }
 
   shift(address, data) {
