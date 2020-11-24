@@ -65,7 +65,8 @@ export default class Bus {
     return {
       ram: [...this.ram],
       cpu: this.cpu,
-      ppu: this.ppu
+      ppu: this.ppu,
+      cartridge: this.cartridge
     }
   }
 
@@ -73,6 +74,7 @@ export default class Bus {
     this.ram = new Uint8Array(state.ram)
     this.cpu.loadState(state.cpu)
     this.ppu.loadState(state.ppu)
+    if (this.cartridge && state.cartridge) this.cartridge.loadState(state.cartridge)
   }
 
   cpuRead(address: number): number {

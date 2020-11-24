@@ -61,6 +61,21 @@ export default class Cartridge {
     if (this.mapper) this.mapper.reset()
   }
 
+  toJSON() {
+    return {
+      vram: this.chrBankNumber === 0 ? [...this.chrMemory] : null,
+      ram: this.mapper.getRAM()
+    }
+  }
+
+  loadState(state) {
+    if (this.chrBankNumber === 0 && state.vram) {
+      this.chrMemory = new Uint8Array(state.vram)
+    }
+
+    this.mapper.loadRAM(state.ram)
+  }
+
   get mirrorMode() {
     const mirrorMode = this.mapper?.mirror()
     if (mirrorMode) return mirrorMode

@@ -41,6 +41,14 @@ export default class MapperMMC1 extends Mapper {
     this.chrRom4k1BankNumber = 0
   }
 
+  getRAM() {
+    return this.ram
+  }
+
+  loadRAM(ram) {
+    this.ram = new Uint8Array(ram)
+  }
+
   shift(address, data) {
     if ((data & 0x80) > 0) {
       this.shiftTimer = 0

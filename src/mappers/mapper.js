@@ -10,6 +10,12 @@ export default class Mapper {
 
   reset() {}
 
+  getRAM() {
+    return null
+  }
+
+  loadRAM() {}
+
   cpuMapRead(addr) {
     return {
       status: false,
