@@ -2,6 +2,7 @@ import Cartridge from '../cartridge'
 import Controller from '../controllers'
 import CPU from '../6502'
 import PPU from '../ppu'
+import APU, { OnAudioReady } from '../apu'
 
 type RenderFn = (imageData: ImageData) => void
 
@@ -9,6 +10,7 @@ export default class Bus {
   public cartridge: Cartridge | null
   public cpu: CPU
   public ppu: PPU
+  public apu: APU
   public ram: Uint8Array
   public isReadOnly: boolean
   public controllers: Controller[]
@@ -23,9 +25,10 @@ export default class Bus {
   public isInDMATransfer: boolean
   private dmaDummy: boolean
 
-  constructor(cpu: CPU, ppu: PPU, onRender?: RenderFn) {
+  constructor(cpu: CPU, ppu: PPU, onRender?: RenderFn, onAudioReady?: OnAudioReady) {
     this.cpu = cpu
     this.ppu = ppu
+    this.apu = new APU(44100, onAudioReady)
 
     this.cpu.connect(this)
 
@@ -165,6 +168,7 @@ export default class Bus {
     }
 
     this.ppu.clock()
+    this.apu.clock()
 
     if (this.ppu.nmi) {
       this.ppu.nmi = false

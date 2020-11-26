@@ -31,9 +31,11 @@
 
   let disassembled
 
-  nes = new Bus(new CPU(), new PPU(), render )
+  nes = new Bus(new CPU(), new PPU(), render, (output) => {
+    // console.log('audio is ready:', output)
+  })
 
-  nes.controllers[0] = controller()
+  // nes.controllers[0] = controller()
 
   function toggleEmulation() {
     emulationMode = !emulationMode
