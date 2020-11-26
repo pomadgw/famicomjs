@@ -762,14 +762,14 @@ export default class PPU {
                 // reading top half
                 spritePatternAddressLo =
                   ((this.spriteScanline[i].id & 0x01) << 12) |
-                  ((this.spriteScanline[i].id & 0xfe) << 4) |
+                  (((this.spriteScanline[i].id & 0xfe) + 1) << 4) |
                   (7 - ((this.scanline - this.spriteScanline[i].y) & 0x07))
               } else {
                 // reading bottom half
                 // eslint-disable-next-line
                 spritePatternAddressLo =
                   ((this.spriteScanline[i].id & 0x01) << 12) |
-                  (((this.spriteScanline[i].id & 0xfe) + 1) << 4) |
+                  ((this.spriteScanline[i].id & 0xfe) << 4) |
                   (7 - ((this.scanline - this.spriteScanline[i].y) & 0x07))
               }
             }
