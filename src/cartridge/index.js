@@ -1,5 +1,6 @@
 import mappers from '../mappers'
 import MIRROR_MODE from '../ppu/mirror-mode'
+import * as myConsole from '../utils/debug'
 
 export default class Cartridge {
   constructor() {
@@ -11,22 +12,12 @@ export default class Cartridge {
     this.chrBankNumber = 0
   }
 
-  async parse(fileObj) {
-    const reader = new FileReader()
-    const data = await new Promise((resolve, reject) => {
-      reader.addEventListener('load', (event) => {
-        resolve(event.target.result)
-      })
-
-      reader.readAsArrayBuffer(fileObj)
-    })
-    const view = new Uint8Array(data)
-
+  parse(view) {
     const mapper1 = view[6]
     const mapper2 = view[7]
 
     this.mapperId = ((mapper2 >> 4) << 4) | (mapper1 >> 4)
-    this.mirrorMode =
+    this.hwMirrorMode =
       (mapper1 & 0x01) > 0 ? MIRROR_MODE.VERTICAL : MIRROR_MODE.HORIZONTAL
 
     let seekPosition = 16
@@ -46,10 +37,14 @@ export default class Cartridge {
         seekPosition + this.prgBankNumber * 16384
       )
       seekPosition += this.prgBankNumber * 16384
-      this.chrMemory = view.slice(
-        seekPosition,
-        seekPosition + this.chrBankNumber * 8192
-      )
+      if (this.chrBankNumber === 0) {
+        this.chrMemory = new Uint8Array(0x2000)
+      } else {
+        this.chrMemory = view.slice(
+          seekPosition,
+          seekPosition + this.chrBankNumber * 8192
+        )
+      }
     } else if (nFileType === 2) {
     }
 
@@ -57,22 +52,55 @@ export default class Cartridge {
 
     if (MapperClass)
       this.mapper = new MapperClass(this.prgBankNumber, this.chrBankNumber)
+    else {
+      // throw new Error(`Unsupported mapper: ${this.mapperId}`)
+    }
+  }
+
+  reset() {
+    if (this.mapper) this.mapper.reset()
+  }
+
+  toJSON() {
+    return {
+      vram: this.chrBankNumber === 0 ? [...this.chrMemory] : null,
+      mapper: this.mapper
+    }
+  }
+
+  loadState(state) {
+    if (this.chrBankNumber === 0 && state.vram) {
+      this.chrMemory = new Uint8Array(state.vram)
+    }
+
+    this.mapper.loadState(state.mapper)
+  }
+
+  get mirrorMode() {
+    const mirrorMode = this.mapper?.mirror()
+    if (mirrorMode) return mirrorMode
+    return this.hwMirrorMode
   }
 
   cpuRead(addr) {
-    const { status, mappedAddress } = this.mapper.cpuMapRead(addr)
+    const { status, mappedAddress, value } = this.mapper.cpuMapRead(addr)
 
     if (status) {
-      return this.prgMemory[mappedAddress]
+      return value ?? this.prgMemory[mappedAddress]
     }
 
     return null
   }
 
   cpuWrite(addr, value) {
-    const { status, mappedAddress } = this.mapper.cpuMapWrite(addr)
+    const {
+      status,
+      mappedAddress,
+      value: isInternalChanged
+    } = this.mapper.cpuMapWrite(addr, value)
 
     if (status) {
+      if (isInternalChanged) return true
       this.prgMemory[mappedAddress] = value
       return true
     }
@@ -82,8 +110,14 @@ export default class Cartridge {
 
   ppuRead(addr) {
     const { status, mappedAddress } = this.mapper.ppuMapRead(addr)
-
     if (status) {
+      myConsole.log(
+        `cart: read from PPU from ${mappedAddress}: ${this.chrMemory[
+          mappedAddress
+        ]
+          .toString(16)
+          .padStart(2, '0')}\n`
+      )
       return this.chrMemory[mappedAddress]
     }
 
@@ -91,10 +125,22 @@ export default class Cartridge {
   }
 
   ppuWrite(addr, value) {
-    const { status, mappedAddress } = this.mapper.ppuMapWrite(addr)
+    const { status, mappedAddress, write } = this.mapper.ppuMapWrite(
+      addr,
+      value
+    )
+
+    myConsole.error(`cart: write to PPU ${status}\n`)
 
     if (status) {
-      this.chrMemory[mappedAddress] = value
+      if (write) {
+        myConsole.log(
+          `cart: write to PPU ${mappedAddress}: ${value
+            .toString(16)
+            .padStart(2, '0')}\n`
+        )
+        this.chrMemory[mappedAddress] = value
+      }
       return true
     }
 

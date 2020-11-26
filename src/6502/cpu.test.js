@@ -77,7 +77,7 @@ describe('CPU', () => {
 
     it('should save various flags accordingly', () => {
       cpu.interrupt(0xfffe)
-      expect(cpu.STATUS.getStatus(Flags.B)).toBe(false)
+      expect(cpu.STATUS.getStatus(Flags.B)).toBe(true)
       expect(cpu.STATUS.getStatus(Flags.U)).toBe(true)
       expect(cpu.STATUS.getStatus(Flags.I)).toBe(true)
     })
@@ -87,7 +87,7 @@ describe('CPU', () => {
       cpu.STATUS.status = 0b11111111
       cpu.interrupt(0xfffe)
 
-      expect(cpu.read(0x100 + oldSP - 2)).toBe(0b11101111)
+      expect(cpu.read(0x100 + oldSP - 2)).toBe(0b11111111)
     })
 
     describe('nmi', () => {

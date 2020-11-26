@@ -72,6 +72,28 @@ export default class CPU {
     this.clocks = 8
   }
 
+  toJSON() {
+    return {
+      A: this.A,
+      X: this.X,
+      Y: this.Y,
+      SP: this.SP,
+      PC: this.PC,
+      STATUS: this.STATUS.status,
+      clocks: this.clocks
+    }
+  }
+
+  loadState(state: any) {
+    this.A = state.A
+    this.X = state.X
+    this.Y = state.Y
+    this.SP = state.SP
+    this.PC = state.PC
+    this.STATUS.status = state.STATUS
+    this.clocks = state.clocks
+  }
+
   read(address: number): number {
     const bus = this.bus
     if (!bus) return 0
@@ -135,11 +157,12 @@ export default class CPU {
     this.pushStack(((PC >> 8) & 0xff))
     this.pushStack((PC & 0xff))
 
-    this.STATUS.setStatus(Flags.B, false)
+    this.STATUS.setStatus(Flags.B, true)
     this.STATUS.setStatus(Flags.U, true)
-    this.STATUS.setStatus(Flags.I, true)
 
     this.pushStack(this.STATUS.status)
+
+    this.STATUS.setStatus(Flags.I, true)
 
     this.absoluteAddress = targetAddress
 
@@ -167,7 +190,7 @@ export default class CPU {
 
     const absoluteAddress = (hi << 8) | lo
 
-    this.absoluteAddress = absoluteAddress
+    this.absoluteAddress = absoluteAddress & 0xffff
     this.clocks += 0
   }
 
@@ -600,21 +623,19 @@ export default class CPU {
   BRK(): void {
     this.nextPC()
 
-    const pc = this.PC
+    // const pc = this.PC
 
-    this.pushStack(((pc >> 8) & 0xff))
-    this.pushStack((pc & 0xff))
+    // this.pushStack(((pc >> 8) & 0xff))
+    // this.pushStack((pc & 0xff))
 
-    this.STATUS.setStatus(Flags.I, true)
+    // this.STATUS.setStatus(Flags.I, true)
 
-    this.STATUS.setStatus(Flags.B, true)
-    this.pushStack(this.STATUS.status)
-    this.STATUS.setStatus(Flags.B, false)
-
-    const newPCLo: number = this.read(0xfffe)
-    const newPCHi: number = this.read(0xffff)
-
-    this.PC = (newPCHi << 8) | newPCLo
+    // this.STATUS.setStatus(Flags.B, true)
+    // this.STATUS.setStatus(Flags.U, true)
+    // this.pushStack(this.STATUS.status)
+    // this.STATUS.setStatus(Flags.B, false)
+    // this.STATUS.setStatus(Flags.U, false)
+    this.interrupt(0xfffe)
   }
 
   RTI(): void {
@@ -637,8 +658,7 @@ export default class CPU {
     const temp = this.A - this.fetchedData
 
     this.STATUS.setStatus(Flags.C, temp >= 0)
-    this.STATUS.setStatus(Flags.Z, temp === 0)
-    this.STATUS.setStatus(Flags.N, temp < 0 || temp >= 0x80)
+    this.setZN(temp & 0xff)
 
     this.clocks += 1
   }
@@ -647,8 +667,7 @@ export default class CPU {
     const temp = this.X - this.fetchedData
 
     this.STATUS.setStatus(Flags.C, temp >= 0)
-    this.STATUS.setStatus(Flags.Z, temp === 0)
-    this.STATUS.setStatus(Flags.N, temp < 0 || temp >= 0x80)
+    this.setZN(temp & 0xff)
 
     this.clocks += 1
   }
@@ -657,8 +676,7 @@ export default class CPU {
     const temp = this.Y - this.fetchedData
 
     this.STATUS.setStatus(Flags.C, temp >= 0)
-    this.STATUS.setStatus(Flags.Z, temp === 0)
-    this.STATUS.setStatus(Flags.N, temp < 0 || temp >= 0x80)
+    this.setZN(temp & 0xff)
 
     this.clocks += 1
   }

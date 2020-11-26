@@ -1,6 +1,7 @@
+import pick from 'lodash/pick'
+import merge from 'lodash/merge'
 import MIRROR_MODE from './mirror-mode'
 import Screen from '../utils/screen'
-import bitfield from '../utils/bitfield'
 
 export const palScreen = [
   { r: 84, g: 84, b: 84 },
@@ -72,12 +73,175 @@ export const palScreen = [
   { r: 0, g: 0, b: 0 }
 ]
 
+class OAM {
+  constructor(x = 0, y = 0, id = 0, attrib = 0) {
+    this.x = x
+    this.y = y
+    this.id = id
+    this.attrib = attrib
+  }
+
+  toJSON() {
+    return {
+      x: this.x,
+      y: this.y,
+      id: this.id,
+      attrib: this.attrib
+    }
+  }
+
+  get values() {
+    const array = [this.y, this.id, this.attrib, this.x]
+
+    return new Proxy(array, {
+      get: (target, addr) => target[addr],
+      set: (target, addr, value) => {
+        target[addr] = value
+
+        switch (addr) {
+          case '0':
+            this.y = value
+            break
+          case '1':
+            this.id = value
+            break
+          case '2':
+            this.attrib = value
+            break
+          case '3':
+            this.x = value
+            break
+          default:
+            break
+        }
+
+        return true
+      }
+    })
+  }
+
+  transfer(otherOAM) {
+    this.x = otherOAM.x
+    this.y = otherOAM.y
+    this.id = otherOAM.id
+    this.attrib = otherOAM.attrib
+  }
+
+  reset() {
+    this.x = 0xff
+    this.y = 0xff
+    this.id = 0xff
+    this.attrib = 0xff
+  }
+}
+
+export const STATUS = {
+  VERTICAL_BLANK: 1 << 7,
+  SPRITE_ZERO_HIT: 1 << 6,
+  SPRITE_OVERFLOW: 1 << 5
+}
+
+export const MASK = {
+  GRAYSCALE: 1,
+  RENDER_BG_LEFT: 1 << 1,
+  RENDER_SPRITES_LEFT: 1 << 2,
+  RENDER_BG: 1 << 3,
+  RENDER_SPRITES: 1 << 4,
+  ENHANCE_RED: 1 << 5,
+  ENHANCE_GREEN: 1 << 6,
+  ENHANCE_BLUE: 1 << 7
+}
+
+export const CONTROL = {
+  NAMETABLE_X: 1,
+  NAMETABLE_Y: 1 << 1,
+  INCREMENT_MODE: 1 << 2,
+  PATTERN_SPRITE: 1 << 3,
+  PATTERN_BG: 1 << 4,
+  SPRITE_SIZE: 1 << 5,
+  SLAVE_MODE: 1 << 6, // unused
+  ENABLENMI: 1 << 7
+}
+
+export const LOOPY_REG = {
+  COARSE_X: {
+    flags: 0b0000_0000_0001_1111,
+    length: 5,
+    posStart: 0
+  },
+  COARSE_Y: {
+    flags: 0b0000_0011_1110_0000,
+    length: 5,
+    posStart: 5
+  },
+  NAMETABLE_X: {
+    flags: 0b0000_0100_0000_0000,
+    length: 1,
+    posStart: 10
+  },
+  NAMETABLE_Y: {
+    flags: 0b0000_1000_0000_0000,
+    length: 1,
+    posStart: 11
+  },
+  FINE_Y: {
+    flags: 0b0111_0000_0000_0000,
+    length: 3,
+    posStart: 12
+  }
+}
+
+export function setLoopy(target, value, { flags, length, posStart }) {
+  target &= ~flags
+  if (length === 1) {
+    if (value === 1) target |= flags
+  } else {
+    target |= (value << posStart) & flags
+  }
+
+  return target
+}
+
+export function getLoopy(target, { flags, posStart }) {
+  return (target & flags) >> posStart
+}
+
+const SERIALIZED_PROPS = [
+  'scanline',
+  'cycle',
+  'status',
+  'mask',
+  'control',
+  'addressLatch',
+  'ppuDataBuffer',
+  'vramAddress',
+  'tramAddress',
+  'fineX',
+  'bgNextTile',
+  'shifter',
+  'bSpriteZeroHitPossible',
+  'bSpriteZeroBeingRendered',
+  'oam',
+  'spriteScanline',
+  'spriteCount',
+  'screen',
+  'oamAddress'
+]
+
 export default class PPU {
   // eslint-disable-next-line no-useless-constructor
   constructor() {
     this.tableName = [new Uint8Array(1024), new Uint8Array(1024)]
     this.tablePattern = [new Uint8Array(4096), new Uint8Array(4096)]
     this.tablePalette = new Uint8Array(32)
+
+    this.oam = [...Array(64).keys()].map(() => new OAM())
+    this.spriteScanline = [...Array(8).keys()].map(() => new OAM())
+    this.spriteCount = 0
+    this.oamAddress = 0x0000
+
+    this.bSpriteZeroHitPossible = false
+    this.bSpriteZeroBeingRendered = false
 
     this.screen = new Screen(256, 240)
     // for debugging purposes
@@ -89,63 +253,16 @@ export default class PPU {
     this.scanline = 0
     this.cycle = 0
 
-    this.statusReg = bitfield(
-      [
-        ['_unused', 5],
-        ['spriteOverflow', 1],
-        ['spriteZeroHit', 1],
-        ['verticalBlank', 1]
-      ],
-      new Uint8Array([0])
-    )
-
-    this.maskReg = bitfield(
-      [
-        ['grayscale', 1],
-        ['renderBgLeft', 1],
-        ['renderSpritesLeft', 1],
-        ['renderBg', 1],
-        ['renderSprites', 1],
-        ['enhanceRed', 1],
-        ['enhanceGreen', 1],
-        ['enhanceBlue', 1]
-      ],
-      new Uint8Array([0])
-    )
-
-    this.controlReg = bitfield(
-      [
-        ['nametableX', 1],
-        ['nametableY', 1],
-        ['incrementMode', 1],
-        ['patternSprite', 1],
-        ['patternBg', 1],
-        ['spriteSize', 1],
-        ['slaveMode', 1], // unused
-        ['enablenmi', 1]
-      ],
-      new Uint8Array([0])
-    )
+    this.status = 0
+    this.mask = 0
+    this.control = 0
 
     this.addressLatch = 0x00
     this.ppuDataBuffer = 0x00
     this.ppuAddress = 0x0000
 
-    const loopyRegister = () =>
-      bitfield(
-        [
-          ['coarseX', 5],
-          ['coarseY', 5],
-          ['nametableX', 1],
-          ['nametableY', 1],
-          ['fineY', 3],
-          ['unused', 1]
-        ],
-        new Uint16Array([0])
-      )
-
-    this.vramAddress = loopyRegister()
-    this.tramAddress = loopyRegister()
+    this.vramAddress = 0
+    this.tramAddress = 0
 
     this.fineX = 0
 
@@ -160,73 +277,201 @@ export default class PPU {
 
     const rootThis = this
 
-    this.bgShifter = {
-      pattern: {
+    this.shifter = {
+      bgPattern: {
         lo: 0,
         hi: 0
       },
-      attrib: {
+      bgAttrib: {
         lo: 0,
         hi: 0
       },
+      spritePatternLo: [0, 0, 0, 0, 0, 0, 0, 0],
+      spritePatternHi: [0, 0, 0, 0, 0, 0, 0, 0],
       reset() {
-        this.pattern = {
+        this.bgPattern = {
           lo: 0,
           hi: 0
         }
 
-        this.attrib = {
+        this.bgAttrib = {
           lo: 0,
           hi: 0
+        }
+      },
+      resetSpriteShifter() {
+        for (let i = 0; i < 8; i++) {
+          this.spritePatternLo[i] = 0
+          this.spritePatternHi[i] = 0
         }
       },
       loadBgShifter() {
-        this.pattern.lo = (this.pattern.lo & 0xff00) | rootThis.bgNextTile.lsb
-        this.pattern.hi = (this.pattern.hi & 0xff00) | rootThis.bgNextTile.msb
+        this.bgPattern.lo =
+          (this.bgPattern.lo & 0xff00) | rootThis.bgNextTile.lsb
+        this.bgPattern.hi =
+          (this.bgPattern.hi & 0xff00) | rootThis.bgNextTile.msb
 
-        this.attrib.lo =
-          (this.attrib.lo & 0xff00) |
+        this.bgAttrib.lo =
+          (this.bgAttrib.lo & 0xff00) |
           ((rootThis.bgNextTile.attrib & 0x01) > 0 ? 0xff : 0)
-        this.attrib.hi =
-          (this.attrib.hi & 0xff00) |
+        this.bgAttrib.hi =
+          (this.bgAttrib.hi & 0xff00) |
           ((rootThis.bgNextTile.attrib & 0x02) > 0 ? 0xff : 0)
       },
       updateShifter() {
-        if (rootThis.maskReg.bRenderBg) {
-          this.pattern.lo <<= 1
-          this.pattern.hi <<= 1
-          this.attrib.lo <<= 1
-          this.attrib.hi <<= 1
+        if ((rootThis.mask & MASK.RENDER_BG) > 0) {
+          this.bgPattern.lo <<= 1
+          this.bgPattern.hi <<= 1
+          this.bgAttrib.lo <<= 1
+          this.bgAttrib.hi <<= 1
+        }
+
+        if (
+          (rootThis.mask & MASK.RENDER_SPRITES) > 0 &&
+          rootThis.cycle >= 1 &&
+          rootThis.cycle < 258
+        ) {
+          for (let i = 0; i < rootThis.spriteCount; i++) {
+            if (rootThis.spriteScanline[i].x > 0) {
+              rootThis.spriteScanline[i].x--
+            } else {
+              this.spritePatternLo[i] <<= 1
+              this.spritePatternHi[i] <<= 1
+            }
+          }
         }
       },
-      yieldBgPixel() {
-        if (!rootThis.maskReg.bRenderBg)
-          return {
-            bgPixel: 0,
-            bgPalette: 0
+      yieldPixel() {
+        let bgPixel = 0
+        let bgPalette = 0
+
+        if ((rootThis.mask & MASK.RENDER_BG) > 0) {
+          const bitmux = 0x8000 >> rootThis.fineX
+
+          const [p0Pixel, p1Pixel] = [
+            (this.bgPattern.lo & bitmux) > 0 ? 1 : 0,
+            (this.bgPattern.hi & bitmux) > 0 ? 1 : 0
+          ]
+
+          const [bgPal0, bgPal1] = [
+            (this.bgAttrib.lo & bitmux) > 0 ? 1 : 0,
+            (this.bgAttrib.hi & bitmux) > 0 ? 1 : 0
+          ]
+
+          bgPixel = (p1Pixel << 1) | p0Pixel
+          bgPalette = (bgPal1 << 1) | bgPal0
+        }
+
+        let fgPixel = 0
+        let fgPalette = 0
+        let fgPriority = false
+
+        if ((rootThis.mask & MASK.RENDER_SPRITES) > 0) {
+          rootThis.bSpriteZeroBeingRendered = false
+
+          for (let i = 0; i < rootThis.spriteCount; i++) {
+            if (rootThis.spriteScanline[i].x === 0) {
+              const fgPixelLo = (this.spritePatternLo[i] & 0x80) > 0 ? 1 : 0
+              const fgPixelHi = (this.spritePatternHi[i] & 0x80) > 0 ? 1 : 0
+              fgPixel = (fgPixelHi << 1) | fgPixelLo
+              fgPalette = (rootThis.spriteScanline[i].attrib & 0x03) + 0x04
+              fgPriority = (rootThis.spriteScanline[i].attrib & 0x20) === 0
+
+              if (fgPixel !== 0) {
+                if (i === 0) rootThis.bSpriteZeroBeingRendered = true
+                break
+              }
+            }
           }
-        const bitmux = 0x8000 >> rootThis.fineX
+        }
 
-        const [p0Pixel, p1Pixel] = [
-          (this.pattern.lo & bitmux) > 0 ? 1 : 0,
-          (this.pattern.hi & bitmux) > 0 ? 1 : 0
-        ]
+        let pixel = 0
+        let palette = 0
 
-        const [bgPal0, bgPal1] = [
-          (this.attrib.lo & bitmux) > 0 ? 1 : 0,
-          (this.attrib.hi & bitmux) > 0 ? 1 : 0
-        ]
+        if (bgPixel === 0 && fgPixel === 0) {
+          pixel = 0
+          palette = 0
+        } else if (bgPixel === 0 && fgPixel > 0) {
+          pixel = fgPixel
+          palette = fgPalette
+        } else if (bgPixel >= 0 && fgPixel === 0) {
+          pixel = bgPixel
+          palette = bgPalette
+        } else {
+          if (fgPriority) {
+            pixel = fgPixel
+            palette = fgPalette
+          } else {
+            pixel = bgPixel
+            palette = bgPalette
+          }
+
+          // Detect sprite zero hit
+          if (
+            rootThis.bSpriteZeroHitPossible &&
+            rootThis.bSpriteZeroBeingRendered
+          ) {
+            if (
+              (rootThis.mask & MASK.RENDER_BG) > 0 &&
+              (rootThis.mask & MASK.RENDER_SPRITES) > 0
+            ) {
+              if (
+                !(
+                  (rootThis.mask & MASK.RENDER_BG_LEFT) > 0 ||
+                  (rootThis.mask & MASK.RENDER_SPRITES_LEFT) > 0
+                )
+              ) {
+                if (rootThis.cycle >= 9 && rootThis.cycle < 258) {
+                  rootThis.status |= STATUS.SPRITE_ZERO_HIT
+                }
+              } else {
+                if (rootThis.cycle >= 1 && rootThis.cycle < 258) {
+                  rootThis.status |= STATUS.SPRITE_ZERO_HIT
+                }
+              }
+            }
+          }
+        }
 
         return {
-          bgPixel: (p1Pixel << 1) | p0Pixel,
-          bgPalette: (bgPal1 << 1) | bgPal0
+          pixel,
+          palette
         }
       }
     }
   }
 
+  toJSON() {
+    return {
+      ...pick(this, SERIALIZED_PROPS),
+      tableName: this.tableName.map((e) => [...e]),
+      tablePattern: this.tablePattern.map((e) => [...e]),
+      tablePalette: [...this.tablePalette]
+    }
+  }
+
+  loadState(state) {
+    SERIALIZED_PROPS.forEach((key) => {
+      if (key === 'screen') return
+      if (key === 'shifter') {
+        merge(this.shifter, state.shifter)
+        return
+      }
+      if (key === 'oam' || key === 'spriteScanline') {
+        this[key] = state[key].map((e) => new OAM(e.x, e.y, e.id, e.attrib))
+      } else {
+        this[key] = state[key]
+      }
+    })
+
+    this.tableName = state.tableName.map((e) => new Uint8Array(e))
+    this.tablePattern = state.tablePattern.map((e) => new Uint8Array(e))
+    this.tablePalette = new Uint8Array(state.tablePalette)
+    this.screen.loadState(state.screen)
+  }
+
   get incrementValue() {
-    return this.controlReg.incrementMode === 1 ? 32 : 1
+    return (this.control & CONTROL.INCREMENT_MODE) > 0 ? 32 : 1
   }
 
   insertCartridge(cartridge) {
@@ -242,14 +487,16 @@ export default class PPU {
     this.addressLatch = 0x00
     this.ppuDataBuffer = 0x00
     this.ppuAddress = 0x0000
+    this.oamAddress = 0x0000
 
-    this.statusReg.value = 0
-    this.controlReg.value = 0
-    this.maskReg.value = 0
-    this.vramAddress.value = 0
-    this.tramAddress.value = 0
+    this.status = 0
+    this.mask = 0
+    this.control = 0
 
-    this.bgShifter.reset()
+    this.vramAddress = 0
+    this.tramAddress = 0
+
+    this.shifter.reset()
     this.fineX = 0
 
     this.nmi = false
@@ -260,36 +507,57 @@ export default class PPU {
       lsb: 0,
       msb: 0
     }
+
+    this.bSpriteZeroHitPossible = false
+    this.bSpriteZeroBeingRendered = false
   }
 
   get isRenderSomthing() {
-    return this.maskReg.bRenderBg || this.maskReg.bRenderSprites
+    return (
+      (this.mask & MASK.RENDER_BG) > 0 || (this.mask & MASK.RENDER_SPRITES) > 0
+    )
   }
 
   incrementScrollX() {
     if (this.isRenderSomthing) {
-      if (this.vramAddress.coarseX === 31) {
-        this.vramAddress.coarseX = 0
-        this.vramAddress.nametableX = ~this.vramAddress.nametableX
+      const prevCoarseX = getLoopy(this.vramAddress, LOOPY_REG.COARSE_X)
+
+      if (prevCoarseX === 31) {
+        this.vramAddress = setLoopy(this.vramAddress, 0, LOOPY_REG.COARSE_X)
+        this.vramAddress ^= LOOPY_REG.NAMETABLE_X.flags
       } else {
-        this.vramAddress.coarseX++
+        this.vramAddress = setLoopy(
+          this.vramAddress,
+          prevCoarseX + 1,
+          LOOPY_REG.COARSE_X
+        )
       }
     }
   }
 
   incrementScrollY() {
     if (this.isRenderSomthing) {
-      if (this.vramAddress.fineY < 7) {
-        this.vramAddress.fineY++
+      const prevFineY = getLoopy(this.vramAddress, LOOPY_REG.FINE_Y)
+      const prevCoarseY = getLoopy(this.vramAddress, LOOPY_REG.COARSE_Y)
+      if (prevFineY < 7) {
+        this.vramAddress = setLoopy(
+          this.vramAddress,
+          prevFineY + 1,
+          LOOPY_REG.FINE_Y
+        )
       } else {
-        this.vramAddress.fineY = 0
-        if (this.vramAddress.coarseY === 29) {
-          this.vramAddress.coarseY = 0
-          this.vramAddress.nametableY = ~this.vramAddress.nametableY
-        } else if (this.vramAddress.coarseY === 31) {
-          this.vramAddress.coarseY = 0
+        this.vramAddress = setLoopy(this.vramAddress, 0, LOOPY_REG.FINE_Y)
+        if (prevCoarseY === 29) {
+          this.vramAddress = setLoopy(this.vramAddress, 0, LOOPY_REG.COARSE_Y)
+          this.vramAddress ^= LOOPY_REG.NAMETABLE_Y.flags
+        } else if (prevCoarseY === 31) {
+          this.vramAddress = setLoopy(this.vramAddress, 0, LOOPY_REG.COARSE_Y)
         } else {
-          this.vramAddress.coarseY++
+          this.vramAddress = setLoopy(
+            this.vramAddress,
+            prevCoarseY + 1,
+            LOOPY_REG.COARSE_Y
+          )
         }
       }
     }
@@ -297,115 +565,95 @@ export default class PPU {
 
   transferAddressX() {
     if (this.isRenderSomthing) {
-      this.vramAddress.nametableX = this.tramAddress.nametableX
-      this.vramAddress.coarseX = this.tramAddress.coarseX
+      this.vramAddress = setLoopy(
+        this.vramAddress,
+        getLoopy(this.tramAddress, LOOPY_REG.NAMETABLE_X),
+        LOOPY_REG.NAMETABLE_X
+      )
+      this.vramAddress = setLoopy(
+        this.vramAddress,
+        getLoopy(this.tramAddress, LOOPY_REG.COARSE_X),
+        LOOPY_REG.COARSE_X
+      )
     }
   }
 
   transferAddressY() {
     if (this.isRenderSomthing) {
-      this.vramAddress.fineY = this.tramAddress.fineY
-      this.vramAddress.nametableY = this.tramAddress.nametableY
-      this.vramAddress.coarseY = this.tramAddress.coarseY
+      this.vramAddress = setLoopy(
+        this.vramAddress,
+        getLoopy(this.tramAddress, LOOPY_REG.FINE_Y),
+        LOOPY_REG.FINE_Y
+      )
+      this.vramAddress = setLoopy(
+        this.vramAddress,
+        getLoopy(this.tramAddress, LOOPY_REG.NAMETABLE_Y),
+        LOOPY_REG.NAMETABLE_Y
+      )
+      this.vramAddress = setLoopy(
+        this.vramAddress,
+        getLoopy(this.tramAddress, LOOPY_REG.COARSE_Y),
+        LOOPY_REG.COARSE_Y
+      )
     }
   }
 
   clock() {
-    // const isRenderSomthing =
-    //   this.maskReg.bRenderBg || this.maskReg.bRenderSprites
-
-    // const incrementScrollX = () => {
-    //   if (isRenderSomthing) {
-    //     if (this.vramAddress.coarseX === 31) {
-    //       this.vramAddress.coarseX = 0
-    //       this.vramAddress.nametableX = ~this.vramAddress.nametableX
-    //     } else {
-    //       this.vramAddress.coarseX++
-    //     }
-    //   }
-    // }
-
-    // const incrementScrollY = () => {
-    //   if (isRenderSomthing) {
-    //     if (this.vramAddress.fineY < 7) {
-    //       this.vramAddress.fineY++
-    //     } else {
-    //       this.vramAddress.fineY = 0
-    //       if (this.vramAddress.coarseY === 29) {
-    //         this.vramAddress.coarseY = 0
-    //         this.vramAddress.nametableY = ~this.vramAddress.nametableY
-    //       } else if (this.vramAddress.coarseY === 31) {
-    //         this.vramAddress.coarseY = 0
-    //       } else {
-    //         this.vramAddress.coarseY++
-    //       }
-    //     }
-    //   }
-    // }
-
-    // const transferAddressX = () => {
-    //   if (isRenderSomthing) {
-    //     this.vramAddress.nametableX = this.tramAddress.nametableX
-    //     this.vramAddress.coarseX = this.tramAddress.coarseX
-    //   }
-    // }
-
-    // const transferAddressY = () => {
-    //   if (isRenderSomthing) {
-    //     this.vramAddress.fineY = this.tramAddress.fineY
-    //     this.vramAddress.nametableY = this.tramAddress.nametableY
-    //     this.vramAddress.coarseY = this.tramAddress.coarseY
-    //   }
-    // }
-
     if (this.scanline >= -1 && this.scanline < 240) {
       if (this.scanline === -1 && this.cycle === 1) {
-        this.statusReg.verticalBlank = 0
+        this.status &= ~(
+          STATUS.VERTICAL_BLANK |
+          STATUS.SPRITE_OVERFLOW |
+          STATUS.SPRITE_ZERO_HIT
+        )
+
+        this.shifter.resetSpriteShifter()
       }
 
       if (
         (this.cycle > 1 && this.cycle < 258) ||
         (this.cycle > 320 && this.cycle < 338)
       ) {
-        this.bgShifter.updateShifter()
+        this.shifter.updateShifter()
 
+        const patternBg = (this.control & CONTROL.PATTERN_BG) > 0 ? 1 : 0
+        const fineY = getLoopy(this.vramAddress, LOOPY_REG.FINE_Y)
         switch ((this.cycle - 1) % 8) {
           case 0:
-            this.bgShifter.loadBgShifter()
+            this.shifter.loadBgShifter()
             this.bgNextTile.id = this.ppuRead(
-              0x2000 | (this.vramAddress.value & 0x0fff)
+              0x2000 | (this.vramAddress & 0x0fff)
             )
             break
           case 2:
             this.bgNextTile.attrib = this.ppuRead(
               0x23c0 |
-                (this.vramAddress.nametableY << 11) |
-                (this.vramAddress.nametableX << 10) |
-                ((this.vramAddress.coarseY >> 2) << 3) |
-                (this.vramAddress.coarseX >> 2)
+                // (this.vramAddress.nametableY << 11) |
+                // (this.vramAddress.nametableX << 10) |
+                (this.vramAddress & 0b0000_1100_0000_0000) |
+                // ((this.vramAddress.coarseY >> 2) << 3) |
+                ((this.vramAddress & 0b0000_0011_1000_0000) >> 4) |
+                // (this.vramAddress.coarseX >> 2)
+                ((this.vramAddress >> 2) & 0b111)
             )
-            if ((this.vramAddress.coarseY & 0x02) > 0) {
+            // if ((this.vramAddress.coarseY & 0x02) > 0) {
+            if ((this.vramAddress & 0x40) > 0) {
               this.bgNextTile.attrib >>= 4
             }
-            if ((this.vramAddress.coarseX & 0x02) > 0) {
+            // if ((this.vramAddress.coarseX & 0x02) > 0) {
+            if ((this.vramAddress & 0x02) > 0) {
               this.bgNextTile.attrib >>= 2
             }
             this.bgNextTile.attrib &= 0x03
             break
           case 4:
             this.bgNextTile.lsb = this.ppuRead(
-              (this.controlReg.patternBg << 12) +
-                (this.bgNextTile.id << 4) +
-                this.vramAddress.fineY +
-                0
+              (patternBg << 12) + (this.bgNextTile.id << 4) + fineY + 0
             )
             break
           case 6:
             this.bgNextTile.msb = this.ppuRead(
-              (this.controlReg.patternBg << 12) +
-                (this.bgNextTile.id << 4) +
-                this.vramAddress.fineY +
-                8
+              (patternBg << 12) + (this.bgNextTile.id << 4) + fineY + 8
             )
             break
           case 7:
@@ -421,18 +669,138 @@ export default class PPU {
       }
 
       if (this.cycle === 257) {
-        this.bgShifter.loadBgShifter()
+        this.shifter.loadBgShifter()
         this.transferAddressX()
       }
 
       if (this.cycle === 338 || this.cycle === 340) {
-        this.bgNextTile.id = this.ppuRead(
-          0x2000 | (this.vramAddress.value & 0x0fff)
-        )
+        this.bgNextTile.id = this.ppuRead(0x2000 | (this.vramAddress & 0x0fff))
       }
 
       if (this.scanline === -1 && this.cycle >= 280 && this.cycle < 305) {
         this.transferAddressY()
+      }
+
+      // Render the foreground (sprites!)
+      // This part is different from what the actual PPU is doing
+
+      // First find sprites needed to be rendered
+      if (this.cycle === 257 && this.scanline >= 0) {
+        this.spriteScanline.forEach((oam) => oam.reset())
+        this.spriteCount = 0
+        this.shifter.resetSpriteShifter()
+
+        let oamEntry = 0
+        this.bSpriteZeroHitPossible = false
+        while (oamEntry < 64 && this.spriteCount < 9) {
+          const diff = this.scanline - this.oam[oamEntry].y
+
+          if (
+            diff >= 0 &&
+            diff < ((this.control & CONTROL.SPRITE_SIZE) > 0 ? 16 : 8)
+          ) {
+            if (this.spriteCount < 8) {
+              if (oamEntry === 0) this.bSpriteZeroHitPossible = true
+              this.spriteScanline[this.spriteCount].transfer(this.oam[oamEntry])
+            }
+
+            this.spriteCount++
+          }
+
+          oamEntry++
+        }
+
+        if (this.spriteCount > 8) {
+          this.status &= ~STATUS.SPRITE_OVERFLOW
+          this.status |= STATUS.SPRITE_OVERFLOW
+          this.spriteCount = 8
+        }
+      }
+
+      // Extract the sprite data
+      if (this.cycle === 340) {
+        for (let i = 0; i < this.spriteCount; i++) {
+          let spritePatternAddressLo
+
+          const patternSprite =
+            (this.control & CONTROL.PATTERN_SPRITE) > 0 ? 1 : 0
+          if ((this.control & CONTROL.SPRITE_SIZE) === 0) {
+            // 8x8 sprite mode
+            if (!((this.spriteScanline[i].attrib & 0x80) > 0)) {
+              // Sprite is normal, not flipped
+              spritePatternAddressLo =
+                (patternSprite << 12) | // in 0k or 4k range
+                (this.spriteScanline[i].id << 4) | // each tile is 16 bytes in size
+                (this.scanline - this.spriteScanline[i].y)
+            } else {
+              // The sprite is flipped vertically
+              spritePatternAddressLo =
+                (patternSprite << 12) | // in 0k or 4k range
+                (this.spriteScanline[i].id << 4) | // each tile is 16 bytes in size
+                (7 - (this.scanline - this.spriteScanline[i].y))
+            }
+          } else {
+            // 8x16 sprite mode
+            if (!((this.spriteScanline[i].attrib & 0x80) > 0)) {
+              // Sprite is normal, not flipped
+              if (this.scanline - this.spriteScanline[i].y < 8) {
+                // reading top half
+                spritePatternAddressLo =
+                  ((this.spriteScanline[i].id & 0x01) << 12) |
+                  ((this.spriteScanline[i].id & 0xfe) << 4) |
+                  ((this.scanline - this.spriteScanline[i].y) & 0x07)
+              } else {
+                // reading bottom half
+                spritePatternAddressLo =
+                  ((this.spriteScanline[i].id & 0x01) << 12) |
+                  (((this.spriteScanline[i].id & 0xfe) + 1) << 4) |
+                  ((this.scanline - this.spriteScanline[i].y) & 0x07)
+              }
+            } else {
+              // The sprite is flipped vertically
+              if (this.scanline - this.spriteScanline[i].y < 8) {
+                // reading top half
+                spritePatternAddressLo =
+                  ((this.spriteScanline[i].id & 0x01) << 12) |
+                  (((this.spriteScanline[i].id & 0xfe) + 1) << 4) |
+                  (7 - ((this.scanline - this.spriteScanline[i].y) & 0x07))
+              } else {
+                // reading bottom half
+                // eslint-disable-next-line
+                spritePatternAddressLo =
+                  ((this.spriteScanline[i].id & 0x01) << 12) |
+                  ((this.spriteScanline[i].id & 0xfe) << 4) |
+                  (7 - ((this.scanline - this.spriteScanline[i].y) & 0x07))
+              }
+            }
+          }
+
+          // eslint-disable-next-line
+          const spritePatternAddressHi = spritePatternAddressLo + 8
+          // eslint-disable-next-line
+          let spritePatternBitLo = this.ppuRead(spritePatternAddressLo)
+          // eslint-disable-next-line
+          let spritePatternBitHi = this.ppuRead(spritePatternAddressHi)
+
+          const isFlippedHorizontally =
+            (this.spriteScanline[i].attrib & 0x40) > 0
+
+          if (isFlippedHorizontally) {
+            //
+            const flipByte = (b) => {
+              b = ((b & 0xf0) >> 4) | ((b & 0x0f) << 4)
+              b = ((b & 0xcc) >> 2) | ((b & 0x33) << 2)
+              b = ((b & 0xaa) >> 1) | ((b & 0x55) << 1)
+              return b
+            }
+
+            spritePatternBitLo = flipByte(spritePatternBitLo)
+            spritePatternBitHi = flipByte(spritePatternBitHi)
+          }
+
+          this.shifter.spritePatternLo[i] = spritePatternBitLo
+          this.shifter.spritePatternHi[i] = spritePatternBitHi
+        }
       }
     }
 
@@ -442,19 +810,19 @@ export default class PPU {
     }
 
     if (this.scanline === 241 && this.cycle === 1) {
-      this.statusReg.verticalBlank = 1
+      this.status |= STATUS.VERTICAL_BLANK
 
-      if (this.controlReg.enablenmi === 1) {
+      if ((this.control & CONTROL.ENABLENMI) > 0) {
         this.nmi = true
       }
     }
 
-    const { bgPixel, bgPalette } = this.bgShifter.yieldBgPixel()
+    const { pixel, palette } = this.shifter.yieldPixel()
 
     this.screen.setColor(
       this.cycle - 1,
       this.scanline,
-      this.getColorFromPaletteRAM(bgPalette, bgPixel)
+      this.getColorFromPaletteRAM(palette, pixel)
     )
 
     this.cycle += 1
@@ -488,7 +856,7 @@ export default class PPU {
           let tileMSB = this.ppuRead(i * 0x1000 + offset + row + 8)
 
           for (let col = 0; col < 8; col++) {
-            const pixel = (tileLSB & 0x01) + (tileMSB & 0x01)
+            const pixel = ((tileLSB & 0x01) << 1) | (tileMSB & 0x01)
 
             tileLSB >>= 1
             tileMSB >>= 1
@@ -515,87 +883,139 @@ export default class PPU {
     // eslint-disable-next-line prefer-const
     let data = 0
 
-    // TODO: implement this later
-    switch (addr) {
-      case 0x0000: // Control
-        break
-      case 0x0001: // Mask
-        break
-      case 0x0002: // Status
-        data = (this.statusReg.value & 0xe0) | (this.ppuDataBuffer & 0x1f)
-        if (!isReadOnly) {
-          this.statusReg.verticalBlank = 0
+    if (isReadOnly) {
+      switch (addr) {
+        case 0x0000: // Control
+          data = 0xff // this.control
+          break
+        case 0x0001: // Mask
+          data = 0xff // this.mask
+          break
+        case 0x0002: // Status
+          data = 0xff // this.status
+          break
+        case 0x0003: // OAM Address
+          break
+        case 0x0004: // OAM Data
+          break
+        case 0x0005: // Scroll
+          break
+        case 0x0006: // PPU Address
+          break
+        case 0x0007: // PPU Data
+          break
+        default:
+          break
+      }
+    } else {
+      switch (addr) {
+        case 0x0000: // Control
+          break
+        case 0x0001: // Mask
+          break
+        case 0x0002: // Status
+          data = (this.status & 0xe0) | (this.ppuDataBuffer & 0x1f)
+          this.status &= ~STATUS.VERTICAL_BLANK
           this.addressLatch = 0
-        }
-        break
-      case 0x0003: // OAM Address
-        break
-      case 0x0004: // OAM Data
-        break
-      case 0x0005: // Scroll
-        break
-      case 0x0006: // PPU Address
-        break
-      case 0x0007: // PPU Data
-        data = this.ppuDataBuffer
-        this.ppuDataBuffer = this.ppuRead(this.vramAddress.value)
-
-        if (this.vramAddress.value >= 0x3f00) {
+          break
+        case 0x0003: // OAM Address
+          break
+        case 0x0004: // OAM Data
+          data = this.oam[(this.oamAddress / 4) >> 0].values[
+            this.oamAddress % 4
+          ]
+          break
+        case 0x0005: // Scroll
+          break
+        case 0x0006: // PPU Address
+          break
+        case 0x0007: // PPU Data
           data = this.ppuDataBuffer
-        }
+          this.ppuDataBuffer = this.ppuRead(this.vramAddress)
 
-        if (!isReadOnly) this.vramAddress.value += this.incrementValue
-        break
-      default:
-        break
+          if (this.vramAddress >= 0x3f00) {
+            data = this.ppuDataBuffer
+          }
+
+          this.vramAddress += this.incrementValue
+          break
+        default:
+          break
+      }
     }
 
     return data
   }
 
+  writeToOAM(address, value) {
+    const oamId = (address / 4) >> 0
+    const oamAttrib = address % 4
+    this.oam[oamId].values[oamAttrib] = value
+  }
+
   cpuWrite(addr, value) {
-    // TODO: implement this later
     switch (addr) {
       case 0x0000: // Control
-        this.controlReg.value = value
-        this.tramAddress.nametableX = this.controlReg.nametableX
-        this.tramAddress.nametableY = this.controlReg.nametableY
+        this.control = value
+        // this.tramAddress.nametableX =
+        //   (this.control & CONTROL.NAMETABLE_X) > 0 ? 1 : 0
+        // this.tramAddress.nametableY =
+        //   (this.control & CONTROL.NAMETABLE_Y) > 0 ? 1 : 0
+        this.tramAddress &= ~(
+          LOOPY_REG.NAMETABLE_X.flags | LOOPY_REG.NAMETABLE_Y.flags
+        )
+        this.tramAddress |=
+          (this.control & (CONTROL.NAMETABLE_X | CONTROL.NAMETABLE_Y)) << 10
         break
       case 0x0001: // Mask
-        this.maskReg.value = value
+        this.mask = value
         break
       case 0x0002: // Status
-        this.statusReg.value = value
+        // this.status = value
         break
       case 0x0003: // OAM Address
+        this.oamAddress = value
         break
       case 0x0004: // OAM Data
+        this.writeToOAM(this.oamAddress, value)
         break
       case 0x0005: // Scroll
         if (this.addressLatch === 0) {
           this.fineX = value & 0x07
-          this.tramAddress.coarseX = value >> 3
+          // this.tramAddress.coarseX = value >> 3
+          this.tramAddress = setLoopy(
+            this.tramAddress,
+            value >> 3,
+            LOOPY_REG.COARSE_X
+          )
           this.addressLatch = 1
         } else {
-          this.tramAddress.fineY = value & 0x07
-          this.tramAddress.coarseY = value >> 3
+          this.tramAddress = setLoopy(
+            this.tramAddress,
+            value & 0x07,
+            LOOPY_REG.FINE_Y
+          )
+          this.tramAddress = setLoopy(
+            this.tramAddress,
+            value >> 3,
+            LOOPY_REG.COARSE_Y
+          )
           this.addressLatch = 0
         }
         break
       case 0x0006: // PPU Address
         if (this.addressLatch === 0) {
-          this.tramAddress.value =
-            (this.tramAddress.value & 0x00ff) | (value << 8)
+          this.tramAddress = ((value & 0x3f) << 8) | (this.tramAddress & 0x00ff)
           this.addressLatch = 1
         } else {
-          this.tramAddress.value = (this.tramAddress.value & 0xff00) | value
-          this.vramAddress.value = this.tramAddress.value
+          this.tramAddress = (this.tramAddress & 0xff00) | value
+          this.vramAddress = this.tramAddress
           this.addressLatch = 0
         }
         break
       case 0x0007: // PPU Data
-        this.ppuWrite(this.vramAddress.value, value)
-        this.vramAddress.value += this.incrementValue
+        this.ppuWrite(this.vramAddress, value)
+        this.vramAddress += this.incrementValue
         break
       default:
         break
@@ -649,6 +1069,7 @@ export default class PPU {
   }
 
   ppuWrite(addr, value) {
+    addr = addr & 0x3fff
     if (this.cartridge.ppuWrite(addr, value)) {
       // TODO: implement this later
     } else if (addr < 0x2000) {

@@ -24,7 +24,7 @@ describe('Bus', () => {
     expect(cpudummy.connect).toHaveBeenCalledWith(bus)
   })
 
-  describe('Proxy RAM', () => {
+  describe('read/write operations', () => {
     it('should mirror CPU RAM per 2KB', () => {
       const cpu = new CPU()
       const ppu = new PPU()
@@ -112,6 +112,19 @@ describe('Bus', () => {
       bus.cpuWrite(0x4017, 0x11)
       expect(bus.controllers[1].write).toHaveBeenCalledWith(0x11)
     })
+
+    it('should be able to write through DMA (write to 0x4014)', () => {
+      const cpu = new CPU()
+      const ppu = new PPU()
+      const bus = new Bus(cpu, ppu)
+      bus.insertCartridge(createDummyCartridge(null))
+
+      bus.cpuWrite(0x4014, 0x12)
+      expect(bus.dmaPage).toBe(0x12)
+      expect(bus.dmaAddress).toBe(0x00)
+      expect(bus.isInDMATransfer).toBe(true)
+    })
+
     it('should get snapshot', () => {
       const cpu = new CPU()
       const ppu = new PPU()
@@ -144,6 +157,65 @@ describe('Bus', () => {
     expect(bus.ppu.clock).toHaveBeenCalledTimes(3)
     expect(bus.cpu.clock).toHaveBeenCalledTimes(1)
     expect(onRender).toHaveBeenCalledTimes(1)
+  })
+
+  it('should not clock cpu when dma transfer is active', () => {
+    const cpu = new CPU()
+    const ppu = new PPU()
+    const onRender = jest.fn()
+    const bus = new Bus(cpu, ppu, onRender)
+    bus.insertCartridge(createDummyCartridge(null))
+
+    jest.spyOn(bus.ppu, 'clock')
+    jest.spyOn(bus.cpu, 'clock')
+
+    bus.isInDMATransfer = true
+
+    bus.clock()
+    bus.clock()
+
+    ppu.isFrameComplete = true
+    bus.clock()
+
+    expect(bus.ppu.clock).toHaveBeenCalledTimes(3)
+    expect(bus.cpu.clock).not.toHaveBeenCalled()
+  })
+
+  it('should do dma transfer when it is is active', () => {
+    const cpu = new CPU()
+    const ppu = new PPU()
+    const onRender = jest.fn()
+    const bus = new Bus(cpu, ppu, onRender)
+    bus.insertCartridge(createDummyCartridge(null))
+
+    jest.spyOn(bus.ppu, 'writeToOAM')
+    jest.spyOn(bus, 'cpuRead')
+
+    bus.isInDMATransfer = true
+    bus.globalSystemClockNumber = 0
+    bus.dmaPage = 0x12
+    bus.dmaAddress = 0x00
+
+    bus.clock()
+    expect(bus.dmaDummy).toBe(true)
+    for (let i = 0; i < 3; i++) bus.clock()
+    expect(bus.dmaDummy).toBe(false)
+
+    for (let i = 0; i < 3; i++) bus.clock()
+    expect(bus.cpuRead).toHaveBeenCalledWith(0x1200)
+
+    for (let i = 0; i < 3; i++) bus.clock()
+    expect(bus.ppu.writeToOAM).toHaveBeenCalledWith(0x00, 0)
+
+    for (let i = 0; i < 6; i++) bus.clock()
+    expect(bus.ppu.writeToOAM).toHaveBeenCalledWith(0x01, 0)
+
+    bus.dmaAddress = 0xff
+
+    for (let i = 0; i < 6; i++) bus.clock()
+    expect(bus.ppu.writeToOAM).toHaveBeenCalledWith(0xff, 0)
+    expect(bus.isInDMATransfer).toBe(false)
+    expect(bus.dmaDummy).toBe(true)
   })
 
   it('should run nmi interrupt if ppu nmi is enabled', () => {
