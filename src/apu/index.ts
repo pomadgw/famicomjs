@@ -6,12 +6,14 @@ export default class APU {
   public globalStartTime: number
   public isAudioReady: boolean
   public output: number
+  public context: AudioContext
   public onAudioReady?: OnAudioReady
 
   constructor(sampleRate: number, onAudioReady?: OnAudioReady) {
     this.sampleRate = sampleRate
     this.timeInSampleRate = 1000 / sampleRate
-    this.globalStartTime = performance.now()
+    this.context = new AudioContext()
+    this.globalStartTime = this.context.currentTime
 
     this.isAudioReady = false
     this.output = 0
@@ -19,7 +21,7 @@ export default class APU {
   }
 
   clock() {
-    const now = performance.now()
+    const now = this.context.currentTime
     if (now - this.globalStartTime >= this.timeInSampleRate) {
       this.isAudioReady = true
       this.globalStartTime = now
