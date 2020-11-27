@@ -10,8 +10,8 @@ export const Button = {
 }
 
 export default class Controller {
-  constructor(buttons) {
-    this.buttonStatus = 0
+  constructor(buttons, array) {
+    this._buttonStatus = array ? 0 : array
     // this.buttonStatusToSend = 0
     this.strobe = false
     this.cursor = 0
@@ -27,6 +27,16 @@ export default class Controller {
     //     this.setButtonState(buttonValue, false)
     //   })
     // }
+  }
+
+  get buttonStatus() {
+    if (typeof this._buttonStatus === 'number') return this._buttonStatus
+    return this._buttonStatus[0]
+  }
+
+  set buttonStatus(value) {
+    if (typeof this._buttonStatus === 'number') this._buttonStatus = value
+    else this._buttonStatus[0] = value
   }
 
   write(value) {

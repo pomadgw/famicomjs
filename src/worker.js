@@ -36,7 +36,9 @@ onmessage = async (e) => {
   // console.log('received message', e.data)
   const { type, value } = e.data
 
-  if (type === 'setCart') {
+  if (type === 'setControllerArray') {
+    nes.controllers[0]._buttonStatus = value
+  } else if (type === 'setCart') {
     const cart = new Cartridge()
 
     await cart.parse(value)

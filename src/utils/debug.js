@@ -1,9 +1,9 @@
 const isUsingNode =
   typeof process !== 'undefined' && process.release.name === 'node'
 
-const PRINT =
-  (typeof window !== 'undefined' && window.DEBUG === true) ||
-  (isUsingNode && process.env.DEBUG === 'true')
+const PRINT = false
+// (typeof window !== 'undefined' && window.DEBUG === true) ||
+// (isUsingNode && process.env.DEBUG === 'true')
 
 const debugFn = (() => {
   if (isUsingNode) {

@@ -58,6 +58,13 @@
     }
   }
 
+  if (!crossOriginIsolated) throw new Error('crossOriginIsolated is false!')
+
+  const sab = new SharedArrayBuffer(1)
+  const sview = new Uint8Array(sab)
+
+  myWorker.postMessage({ type: 'setControllerArray', sab })
+
   Object.entries(controllers).forEach(([button, target]) => {
     document.addEventListener('keydown', (e) => {
       if (e.code === button) {

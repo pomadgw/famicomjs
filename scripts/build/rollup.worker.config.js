@@ -5,7 +5,6 @@ import commonjs from 'rollup-plugin-commonjs'
 import { terser } from 'rollup-plugin-terser'
 import babel from '@rollup/plugin-babel'
 import json from '@rollup/plugin-json'
-import svelte from 'rollup-plugin-svelte'
 
 const extensions = ['.js', '.jsx', '.ts', '.tsx']
 
@@ -14,8 +13,7 @@ const pluginsFactory = () => {
     node_resolve({ extensions }),
     commonjs(),
     babel({ extensions }),
-    json(),
-    svelte()
+    json()
   ]
 
   if (process.env.NODE_ENV === 'production') {
@@ -36,7 +34,7 @@ const config = [
     output: {
       sourcemap: true,
       dir: 'worker',
-      format: 'iife',
+      format: 'es',
       entryFileNames: '[name].js',
       assetFileNames: '[name][extname]'
     },
