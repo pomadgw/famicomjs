@@ -37,7 +37,9 @@ onmessage = async (e) => {
   const { type, value } = e.data
 
   if (type === 'setControllerArray') {
-    nes.controllers[0]._buttonStatus = value
+    const sview = new Uint8Array(value)
+    nes.controllers[0]._buttonStatus = sview
+    console.log(nes.controllers[0])
   } else if (type === 'setCart') {
     const cart = new Cartridge()
 

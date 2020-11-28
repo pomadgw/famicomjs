@@ -39,6 +39,17 @@ const config = [
       assetFileNames: '[name][extname]'
     },
     plugins: pluginsFactory()
+  },
+  {
+    input: './src/nes-worker.js',
+    output: {
+      sourcemap: true,
+      dir: 'worker',
+      format: 'es',
+      entryFileNames: '[name].js',
+      assetFileNames: '[name][extname]'
+    },
+    plugins: pluginsFactory()
   }
 ]
 

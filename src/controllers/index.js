@@ -10,8 +10,8 @@ export const Button = {
 }
 
 export default class Controller {
-  constructor(buttons, array) {
-    this._buttonStatus = array ? 0 : array
+  constructor(buttons, array = undefined) {
+    this._buttonStatus = array ?? 0
     // this.buttonStatusToSend = 0
     this.strobe = false
     this.cursor = 0

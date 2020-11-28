@@ -2,13 +2,15 @@ import Cartridge from '../cartridge'
 import Controller from '../controllers'
 import CPU from '../6502'
 import PPU from '../ppu'
+import APU from '../apu'
 
-type RenderFn = (imageData: ImageData) => void
+type RenderFn = (imageData: Uint8ClampedArray) => void
 
 export default class Bus {
   public cartridge: Cartridge | null
   public cpu: CPU
   public ppu: PPU
+  public apu: APU
   public ram: Uint8Array
   public isReadOnly: boolean
   public controllers: Controller[]
@@ -26,6 +28,7 @@ export default class Bus {
   constructor(cpu: CPU, ppu: PPU, onRender?: RenderFn) {
     this.cpu = cpu
     this.ppu = ppu
+    this.apu = new APU()
 
     this.cpu.connect(this)
 
@@ -42,6 +45,8 @@ export default class Bus {
     this._on = {
       render: onRender
     }
+
+    console.log(this._on)
 
     this.controllers = [
       new Controller({
@@ -165,6 +170,7 @@ export default class Bus {
     }
 
     this.ppu.clock()
+    this.apu.clock()
 
     if (this.ppu.nmi) {
       this.ppu.nmi = false
@@ -174,9 +180,11 @@ export default class Bus {
     this.globalSystemClockNumber += 1
 
     if (this.ppu.isFrameComplete) {
-      const { imageData } = this.ppu.getScreen()
-      if (this._on.render && imageData)
-        this._on.render(imageData)
+      const screen = this.ppu.getScreen()
+      if (this._on.render) {
+        // console.log('rendering....')
+        this._on.render(screen.image)
+      }
     }
   }
 }

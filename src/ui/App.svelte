@@ -43,58 +43,72 @@
     ArrowRight: 'Right'
   }
 
-  const myWorker = new Worker('/worker/worker.js')
+  const Button = {
+    A: 1 << 0,
+    B: 1 << 1,
+    Select: 1 << 2,
+    Start: 1 << 3,
+    Up: 1 << 4,
+    Down: 1 << 5,
+    Left: 1 << 6,
+    Right: 1 << 7
+  }
+
+  // const myWorker = new Worker('/worker/worker.js')
 
   let rendered = null
 
-  myWorker.onmessage = (e) => {
-    // console.log('from worker', e)
-    const { type, value } = e.data
-
-    if (type === 'rendered' || type === 'requestFrame') {
-      rendered = value
-    } else {
-      console.log({ type, value })
-    }
-  }
-
-  if (!crossOriginIsolated) throw new Error('crossOriginIsolated is false!')
+  if (!crossOriginIsolated) console.warn('crossOriginIsolated is false!')
 
   const sab = new SharedArrayBuffer(1)
+  const sharedImageBuffer = new SharedArrayBuffer(256 * 240 * 4)
+  const imageView = new Uint8ClampedArray(sharedImageBuffer)
   const sview = new Uint8Array(sab)
 
-  myWorker.postMessage({ type: 'setControllerArray', sab })
+  // myWorker.postMessage({ type: 'setControllerArray', value: sab })
+
+  const audioContext = new AudioContext()
+  let whiteNoiseNode
+
+  audioContext.audioWorklet.addModule('/worker/nes-worker.js').then(() => {
+    whiteNoiseNode = new AudioWorkletNode(audioContext, 'nes-runner')
+    whiteNoiseNode.connect(audioContext.destination)
+    whiteNoiseNode.port.postMessage({ type: 'setControllerArray', value: sab })
+    whiteNoiseNode.port.postMessage({ type: 'setImageBuffer', value: sharedImageBuffer })
+
+    whiteNoiseNode.port.onmessage = (e) => {
+      const { type, value } = e.data
+
+      if (type === 'rendered' || type === 'requestFrame') {
+        rendered = new ImageData(imageView.slice(0), 256)
+      } else {
+        console.log({ type, value })
+      }
+    }
+
+  })
 
   Object.entries(controllers).forEach(([button, target]) => {
+    const buttonValue = Button[target]
+
     document.addEventListener('keydown', (e) => {
       if (e.code === button) {
-        emulationMode = false
-        console.log(target)
-        myWorker.postMessage({
-          type: 'keydown',
-          value: target
-        })
-        emulationMode = true
+        sview[0] &= ~buttonValue
+        sview[0] |= buttonValue
+        // console.log(sview[0])
       }
     })
 
     document.addEventListener('keyup', (e) => {
       if (e.code === button) {
-        emulationMode = false
-        myWorker.postMessage({
-          type: 'keyup',
-          value: target
-        })
-        emulationMode = true
+        sview[0] &= ~buttonValue
       }
     })
   })
 
-  nes.controllers[0] = controller()
-
   function toggleEmulation() {
     emulationMode = !emulationMode
-    myWorker.postMessage({ type: 'toggleRun' })
+    whiteNoiseNode.port.postMessage({ type: 'toggleRun' })
   }
 
   function disassembleRAM(force = false) {
@@ -122,7 +136,7 @@
     // const cart = new Cartridge()
     // cart.parse(view)
 
-    myWorker.postMessage({
+    whiteNoiseNode.port.postMessage({
       type: 'setCart',
       value: view
     })
@@ -137,15 +151,19 @@
 
     // disassembleRAM()
     emulationMode = true
-    // myWorker.postMessage({ type: 'toggleRun' })
+    whiteNoiseNode.port.postMessage({ type: 'toggleRun' })
   }
 
   function resetNES() {
-    nes.reset()
-    offsetStart = nes.cpu.PC
-    nesPC = nes.cpu.PC
-    registers = nes.cpu
-    disassembleRAM()
+    // nes.reset()
+    // offsetStart = nes.cpu.PC
+    // nesPC = nes.cpu.PC
+    // registers = nes.cpu
+    // disassembleRAM()
+
+    whiteNoiseNode.port.postMessage({
+      type: 'reset'
+    })
   }
 
   function stepNES() {
@@ -211,8 +229,8 @@
     if (emulationMode) {
       if (!startFrame) startFrame = timestamp
 
-      if (timestamp - startFrame >= 1000 / 60) {
-        myWorker.postMessage({ type: 'requestFrame' })
+      // if (timestamp - startFrame >= 1000 / 60) {
+        // myWorker.postMessage({ type: 'requestFrame' })
         // startFrame = timestamp
 
         // do {
@@ -225,7 +243,7 @@
         if (rendered !== null) {
           render(rendered)
         }
-      }
+      // }
 
       requestAnimationFrame(runEmulation)
     }
