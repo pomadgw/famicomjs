@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.eslintcache
+coverage/
+_bin/
+yarn-error.log
+build/
+nestest.nes
+nestest.log
+.DS_Store
+dist
+dist-ssr
+*.local

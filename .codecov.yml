@@ -1,0 +1,25 @@
+coverage:
+  status:
+    patch:
+      default:
+        target: 80%
+    project:
+      default:
+        target: 90
+        threshold: 1%
+      CPU:
+        paths:
+          - src/6502
+      PPU:
+        paths:
+          - src/ppu
+        threshold: 8%
+      cartridge:
+        paths:
+          - src/cartridge
+      mappers:
+        paths:
+          - src/mappers
+      bus:
+        paths:
+          - src/bus
