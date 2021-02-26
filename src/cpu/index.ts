@@ -44,6 +44,12 @@ export default class CPU {
   private state: CPUOperationState = CPUOperationState.READ_OPCODE
   private step = 0
 
+  private lo = 0
+  private hi = 0
+  private temp = 0
+  private address = 0
+  private reladdress = 0
+
   reset() {
     this.irqTrigger |= IRQ.RESET
     this.sync = true
@@ -99,6 +105,19 @@ export default class CPU {
           this.sync = true
         })
         break
+      case 0xad:
+        if (this.step === 0) {
+          this.lo = bus.read(this.PC++)
+          this.hi = bus.read(this.PC++)
+          this.address = (this.hi << 8) | this.lo
+
+          this.A = bus.read(this.address)
+          this.setNZ(this.A)
+        }
+        this.onStep(3, () => {
+          this.sync = true
+        })
+        break
       default:
         this.sync = true
         break
@@ -122,5 +141,13 @@ export default class CPU {
     if (step === this.step) {
       callback()
     }
+  }
+
+  private setNZ(value: number) {
+    if (value === 0) this.P |= StatusFlag.Z
+    else this.P &= ~StatusFlag.Z
+
+    if ((value & 0x80) > 0) this.P |= StatusFlag.N
+    else this.P &= ~StatusFlag.N
   }
 }
