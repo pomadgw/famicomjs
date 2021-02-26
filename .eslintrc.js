@@ -8,7 +8,7 @@ module.exports = {
   extends: [
     'standard',
     'plugin:@typescript-eslint/eslint-recommended',
-    'plugin:@typescript-eslint/recommended',
+    // 'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended'
   ],
   parserOptions: {
@@ -16,7 +16,7 @@ module.exports = {
     sourceType: 'module',
     parser: '@babel/eslint-parser'
   },
-  plugins: ['@typescript-eslint'],
+  // plugins: ['@typescript-eslint'],
   // parser: '@typescript-eslint/parser',
   parser: '@babel/eslint-parser',
   rules: {}
