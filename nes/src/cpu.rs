@@ -1,4 +1,5 @@
 use wasm_bindgen::prelude::*;
+use crate::bus::Bus;
 
 #[wasm_bindgen]
 #[repr(u8)]
@@ -16,18 +17,32 @@ pub enum Status {
 
 #[wasm_bindgen]
 pub struct CPU {
-  pub P: u8
+  pub a: u8,
+  pub x: u8,
+  pub y: u8,
+  pub sp: u8,
+  pub pc: u16,
+  pub p: u8
 }
 
 #[wasm_bindgen]
 impl CPU {
   pub fn new() -> CPU {
     CPU {
-      P: 0
+      a: 0,
+      x: 0,
+      y: 0,
+      pc: 0,
+      sp: 0,
+      p: 0
     }
   }
 
   pub fn get_status(&self) -> u8 {
-    self.P
+    self.p
+  }
+
+  pub fn clock(&mut self, bus: &mut Bus) {
+    //
   }
 }
