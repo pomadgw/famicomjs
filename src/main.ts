@@ -3,6 +3,7 @@
 
 import Bus from './bus'
 import CPU from './cpu'
+import wasm from '../nes/pkg/nes'
 
 // createApp(App).mount('#app')
 
@@ -12,3 +13,6 @@ const cpu = new CPU()
 cpu.reset()
 
 cpu.clock(bus)
+wasm().then((e) => {
+  console.log(e)
+})
