@@ -1,7 +1,5 @@
 use crate::bus::Bus;
-use wasm_bindgen::prelude::*;
 
-#[wasm_bindgen]
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Status {
@@ -15,7 +13,6 @@ pub enum Status {
     N = 0x80,
 }
 
-#[wasm_bindgen]
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum IrqType {
@@ -26,8 +23,6 @@ pub enum IrqType {
     APUDPCM = 0x10,
 }
 
-#[wasm_bindgen]
-#[derive(Clone, Copy, Debug)]
 pub struct CPU {
     pub a: u8,
     pub x: u8,
@@ -58,7 +53,6 @@ macro_rules! to_word {
     };
 }
 
-#[wasm_bindgen]
 impl CPU {
     pub fn new() -> CPU {
         CPU {
@@ -94,8 +88,8 @@ impl CPU {
         (self.irq_triggers & (trigger as u8)) != 0
     }
 
-    fn has_interrupts(&self, irq_status: bool) -> bool {
-        self.irq_triggers != 0 && irq_status
+    fn has_interrupts(&self) -> bool {
+        self.irq_triggers != 0 && !self.get_flag(Status::I)
     }
 
     pub fn reset(&mut self) {
@@ -106,7 +100,9 @@ impl CPU {
     pub fn clock(&mut self, bus: &mut Bus) {
         if self.sync {
             self.sync = false;
-            if self.is_irq_on(IrqType::Reset) {
+            if self.is_irq_on(IrqType::Reset) || self.is_irq_on(IrqType::Nmi) {
+                self.current_opcode = 0x00;
+            } else if self.has_interrupts() {
                 self.current_opcode = 0x00;
             } else {
                 self.current_opcode = bus.read(self.next_pc());

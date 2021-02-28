@@ -1,13 +1,10 @@
 use crate::ppu::PPU;
-use wasm_bindgen::prelude::*;
 
-#[wasm_bindgen]
 pub struct Bus {
     ram: Vec<u8>,
     ppu: PPU,
 }
 
-#[wasm_bindgen]
 impl Bus {
     pub fn new() -> Bus {
         Bus {
