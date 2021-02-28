@@ -16,7 +16,7 @@ mod tests {
 
         loop {
             cpu.clock(&mut bus);
-            
+
             if cpu.sync {
                 break;
             }
