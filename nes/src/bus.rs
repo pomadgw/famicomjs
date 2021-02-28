@@ -16,7 +16,7 @@ impl Bus {
     }
   }
 
-  pub fn read(self, address: u16) -> u8 {
+  pub fn read(&self, address: u16) -> u8 {
     self.ram[address as usize]
   }
 
