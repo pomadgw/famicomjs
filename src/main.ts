@@ -14,10 +14,9 @@ wasm().then((e) => {
   nes.reset()
 
   nes.clock()
-  while (!nes.cpu.sync) {
+  while (!nes.is_cpu_done()) {
     nes.clock()
   }
   console.log(e.get_nes_screen_buffer_pointer())
-  console.log(nes.cpu.cycles)
-  console.log(nes.cpu.pc)
+  console.log(nes.debug())
 })
