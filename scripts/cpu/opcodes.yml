@@ -1,4 +1,0 @@
-LDA:
-  code: |
-    this.A = bus.read(this.address)
-    this.setNZ(this.A)

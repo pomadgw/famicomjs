@@ -1,4 +1,0 @@
-ABS: |
-    this.lo = bus.read(this.PC++)
-    this.hi = bus.read(this.PC++)
-    this.address = (this.hi << 8) | this.lo
