@@ -1,0 +1,3 @@
+[submodule "nes/neslib"]
+	path = nes/neslib
+	url = https://github.com/pomadgw/nesrs

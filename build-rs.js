@@ -3,9 +3,9 @@ const chokidar = require('chokidar')
 const { exec } = require('child_process')
 
 const crateDir = path.resolve(__dirname, './nes')
-const crateSource = path.resolve(__dirname, './nes/src')
+const crateSource = path.resolve(__dirname, './nes')
 
-const watcher = chokidar.watch(`${crateSource}/**/*.rs`, {
+const watcher = chokidar.watch(`${crateSource}/{neslib,src}/**/*.rs`, {
   ignored: /^\./,
   persistent: true
 })
