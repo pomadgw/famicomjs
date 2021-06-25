@@ -6,6 +6,7 @@ pub mod bus;
 pub mod ppu;
 
 use nesrs::bus::*;
+use nesrs::ppu::*;
 use nesrs::memory::Memory;
 use wasm_bindgen::prelude::*;
 use js_sys;
@@ -15,18 +16,6 @@ use js_sys;
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
-
-// Function to return a pointer to our buffer
-// in wasm memory
-#[wasm_bindgen]
-pub fn get_nes_screen_buffer_pointer() -> *const u8 {
-    let pointer: *const u8;
-    unsafe {
-        pointer = ppu::NES_SCREEN_BUFFER.as_ptr();
-    }
-
-    return pointer;
-}
 
 #[wasm_bindgen]
 pub struct NES {
@@ -75,5 +64,9 @@ impl NES {
 
     pub fn change_pc(&mut self, pc: u16) {
         self.bus.cpu.regs.pc = pc;
+    }
+
+    pub fn get_screen_buffer_pointer(&self) -> *const u8 {
+        get_screen_buffer_pointer()
     }
 }
