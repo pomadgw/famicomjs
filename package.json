@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "run-p dev:**",
     "dev:frontend": "vite",
-    "build": "vite build",
+    "build": "NODE_ENV=production npm run build:neslib && vite build",
     "serve": "vite preview",
     "build:neslib": "node build-rs.js",
     "dev:neslib": "npm run build:neslib",
@@ -82,7 +82,7 @@
   "dependencies": {
     "@babel/runtime": "^7.11.2",
     "gamecontroller.js": "^1.5.0",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "lodash.camelcase": "^4.3.0",
     "regenerator-runtime": "^0.13.7",
     "tailwindcss": "^1.8.13",
