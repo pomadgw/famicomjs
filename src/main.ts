@@ -6,28 +6,27 @@ import wasm, { NES } from '../nes/pkg/nes'
 // createApp(App).mount('#app')
 
 wasm().then((e) => {
-  const nes = NES.new()
-  nes.write(0xfffc, 0x00)
-  nes.write(0xfffd, 0x80)
-  console.log(nes.read(0xfffc))
-  console.log(nes.read(0xfffd))
-  nes.reset()
+  fetch('/nestest.nes')
+    .then((response) => response.arrayBuffer())
+    .then((buffer) => {
+      const view = new Uint8Array(buffer)
+      const nes = NES.new(view)
+      nes.reset()
+      nes.toggle_debug()
 
-  nes.write(0x8000, 0xa9)
-  nes.write(0x8001, 0x10)
-  nes.write(0x8002, 0xaa)
+      const clock = () => {
+        nes.clock()
+        while (!nes.is_cpu_done()) {
+          nes.clock()
+        }
+        console.log(nes.debug())
+      }
 
-  const clock = () => {
-    nes.clock()
-    while (!nes.is_cpu_done()) {
-      nes.clock()
-    }
-    console.log(nes.debug())
-  }
+      clock()
+      nes.change_pc(0xc000)
 
-  clock()
-  clock()
-  clock()
+      for (let i = 0; i < 1000; i++) clock()
+    })
 
   console.log(e.get_nes_screen_buffer_pointer())
 })
