@@ -18,6 +18,16 @@ use js_sys;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
+pub fn get_screen_width() -> usize {
+    NES_WIDTH_SIZE
+}
+
+#[wasm_bindgen]
+pub fn get_screen_height() -> usize {
+    NES_HEIGHT_SIZE
+}
+
+#[wasm_bindgen]
 pub struct NES {
     bus: Bus,
 }
