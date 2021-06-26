@@ -48,6 +48,10 @@ impl NES {
         self.bus.clock();
     }
 
+    pub fn clock_until_frame_done(&mut self) {
+        self.bus.clock_until_frame_done();
+    }
+
     pub fn reset(&mut self) {
         self.bus.reset();
     }
