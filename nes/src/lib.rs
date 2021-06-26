@@ -81,6 +81,6 @@ impl NES {
     }
 
     pub fn get_screen_buffer_pointer(&self) -> *const u8 {
-        get_screen_buffer_pointer()
+        self.bus.ppu.borrow().get_screen_buffer_pointer()
     }
 }
