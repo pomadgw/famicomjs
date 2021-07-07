@@ -2,10 +2,10 @@ module.exports = {
   env: {
     browser: true,
     es2020: true,
-    node: true,
     jest: true
   },
   extends: [
+    'plugin:vue/essential',
     'standard',
     'plugin:@typescript-eslint/eslint-recommended',
     // 'plugin:@typescript-eslint/recommended',
@@ -16,8 +16,8 @@ module.exports = {
     sourceType: 'module',
     parser: '@babel/eslint-parser'
   },
+  plugins: ['vue'],
   // plugins: ['@typescript-eslint'],
   // parser: '@typescript-eslint/parser',
-  parser: '@babel/eslint-parser',
   rules: {}
 }
