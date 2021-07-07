@@ -1,6 +1,8 @@
 <template>
   <div>
     <canvas ref="canvas" width="256" height="240" />
+
+    <div><button @click="resetNES">Reset</button></div>
   </div>
 </template>
 
@@ -14,9 +16,9 @@ export default defineComponent({
   components: {
     HelloWorld
   },
-  data() {
+  data() : { nes: NES | null } {
     return {
-      canvas: null,
+      nes: null,
     }
   },
   mounted() {
@@ -26,40 +28,21 @@ export default defineComponent({
         .then((buffer) => {
           const view = new Uint8Array(buffer)
           const nes = NES.new(view)
+          this.nes = nes;
           nes.reset()
-          // nes.toggle_debug()
-
-          const clock = () => {
-            nes.clock()
-            while (!nes.is_cpu_done()) {
-              nes.clock()
-            }
-            // console.log(nes.debug())
-          }
-
-          clock()
-          nes.change_pc(0xc000)
 
           const wasmMemory = new Uint8Array(wasmObject.memory.buffer)
           const nesScreenPointer = nes.get_screen_buffer_pointer()
           console.log(wasmMemory[nesScreenPointer + 0])
           const ctx = document.querySelector('canvas')?.getContext('2d');
 
-          ctx.imageSmoothingEnabled = false;
-          ctx.mozImageSmoothingEnabled = false;
-          ctx.webkitImageSmoothingEnabled = false;
-          ctx.msImageSmoothingEnabled = false;
+          if (ctx) {
+            ctx.imageSmoothingEnabled = false
+          }
 
           let start: DOMHighResTimeStamp | undefined = undefined;
 
           const step: FrameRequestCallback = (timestamp: DOMHighResTimeStamp) => {
-            // if (start === undefined) {
-            //   start = timestamp
-            // }
-            // const elapsed = timestamp - start;
-
-            // if (elapsed >= 17) {
-            //   start = timestamp
               nes.clock_until_frame_done()
 
               if (ctx) {
@@ -75,15 +58,19 @@ export default defineComponent({
 
                 ctx.putImageData(imageData, 0, 0);
               }
-
-            // }
-
             requestAnimationFrame(step)
           }
 
           step()
         })
     })
+  },
+  methods: {
+    resetNES() {
+      if (this.nes) {
+        this.nes.reset()
+      }
+    }
   }
 })
 </script>
