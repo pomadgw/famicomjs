@@ -7,6 +7,7 @@ pub mod ppu;
 
 use nesrs::bus::*;
 use nesrs::ppu::*;
+use nesrs::controller::ButtonStatus;
 use nesrs::memory::Memory;
 use wasm_bindgen::prelude::*;
 use js_sys;
@@ -78,6 +79,10 @@ impl NES {
 
     pub fn change_pc(&mut self, pc: u16) {
         self.bus.cpu.regs.pc = pc;
+    }
+
+    pub fn press_button(&mut self, id: usize, button: u8, status: bool) {
+        self.bus.press_controller_button(id, ButtonStatus::from_bits(button).unwrap(), status);
     }
 
     pub fn get_screen_buffer_pointer(&self) -> *const u8 {
