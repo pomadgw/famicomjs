@@ -1,21 +1,12 @@
 <template>
   <div>
-    <img alt="Vue logo" src="./assets/logo.png" />
-    <HelloWorld msg="Hello Vue 3 + TypeScript + Vite" />
+    <canvas ref="canvas" width="256" height="240" />
+
+    <div><button @click="resetNES">Reset</button></div>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
-import HelloWorld from './components/HelloWorld.vue'
-
-export default defineComponent({
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-})
-</script>
+<script lang="ts" src="./App.ts"></script>
 
 <style>
 #app {
@@ -25,5 +16,10 @@ export default defineComponent({
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+
+canvas {
+  width: 512px;
+  image-rendering: pixelated;
 }
 </style>

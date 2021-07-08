@@ -1,4 +1,5 @@
 const path = require('path')
+const debounce = require('lodash/debounce')
 const chokidar = require('chokidar')
 const { exec } = require('child_process')
 
@@ -10,7 +11,7 @@ const watcher = chokidar.watch(`${crateSource}/{neslib,src}/**/*.rs`, {
   persistent: true
 })
 
-const compileWebm = () => {
+const compileWebm = () =>
   exec(
     'wasm-pack build --target web',
     { cwd: crateDir },
@@ -24,21 +25,30 @@ const compileWebm = () => {
       console.log(stderr)
     }
   )
-}
 
-watcher
-  .on('add', function (path) {
-    console.log('File', path, 'has been added')
-    compileWebm()
+const debouncedCompile = debounce(compileWebm, 100)
+
+if (process.env.NODE_ENV === 'production') {
+  const pc = compileWebm()
+  pc.on('close', () => {
+    console.log('done!')
+    process.exit(0)
   })
-  .on('change', function (path) {
-    console.log('File', path, 'has been changed')
-    compileWebm()
-  })
-  .on('unlink', function (path) {
-    console.log('File', path, 'has been removed')
-    compileWebm()
-  })
-  .on('error', function (error) {
-    console.error('Error happened', error)
-  })
+} else {
+  watcher
+    .on('add', function (path) {
+      console.log('File', path, 'has been added')
+      debouncedCompile()
+    })
+    .on('change', function (path) {
+      console.log('File', path, 'has been changed')
+      debouncedCompile()
+    })
+    .on('unlink', function (path) {
+      console.log('File', path, 'has been removed')
+      debouncedCompile()
+    })
+    .on('error', function (error) {
+      console.error('Error happened', error)
+    })
+}

@@ -1,4 +1,3 @@
-
 extern crate nesrs;
 mod utils;
 
@@ -6,10 +5,11 @@ pub mod bus;
 // pub mod cpu;
 pub mod ppu;
 
-use bus::Bus;
-use nesrs::cpu::CPU;
+use nesrs::bus::*;
+use nesrs::ppu::*;
 use nesrs::memory::Memory;
 use wasm_bindgen::prelude::*;
+use js_sys;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -17,57 +17,70 @@ use wasm_bindgen::prelude::*;
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-// Function to return a pointer to our buffer
-// in wasm memory
 #[wasm_bindgen]
-pub fn get_nes_screen_buffer_pointer() -> *const u8 {
-    let pointer: *const u8;
-    unsafe {
-        pointer = ppu::NES_SCREEN_BUFFER.as_ptr();
-    }
+pub fn get_screen_width() -> usize {
+    NES_WIDTH_SIZE
+}
 
-    return pointer;
+#[wasm_bindgen]
+pub fn get_screen_height() -> usize {
+    NES_HEIGHT_SIZE
 }
 
 #[wasm_bindgen]
 pub struct NES {
     bus: Bus,
-    cpu: CPU,
 }
 
 #[wasm_bindgen]
 impl NES {
-    pub fn new() -> NES {
+    pub fn new(rom_data: js_sys::Uint8Array) -> NES {
+        let mut data: Vec<u8> = Vec::new();
+        data.resize(rom_data.length() as usize, 0);
+        rom_data.copy_to(&mut data[..]);
+
         NES {
-            bus: Bus::new(),
-            cpu: CPU::new(),
+            bus: Bus::new_from_array(&data),
         }
     }
 
     pub fn clock(&mut self) {
-        self.cpu.clock(&mut self.bus);
+        self.bus.clock();
+    }
+
+    pub fn clock_until_frame_done(&mut self) {
+        self.bus.clock_until_frame_done();
     }
 
     pub fn reset(&mut self) {
-        self.cpu.reset();
+        self.bus.reset();
     }
 
-    pub fn read(&self, address: u16) -> u8 {
-        self.bus.read(address as usize, false)
+    pub fn read(&mut self, address: u16) -> u8 {
+        self.bus.memory().read(address as usize, false)
     }
 
     pub fn write(&mut self, address: u16, value: u8) {
-        self.bus.write(address as usize, value);
+        self.bus.memory().write(address as usize, value);
     }
 
     pub fn is_cpu_done(&self) -> bool {
-        self.cpu.done()
+        self.bus.cpu.done()
+    }
+
+    pub fn toggle_debug(&mut self) {
+        self.bus.cpu.debug = !self.bus.cpu.debug;
     }
 
     pub fn debug(&self) -> String {
-        String::from(format!(
-            "{:04X} A: ${:02X} X: ${:02X} Y: ${:02X} SP: ${:02X} P: ${:02X}",
-            self.cpu.regs.pc, self.cpu.regs.a, self.cpu.regs.x, self.cpu.regs.y, self.cpu.regs.sp, self.cpu.regs.p
-        ))
+        self.bus.cpu.debug()
+    }
+
+    pub fn change_pc(&mut self, pc: u16) {
+        self.bus.cpu.regs.pc = pc;
+    }
+
+    pub fn get_screen_buffer_pointer(&self) -> *const u8 {
+        self.bus.ppu.borrow().get_screen_buffer_pointer()
     }
 }

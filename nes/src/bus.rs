@@ -13,7 +13,7 @@ impl Bus {
 }
 
 impl Memory for Bus {
-    fn read(&self, address: usize, _is_read_only: bool) -> u8 {
+    fn read(&mut self, address: usize, _is_read_only: bool) -> u8 {
         self.ram[address]
     }
 
