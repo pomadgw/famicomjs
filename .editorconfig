@@ -1,7 +1,7 @@
 # editorconfig.org
 root = true
 
-[*.{js,ts,html,yml,json,svelte,css,pegjs,mustache}]
+[*.{js,ts,html,yml,json,svelte,css,pegjs,mustache,vue}]
 charset = utf-8
 end_of_line = lf
 insert_final_newline = true
