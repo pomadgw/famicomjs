@@ -41,7 +41,7 @@ impl NES {
         rom_data.copy_to(&mut data[..]);
 
         NES {
-            bus: Bus::new_from_array(&data),
+            bus: Bus::new_from_array(&data).unwrap(),
         }
     }
 
@@ -86,6 +86,6 @@ impl NES {
     }
 
     pub fn get_screen_buffer_pointer(&self) -> *const u8 {
-        self.bus.ppu.borrow().get_screen_buffer_pointer()
+        self.bus.ppu.lock().unwrap().get_screen_buffer_pointer()
     }
 }
