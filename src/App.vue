@@ -1,6 +1,13 @@
 <template>
   <div>
-    <canvas ref="canvas" width="256" height="240" class="w-full" />
+    <div class="flex align-items-center justify-center">
+      <canvas
+        ref="canvas"
+        width="256"
+        height="240"
+        class="sm:w-full md:max-w-md"
+      />
+    </div>
     <div>
       <div class="px-4 py-2">
         <button class="w-full bg-red-400 rounded-md p-2 mb-2" @click="resetNES">
