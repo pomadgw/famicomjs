@@ -26,7 +26,7 @@ pub fn get_screen_height() -> usize {
 
 #[wasm_bindgen]
 pub struct NES {
-    bus: Bus,
+    bus: Nes,
 }
 
 #[wasm_bindgen]
@@ -37,7 +37,7 @@ impl NES {
         rom_data.copy_to(&mut data[..]);
 
         NES {
-            bus: Bus::new_from_array(&data).unwrap(),
+            bus: Nes::new_from_array(&data).unwrap(),
         }
     }
 
@@ -47,6 +47,14 @@ impl NES {
 
     pub fn clock_until_frame_done(&mut self) {
         self.bus.clock_until_frame_done();
+    }
+
+    pub fn clock_until_audio_ready(&mut self) -> f32 {
+        self.bus.clock_until_audio_ready()
+    }
+
+    pub fn done_drawing(&self) -> bool {
+      self.bus.is_done_drawing()
     }
 
     pub fn reset(&mut self) {
@@ -81,7 +89,7 @@ impl NES {
         self.bus.press_controller_button(id, ButtonStatus::from_bits(button).unwrap(), status);
     }
 
-    pub fn get_screen_buffer_pointer(&self) -> *const u8 {
-        self.bus.ppu.lock().unwrap().get_screen_buffer_pointer()
+    pub fn get_screen_buffer_pointer(&mut self) -> *const u8 {
+        self.bus.ppu().get_screen_buffer_pointer()
     }
 }
