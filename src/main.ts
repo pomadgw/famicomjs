@@ -26,12 +26,10 @@ document.querySelector('#test')?.addEventListener('click', async () => {
   const processor = await createMyAudioProcessor()
 
   let sab: SharedArrayBuffer
-  let sabUint8: Uint8Array
 
   if (audioContext && processor) {
     processor.connect(audioContext.destination)
     sab = new SharedArrayBuffer(256 * 240 * 4)
-    sabUint8 = new Uint8Array(sab)
 
     processor.port.postMessage({ event: 'sab', value: sab })
     await fetch('/nes/pkg/nes_bg.wasm')
@@ -62,7 +60,8 @@ document.querySelector('#test')?.addEventListener('click', async () => {
     const step: FrameRequestCallback = (
       timestamp: DOMHighResTimeStamp
     ) => {
-      if (ctx) {
+      if (ctx && sab) {
+        const sabUint8 = new Uint8Array(sab)
         const imageData = ctx.createImageData(
           256,
           240

@@ -55,20 +55,14 @@ impl NES {
         }
     }
 
-    pub fn is_audio_sample_ready(&self) -> bool {
-        self.bus.is_audio_sample_ready
-    }
-
-    pub fn reset_audio_sample_ready(&mut self) {
-        self.bus.is_audio_sample_ready = false
-    }
-
     pub fn clock_until_frame_done(&mut self) {
         self.bus.clock_until_frame_done();
     }
 
     pub fn clock_until_audio_ready(&mut self) -> f32 {
-        self.bus.clock_until_audio_ready()
+        let audio = self.bus.clock_until_audio_ready();
+        self.bus.copy_framebuffer(&mut self.screenbuffer);
+        audio
     }
 
     pub fn audio_output(&mut self) -> f32 {
@@ -113,6 +107,10 @@ impl NES {
 
     pub fn get_screen_buffer_pointer(&mut self) -> *const u8 {
         self.screenbuffer.as_ptr()
+    }
+
+    pub fn get_screen_buffer_len(&self) -> usize {
+        self.screenbuffer.len()
     }
 
     pub fn set_pause(&mut self, value: bool) {

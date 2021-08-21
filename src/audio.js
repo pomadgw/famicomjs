@@ -42,10 +42,20 @@ class NesAudio extends AudioWorkletProcessor {
     /* using the inputs (or not, as needed), write the output
        into each of the outputs */
     if (this.nes && this.wasmMemory) {
+      const audio = this.nes.clock_until_audio_ready()
+      const pointer = this.nes.get_screen_buffer_pointer()
+      const len = this.nes.get_screen_buffer_len()
+      this.wasmMemory = new Uint8Array(this.wasmObject.memory.buffer, pointer, len)
+
+      for (let i = 0; i < this.wasmMemory.length; i++) {
+        this.sab[i] = this.wasmMemory[i]
+        console.log(this.sab[i])
+      }
+
       const output = outputs[0]
       output.forEach((channel) => {
         for (let i = 0; i < channel.length; i++) {
-          channel[i] = 0
+          channel[i] = audio
         }
       })
     }
