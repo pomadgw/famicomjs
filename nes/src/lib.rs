@@ -1,12 +1,15 @@
 extern crate nesrs;
+
 mod utils;
 
 use nesrs::bus::*;
 use nesrs::ppu::*;
 use nesrs::controller::ButtonStatus;
 use six_five::memory::Memory;
+use six_five::cpu::CPU;
 use wasm_bindgen::prelude::*;
 use js_sys;
+use web_sys;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -27,6 +30,7 @@ pub fn get_screen_height() -> usize {
 #[wasm_bindgen]
 pub struct NES {
     bus: Nes,
+    screenbuffer: Vec<u8>,
 }
 
 #[wasm_bindgen]
@@ -38,11 +42,25 @@ impl NES {
 
         NES {
             bus: Nes::new_from_array(&data).unwrap(),
+            screenbuffer: vec![0; NES_WIDTH_SIZE * NES_HEIGHT_SIZE * 4]
         }
     }
 
     pub fn clock(&mut self) {
         self.bus.clock();
+
+        if self.bus.is_done_drawing() {
+            self.bus.copy_framebuffer_on_done_drawing(&mut self.screenbuffer);
+            web_sys::console::log_1(&"done drawing".into());
+        }
+    }
+
+    pub fn is_audio_sample_ready(&self) -> bool {
+        self.bus.is_audio_sample_ready
+    }
+
+    pub fn reset_audio_sample_ready(&mut self) {
+        self.bus.is_audio_sample_ready = false
     }
 
     pub fn clock_until_frame_done(&mut self) {
@@ -51,6 +69,10 @@ impl NES {
 
     pub fn clock_until_audio_ready(&mut self) -> f32 {
         self.bus.clock_until_audio_ready()
+    }
+
+    pub fn audio_output(&mut self) -> f32 {
+        self.bus.audio_output
     }
 
     pub fn done_drawing(&self) -> bool {
@@ -90,6 +112,18 @@ impl NES {
     }
 
     pub fn get_screen_buffer_pointer(&mut self) -> *const u8 {
-        self.bus.ppu().get_screen_buffer_pointer()
+        self.screenbuffer.as_ptr()
+    }
+
+    pub fn set_pause(&mut self, value: bool) {
+        self.bus.pause = value;
+    }
+
+    pub fn pause(&self) -> bool {
+        self.bus.pause
+    }
+
+    pub fn pc(&self) -> u16 {
+        self.bus.cpu.regs.pc
     }
 }
