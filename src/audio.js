@@ -16,7 +16,7 @@ class NesAudio extends AudioWorkletProcessor {
       if (e.data.event === 'sab') {
         this.sab = e.data.value
       }
-      if (e.data.event === 'sab_controller') {
+      if (e.data.event === 'sabController') {
         this.sab_controller = e.data.value
       }
 
