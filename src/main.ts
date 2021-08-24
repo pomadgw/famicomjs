@@ -1,10 +1,10 @@
 import './style.css'
 
-import { createApp } from 'vue'
-import App from './App.vue'
+// import { createApp } from 'vue'
+// import App from './App.vue'
 
 // createApp(App).mount('#app')
-import wasm, { NES } from '../nes/pkg/nes'
+// import wasm, { NES } from '../nes/pkg/nes'
 
 const A = 1 << 0
 const B = 1 << 1
@@ -37,44 +37,49 @@ async function createMyAudioProcessor() {
     try {
       audioContext = new AudioContext()
       await audioContext.resume()
-      await audioContext.audioWorklet.addModule("/src/audio.js")
-    } catch(e) {
+      await audioContext.audioWorklet.addModule('/src/audio.js')
+    } catch (e) {
       return null
     }
   }
 
-  return new AudioWorkletNode(audioContext, "nes-audio")
+  return new AudioWorkletNode(audioContext, 'nes-audio')
 }
 
 document.querySelector('#test')?.addEventListener('click', async () => {
   const processor = await createMyAudioProcessor()
 
   let sab: SharedArrayBuffer
+  let sabController: SharedArrayBuffer
 
   if (audioContext && processor) {
     processor.connect(audioContext.destination)
     sab = new SharedArrayBuffer(256 * 240 * 4)
+    sabController = new SharedArrayBuffer(3)
 
     processor.port.postMessage({ event: 'sab', value: sab })
+    processor.port.postMessage({ event: 'sabController', value: sabController })
     await fetch('/nes/pkg/nes_bg.wasm')
-      .then(r => r.arrayBuffer())
+      .then((r) => r.arrayBuffer())
       .then((buffer) => {
         processor.port.postMessage({
           event: 'wasm',
-          value: buffer,
+          value: buffer
         })
       })
 
-    await
-      fetch('/nestest.nes')
-        .then((response) => response.arrayBuffer())
-        .then((buffer) => {
-            processor.port.postMessage({
-              event: 'nes',
-              value: buffer,
-            })
-            processor.port.postMessage({ event: 'set_sr', value: audioContext?.sampleRate })
-          })
+    await fetch('/bad_apple.nes')
+      .then((response) => response.arrayBuffer())
+      .then((buffer) => {
+        processor.port.postMessage({
+          event: 'nes',
+          value: buffer
+        })
+        processor.port.postMessage({
+          event: 'set_sr',
+          value: audioContext?.sampleRate
+        })
+      })
   }
 
   document.addEventListener('keydown', (e) => {
@@ -105,24 +110,23 @@ document.querySelector('#test')?.addEventListener('click', async () => {
     }
   })
 
-
   const keyDownButton = (button: number) => {
     if (processor) {
+      const sabControllerByte = new Uint8Array(sabController)
       // processor.press_button(0, button, true)
-      processor.port.postMessage({
-        event: 'keydown',
-        value: button
-      })
+      sabControllerByte[0] = 1
+      sabControllerByte[1] = 1
+      sabControllerByte[2] = button
     }
   }
 
   const keyUpButton = (button: number) => {
     if (processor) {
+      const sabControllerByte = new Uint8Array(sabController)
       // processor.press_button(0, button, false)
-      processor.port.postMessage({
-        event: 'keyup',
-        value: button
-      })
+      sabControllerByte[0] = 1
+      sabControllerByte[1] = 0
+      sabControllerByte[2] = button
     }
   }
 
@@ -130,15 +134,10 @@ document.querySelector('#test')?.addEventListener('click', async () => {
 
   if (ctx) {
     ctx.imageSmoothingEnabled = false
-    const step: FrameRequestCallback = (
-      timestamp: DOMHighResTimeStamp
-    ) => {
+    const step: FrameRequestCallback = (timestamp: DOMHighResTimeStamp) => {
       if (ctx && sab) {
         const sabUint8 = new Uint8Array(sab)
-        const imageData = ctx.createImageData(
-          256,
-          240
-        )
+        const imageData = ctx.createImageData(256, 240)
 
         for (let i = 0; i < 256 * 240 * 4; i += 1) {
           imageData.data[i] = Atomics.load(sabUint8, i)
