@@ -1,33 +1,16 @@
 import { defineComponent } from 'vue'
-import wasm, { NES } from '../nes/pkg/nes'
 
-const A = 1 << 0
-const B = 1 << 1
-const SELECT = 1 << 2
-const START = 1 << 3
-const UP = 1 << 4
-const DOWN = 1 << 5
-const LEFT = 1 << 6
-const RIGHT = 1 << 7
-
-interface IButtons {
-  [key: string]: number
-}
-
-const Buttons: IButtons = {
-  A,
-  B,
-  SELECT,
-  START,
-  UP,
-  DOWN,
-  LEFT,
-  RIGHT
-}
+import NESRunner, { IButtons, Buttons } from './runner'
 
 interface Data {
-  nes: NES | null
+  nes: NESRunner | null
   Buttons: IButtons
+  isNESStart: boolean
+  romData: ArrayBuffer
+}
+
+interface HTMLInputEvent extends Event {
+  target: HTMLInputElement & EventTarget
 }
 
 export default defineComponent({
@@ -35,85 +18,45 @@ export default defineComponent({
   data(): Data {
     return {
       nes: null,
-      Buttons
+      Buttons,
+      isNESStart: false,
+      romData: new ArrayBuffer(0)
     }
   },
-  mounted() {
-    wasm().then((wasmObject) => {
-      fetch('/nestest.nes')
-        .then((response) => response.arrayBuffer())
-        .then((buffer) => {
-          const view = new Uint8Array(buffer)
-          const nes: NES = NES.new(view)
-          this.nes = nes
-          nes.reset()
+  async mounted() {
+    this.nes = new NESRunner()
+    await this.nes.isDoneInitialize
 
-          const wasmMemory = new Uint8Array(wasmObject.memory.buffer)
-          const nesScreenPointer = nes.get_screen_buffer_pointer()
-          console.log(wasmMemory[nesScreenPointer + 0])
-          const ctx = document.querySelector('canvas')?.getContext('2d')
+    const canvas: HTMLCanvasElement | null = this.$refs
+      .canvas as HTMLCanvasElement
 
-          if (ctx) {
-            ctx.imageSmoothingEnabled = false
-          }
+    const ctx = canvas?.getContext('2d')
 
-          document.addEventListener('keydown', (e) => {
-            if (e.code === 'KeyA') {
-              this.keyDownButton(A)
-            } else if (e.code === 'KeyS') {
-              this.keyDownButton(B)
-            } else if (e.code === 'KeyZ') {
-              this.keyDownButton(START)
-            } else if (e.code === 'KeyX') {
-              this.keyDownButton(SELECT)
-            } else if (e.code.substr(0, 5) === 'Arrow') {
-              this.keyDownButton(Buttons[e.code.substr(5).toUpperCase()])
-            }
-          })
-
-          document.addEventListener('keyup', (e) => {
-            if (e.code === 'KeyA') {
-              this.keyUpButton(A)
-            } else if (e.code === 'KeyS') {
-              this.keyUpButton(B)
-            } else if (e.code === 'KeyZ') {
-              this.keyUpButton(START)
-            } else if (e.code === 'KeyX') {
-              this.keyUpButton(SELECT)
-            } else if (e.code.substr(0, 5) === 'Arrow') {
-              this.keyUpButton(Buttons[e.code.substr(5).toUpperCase()])
-            }
-          })
-
-          const step: FrameRequestCallback = (
-            timestamp: DOMHighResTimeStamp
-          ) => {
-            nes.clock_until_frame_done()
-
-            if (ctx) {
-              const imageData = ctx.createImageData(
-                wasmObject.get_screen_width(),
-                wasmObject.get_screen_height()
-              )
-
-              for (let i = 0; i < imageData.data.length; i += 4) {
-                // Modify pixel data
-                imageData.data[i + 0] = wasmMemory[nesScreenPointer + i + 0] // R value
-                imageData.data[i + 1] = wasmMemory[nesScreenPointer + i + 1] // G value
-                imageData.data[i + 2] = wasmMemory[nesScreenPointer + i + 2] // B value
-                imageData.data[i + 3] = wasmMemory[nesScreenPointer + i + 3] // A value
-              }
-
-              ctx.putImageData(imageData, 0, 0)
-            }
-            requestAnimationFrame(step)
-          }
-
-          step(0)
-        })
-    })
+    if (ctx) {
+      this.nes.renderImage(ctx)
+    }
   },
   methods: {
+    async initializeNES() {
+      if (this.nes) {
+        await this.nes.initializeAudioContext()
+        this.isNESStart = true
+
+        if (this.romData.byteLength > 0) {
+          this.nes?.loadROM(this.romData)
+        }
+      }
+    },
+    pauseNES() {
+      if (this.nes) {
+        this.nes.pause()
+      }
+    },
+    resumeNES() {
+      if (this.nes) {
+        this.nes.resume()
+      }
+    },
     resetNES() {
       if (this.nes) {
         this.nes.reset()
@@ -127,14 +70,29 @@ export default defineComponent({
         }, 10)
       }
     },
+    async loadROM(e: HTMLInputEvent) {
+      const { files } = e.target
+
+      if (files && files.length > 0) {
+        const file = files[0]
+
+        await file.arrayBuffer().then((arrayBuffer) => {
+          this.romData = arrayBuffer
+
+          if (this.isNESStart) {
+            this.nes?.loadROM(arrayBuffer)
+          }
+        })
+      }
+    },
     keyDownButton(button: number) {
       if (this.nes) {
-        this.nes.press_button(0, button, true)
+        this.nes.keyDownButton(button)
       }
     },
     keyUpButton(button: number) {
       if (this.nes) {
-        this.nes.press_button(0, button, false)
+        this.nes.keyUpButton(button)
       }
     }
   }

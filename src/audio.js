@@ -3,6 +3,7 @@ import './textdecoder'
 import wasm, { NES } from '../nes/pkg/nes'
 
 import { EVENT_TYPE } from './worker-constants'
+import { NESStatus } from './utils'
 
 let isWasmLoaded = false
 
@@ -21,7 +22,7 @@ class NesAudio extends AudioWorkletProcessor {
           this.sab = value
           break
         case EVENT_TYPE.TRANSFER_SAB_CONTROLLER:
-          this.sab_controller = value
+          this.sab_controller = new NESStatus(value)
           break
         case EVENT_TYPE.LOAD_ROM:
           if (isWasmLoaded) {
@@ -47,6 +48,21 @@ class NesAudio extends AudioWorkletProcessor {
         case EVENT_TYPE.LOAD_WASM:
           this.loadWasm(value)
           break
+        case EVENT_TYPE.RESUME:
+          if (this.nes) {
+            this.nes.set_pause(false)
+          }
+          break
+        case EVENT_TYPE.PAUSE:
+          if (this.nes) {
+            this.nes.set_pause(true)
+          }
+          break
+        case EVENT_TYPE.RESET:
+          if (this.nes) {
+            this.nes.reset()
+          }
+          break
       }
     }
   }
@@ -60,19 +76,23 @@ class NesAudio extends AudioWorkletProcessor {
   }
 
   process(inputList, outputs) {
+    if (this.sab_controller.paused) {
+      return true
+    }
+
     /* using the inputs (or not, as needed), write the output
        into each of the outputs */
     if (this.nes && this.wasmMemory) {
-      const sabControllerByte = new Uint8Array(this.sab_controller)
-
-      if (sabControllerByte[0] === 1) {
-        sabControllerByte[0] = 0
-
-        if (sabControllerByte[1] === 0) {
-          this.nes.press_button(0, sabControllerByte[2], false)
+      if (this.sab_controller.checkButton()) {
+        if (this.sab_controller.isKeyDown()) {
+          this.nes.press_button(0, this.sab_controller.pressedButton, false)
         } else {
-          this.nes.press_button(0, sabControllerByte[2], true)
+          this.nes.press_button(0, this.sab_controller.pressedButton, true)
         }
+      }
+
+      if (this.sab_controller.ok && this.sab_controller.reset()) {
+        this.nes.reset()
       }
 
       if (!this.audioview || this.pos >= this.audioview.length) {
