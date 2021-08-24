@@ -49,8 +49,16 @@ impl NES {
             bus: Nes::new_from_array(&data).unwrap(),
             screenbuffer: vec![0; NES_WIDTH_SIZE * NES_HEIGHT_SIZE * 4],
             audio_time: 0.0,
-            audio_buffer: vec![0.0; 1024],
+            audio_buffer: vec![0.0; 512],
         }
+    }
+
+    pub fn replace_cartridge(&mut self, rom_data: js_sys::Uint8Array) {
+        let mut data: Vec<u8> = Vec::new();
+        data.resize(rom_data.length() as usize, 0);
+        rom_data.copy_to(&mut data[..]);
+
+        self.bus.replace_cartridge_with_array(&data).unwrap();
     }
 
     pub fn set_sample_rate(&mut self, rate: u32  ) {
@@ -87,7 +95,7 @@ impl NES {
             *buffer = self.bus.clock_until_audio_ready();
         }
 
-        self.bus.copy_framebuffer(&mut self.screenbuffer);
+        self.bus.copy_framebuffer_on_done_drawing(&mut self.screenbuffer);
     }
 
     pub fn get_audio_buffer_pointer(&mut self) -> *const f32 {

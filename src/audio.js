@@ -28,7 +28,12 @@ class NesAudio extends AudioWorkletProcessor {
             const buffer = value
             const view = new Uint8Array(buffer)
 
-            this.nes = NES.new(view)
+            if (this.nes) {
+              this.nes.set_pause(true)
+              this.nes.replace_cartridge(view)
+            } else {
+              this.nes = NES.new(view)
+            }
 
             this.nes.reset()
             this.nes.set_pause(false)
