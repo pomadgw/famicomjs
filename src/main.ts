@@ -70,6 +70,7 @@ class NESRunner {
           await this.audioContext.val.resume()
           await this.audioContext.val.audioWorklet.addModule('/src/audio.js')
         } catch (e) {
+          console.error(e)
           return createNone()
         }
       }
@@ -94,7 +95,7 @@ class NESRunner {
           value: this.sabController.val
         })
 
-        fetch('/nes/pkg/nes_bg.wasm')
+        return fetch('/nes/pkg/nes_bg.wasm')
           .then((r) => r.arrayBuffer())
           .then((buffer) => {
             processor.val.port.postMessage({
@@ -103,9 +104,9 @@ class NESRunner {
             })
 
             this.isWasmLoaded = true
-          })
 
-        return true
+            return true
+          })
       }
 
       return false
@@ -214,9 +215,11 @@ declare global {
   }
 }
 
-window.nesRunner = new NESRunner()
-
 document.querySelector('#test')?.addEventListener('click', async () => {
+  window.nesRunner = new NESRunner()
+
+  await window.nesRunner.isDoneInitialize
+
   const ctx = document.querySelector('canvas')?.getContext('2d')
 
   const romBuffer = await fetch('/nestest.nes').then((response) =>
