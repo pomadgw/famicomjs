@@ -4,11 +4,8 @@ import { Option, createSome, createNone } from 'option-t/lib/PlainOption'
 
 import { EVENT_TYPE } from './worker-constants'
 
-// import { createApp } from 'vue'
-// import App from './App.vue'
-
-// createApp(App).mount('#app')
-// import wasm, { NES } from '../nes/pkg/nes'
+import audioUrl from '../audio.esm?url'
+import nesWasmURL from '../nes/pkg/nes_bg.wasm?url'
 
 const A = 1 << 0
 const B = 1 << 1
@@ -68,7 +65,7 @@ class NESRunner {
         try {
           this.audioContext = createSome(new AudioContext())
           await this.audioContext.val.resume()
-          await this.audioContext.val.audioWorklet.addModule('/src/audio.js')
+          await this.audioContext.val.audioWorklet.addModule(audioUrl)
         } catch (e) {
           console.error(e)
           return createNone()
@@ -95,7 +92,7 @@ class NESRunner {
           value: this.sabController.val
         })
 
-        return fetch('/nes/pkg/nes_bg.wasm')
+        return fetch(nesWasmURL)
           .then((r) => r.arrayBuffer())
           .then((buffer) => {
             processor.val.port.postMessage({
