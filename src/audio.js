@@ -2,6 +2,8 @@ import './url'
 import './textdecoder'
 import wasm, { NES } from '../nes/pkg/nes'
 
+import { EVENT_TYPE } from './worker-constants'
+
 let isWasmLoaded = false
 
 class NesAudio extends AudioWorkletProcessor {
@@ -12,51 +14,47 @@ class NesAudio extends AudioWorkletProcessor {
     this.buffer = []
 
     this.port.onmessage = (e) => {
-      // console.log(e)
-      if (e.data.event === 'sab') {
-        this.sab = e.data.value
-      }
-      if (e.data.event === 'sabController') {
-        this.sab_controller = e.data.value
-      }
+      const { event, value } = e.data
 
-      if (isWasmLoaded && e.data.event === 'nes') {
-        const buffer = e.data.value
-        const view = new Uint8Array(buffer)
+      switch (event) {
+        case EVENT_TYPE.TRANSFER_SAB:
+          this.sab = value
+          break
+        case EVENT_TYPE.TRANSFER_SAB_CONTROLLER:
+          this.sab_controller = value
+          break
+        case EVENT_TYPE.LOAD_ROM:
+          if (isWasmLoaded) {
+            const buffer = value
+            const view = new Uint8Array(buffer)
 
-        const nes = NES.new(view)
-        this.nes = nes
+            this.nes = NES.new(view)
 
-        nes.reset()
-        this.nes.set_pause(false)
-      }
-
-      if (isWasmLoaded && this.nes && e.data.event === 'set_sr') {
-        const sampleRate = e.data.value
-        this.nes.set_sample_rate(sampleRate)
-      }
-
-      if (e.data.event === 'wasm') {
-        wasm(e.data.value).then((wasmObject) => {
-          isWasmLoaded = true
-          this.wasmObject = wasmObject
-          console.log(wasmObject.memory)
-          this.wasmMemory = new Uint8Array(wasmObject.memory.buffer)
-          console.log(this.wasmMemory.length)
-        })
-      }
-
-      if (this.nes && e.data.event === 'keydown') {
-        this.nes.press_button(0, e.data.value, true)
-      }
-
-      if (this.nes && e.data.event === 'keyup') {
-        this.nes.press_button(0, e.data.value, false)
+            this.nes.reset()
+            this.nes.set_pause(false)
+          }
+          break
+        case EVENT_TYPE.SET_SAMPLE_RATE:
+          if (this.nes) {
+            this.nes.set_sample_rate(value)
+          }
+          break
+        case EVENT_TYPE.LOAD_WASM:
+          this.loadWasm(value)
+          break
       }
     }
   }
 
-  process(inputList, outputs, parameters) {
+  loadWasm(buffer) {
+    wasm(buffer).then((wasmObject) => {
+      isWasmLoaded = true
+      this.wasmObject = wasmObject
+      this.wasmMemory = new Uint8Array(wasmObject.memory.buffer)
+    })
+  }
+
+  process(inputList, outputs) {
     /* using the inputs (or not, as needed), write the output
        into each of the outputs */
     if (this.nes && this.wasmMemory) {
