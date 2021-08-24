@@ -35,6 +35,7 @@ pub struct NES {
     screenbuffer: Vec<u8>,
 
     audio_time: f32,
+    audio_buffer: Vec<f32>,
 }
 
 #[wasm_bindgen]
@@ -48,7 +49,12 @@ impl NES {
             bus: Nes::new_from_array(&data).unwrap(),
             screenbuffer: vec![0; NES_WIDTH_SIZE * NES_HEIGHT_SIZE * 4],
             audio_time: 0.0,
+            audio_buffer: vec![0.0; 1024],
         }
+    }
+
+    pub fn set_sample_rate(&mut self, rate: u32  ) {
+        self.bus.set_audio_sample_rate(rate)
     }
 
     pub fn clock(&mut self) {
@@ -74,6 +80,22 @@ impl NES {
         let audio = self.bus.clock_until_audio_ready();
         self.bus.copy_framebuffer(&mut self.screenbuffer);
         audio
+    }
+
+    pub fn clock_until_audio_ready_2(&mut self) {
+        for buffer in self.audio_buffer.iter_mut() {
+            *buffer = self.bus.clock_until_audio_ready();
+        }
+
+        self.bus.copy_framebuffer(&mut self.screenbuffer);
+    }
+
+    pub fn get_audio_buffer_pointer(&mut self) -> *const f32 {
+        self.audio_buffer.as_ptr()
+    }
+
+    pub fn get_audio_buffer_len(&self) -> usize {
+        self.audio_buffer.len()
     }
 
     pub fn cpu_total_cycles(&self) -> u32 {

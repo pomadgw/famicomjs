@@ -42,13 +42,14 @@ document.querySelector('#test')?.addEventListener('click', async () => {
       })
 
     await
-      fetch('/bad_apple.nes')
+      fetch('/nestest.nes')
         .then((response) => response.arrayBuffer())
         .then((buffer) => {
             processor.port.postMessage({
               event: 'nes',
               value: buffer,
             })
+            processor.port.postMessage({ event: 'set_sr', value: audioContext?.sampleRate })
           })
   }
 

@@ -28,6 +28,11 @@ class NesAudio extends AudioWorkletProcessor {
         this.nes.set_pause(false)
       }
 
+      if (isWasmLoaded && this.nes && e.data.event === 'set_sr') {
+        const sampleRate = e.data.value
+        this.nes.set_sample_rate(sampleRate)
+      }
+
       if (e.data.event === 'wasm') {
         wasm(e.data.value).then((wasmObject) => {
           isWasmLoaded = true
@@ -44,39 +49,35 @@ class NesAudio extends AudioWorkletProcessor {
     /* using the inputs (or not, as needed), write the output
        into each of the outputs */
     if (this.nes && this.wasmMemory) {
-      if (this.buffer.length === 0) {
-        console.time('audio buffer')
-        for (let i = 0; i < 44100 * 10; i++) {
-          const audio = this.nes.clock_until_audio_ready()
-          this.buffer.push(audio)
-        }
-        console.timeEnd('audio buffer')
+      if (!this.audioview || this.pos >= this.audioview.length) {
+        this.nes.clock_until_audio_ready_2()
+        const pointer = this.nes.get_audio_buffer_pointer()
+        const len = this.nes.get_audio_buffer_len()
+        this.pos = 0
+        this.audioview = new Float32Array(
+          this.wasmObject.memory.buffer,
+          pointer,
+          len
+        )
       }
-      // console.log(this.nes.cpu_total_cycles())
-      // console.log(audio)
 
       const output = outputs[0]
       output.forEach((channel) => {
         for (let i = 0; i < channel.length; i++) {
-          channel[i] = this.buffer.shift()// + ((Math.random() * 2 - 1) * 0.005)
+          channel[i] = this.audioview[this.pos]
+          this.pos += 1
         }
       })
 
-      // if (this.nes.done_drawing()) {
-      //   const pointer = this.nes.get_screen_buffer_pointer()
-      //   const len = this.nes.get_screen_buffer_len()
-      //   this.wasmMemory = new Uint8Array(
-      //     this.wasmObject.memory.buffer,
-      //     pointer,
-      //     len
-      //   )
-      //   const view = new Uint8Array(this.sab)
-
-      //   for (let i = 0; i < this.wasmMemory.length; i++) {
-      //     // this.sab[i] = this.wasmMemory[i]
-      //     Atomics.store(view, i, this.wasmMemory[i])
-      //   }
-      // }
+      const pointer = this.nes.get_screen_buffer_pointer()
+      const len = this.nes.get_screen_buffer_len()
+      this.wasmMemory = new Uint8Array(
+        this.wasmObject.memory.buffer,
+        pointer,
+        len
+      )
+      const view = new Uint8Array(this.sab)
+      view.set(this.wasmMemory)
     }
 
     return true
