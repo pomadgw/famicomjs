@@ -42,7 +42,7 @@ document.querySelector('#test')?.addEventListener('click', async () => {
       })
 
     await
-      fetch('/nestest.nes')
+      fetch('/bad_apple.nes')
         .then((response) => response.arrayBuffer())
         .then((buffer) => {
             processor.port.postMessage({
@@ -57,6 +57,26 @@ document.querySelector('#test')?.addEventListener('click', async () => {
   if (ctx) {
     ctx.imageSmoothingEnabled = false
 
+    // processor.port.onmessage = (e) => {
+    //   const { event, value } = e.data
+    //   // console.log(event)
+
+    //   if (event === 'render_image') {
+    //     const sabUint8 = new Uint8Array(sab)
+
+    //     const imageData = ctx.createImageData(
+    //       256,
+    //       240
+    //     )
+
+    //     for (let i = 0; i < 256 * 240 * 4; i++) {
+    //       imageData.data[i] = sabUint8[i]
+    //     }
+
+    //     ctx.putImageData(imageData, 0, 0)
+    //   }
+    // }
+
     const step: FrameRequestCallback = (
       timestamp: DOMHighResTimeStamp
     ) => {
@@ -67,8 +87,10 @@ document.querySelector('#test')?.addEventListener('click', async () => {
           240
         )
 
-        for (let i = 0; i < 256 * 240 * 4; i += 4) {
-          imageData.data[i] = sabUint8[i]
+        // console.log(sabUint8)
+
+        for (let i = 0; i < 256 * 240 * 4; i += 1) {
+          imageData.data[i] = Atomics.load(sabUint8, i)
         }
 
         ctx.putImageData(imageData, 0, 0)

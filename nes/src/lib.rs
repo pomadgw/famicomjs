@@ -11,6 +11,8 @@ use wasm_bindgen::prelude::*;
 use js_sys;
 use web_sys;
 
+use std::time::Instant;
+
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
 #[cfg(feature = "wee_alloc")]
@@ -31,6 +33,8 @@ pub fn get_screen_height() -> usize {
 pub struct NES {
     bus: Nes,
     screenbuffer: Vec<u8>,
+
+    audio_time: f32,
 }
 
 #[wasm_bindgen]
@@ -42,7 +46,8 @@ impl NES {
 
         NES {
             bus: Nes::new_from_array(&data).unwrap(),
-            screenbuffer: vec![0; NES_WIDTH_SIZE * NES_HEIGHT_SIZE * 4]
+            screenbuffer: vec![0; NES_WIDTH_SIZE * NES_HEIGHT_SIZE * 4],
+            audio_time: 0.0,
         }
     }
 
@@ -55,6 +60,12 @@ impl NES {
         }
     }
 
+    pub fn sin(&mut self) -> f32 {
+        self.audio_time += 1.0 / 44100.0;
+        
+        (self.audio_time * 440.0 * 2.0 * 3.1415).sin() * 0.5
+    }
+
     pub fn clock_until_frame_done(&mut self) {
         self.bus.clock_until_frame_done();
     }
@@ -63,6 +74,10 @@ impl NES {
         let audio = self.bus.clock_until_audio_ready();
         self.bus.copy_framebuffer(&mut self.screenbuffer);
         audio
+    }
+
+    pub fn cpu_total_cycles(&self) -> u32 {
+        self.bus.cpu_total_cycles()
     }
 
     pub fn audio_output(&mut self) -> f32 {
