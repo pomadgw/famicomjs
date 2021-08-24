@@ -42,6 +42,14 @@ class NesAudio extends AudioWorkletProcessor {
           console.log(this.wasmMemory.length)
         })
       }
+
+      if (this.nes && e.data.event === 'keydown') {
+        this.nes.press_button(0, e.data.value, true)
+      }
+
+      if (this.nes && e.data.event === 'keyup') {
+        this.nes.press_button(0, e.data.value, false)
+      }
     }
   }
 

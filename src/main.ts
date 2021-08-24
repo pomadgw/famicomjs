@@ -6,6 +6,30 @@ import App from './App.vue'
 // createApp(App).mount('#app')
 import wasm, { NES } from '../nes/pkg/nes'
 
+const A = 1 << 0
+const B = 1 << 1
+const SELECT = 1 << 2
+const START = 1 << 3
+const UP = 1 << 4
+const DOWN = 1 << 5
+const LEFT = 1 << 6
+const RIGHT = 1 << 7
+
+interface IButtons {
+  [key: string]: number
+}
+
+const Buttons: IButtons = {
+  A,
+  B,
+  SELECT,
+  START,
+  UP,
+  DOWN,
+  LEFT,
+  RIGHT
+}
+
 let audioContext: AudioContext | null = null
 
 async function createMyAudioProcessor() {
@@ -53,31 +77,59 @@ document.querySelector('#test')?.addEventListener('click', async () => {
           })
   }
 
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'KeyA') {
+      keyDownButton(A)
+    } else if (e.code === 'KeyS') {
+      keyDownButton(B)
+    } else if (e.code === 'KeyZ') {
+      keyDownButton(START)
+    } else if (e.code === 'KeyX') {
+      keyDownButton(SELECT)
+    } else if (e.code.substr(0, 5) === 'Arrow') {
+      keyDownButton(Buttons[e.code.substr(5).toUpperCase()])
+    }
+  })
+
+  document.addEventListener('keyup', (e) => {
+    if (e.code === 'KeyA') {
+      keyUpButton(A)
+    } else if (e.code === 'KeyS') {
+      keyUpButton(B)
+    } else if (e.code === 'KeyZ') {
+      keyUpButton(START)
+    } else if (e.code === 'KeyX') {
+      keyUpButton(SELECT)
+    } else if (e.code.substr(0, 5) === 'Arrow') {
+      keyUpButton(Buttons[e.code.substr(5).toUpperCase()])
+    }
+  })
+
+
+  const keyDownButton = (button: number) => {
+    if (processor) {
+      // processor.press_button(0, button, true)
+      processor.port.postMessage({
+        event: 'keydown',
+        value: button
+      })
+    }
+  }
+
+  const keyUpButton = (button: number) => {
+    if (processor) {
+      // processor.press_button(0, button, false)
+      processor.port.postMessage({
+        event: 'keyup',
+        value: button
+      })
+    }
+  }
+
   const ctx = document.querySelector('canvas')?.getContext('2d')
 
   if (ctx) {
     ctx.imageSmoothingEnabled = false
-
-    // processor.port.onmessage = (e) => {
-    //   const { event, value } = e.data
-    //   // console.log(event)
-
-    //   if (event === 'render_image') {
-    //     const sabUint8 = new Uint8Array(sab)
-
-    //     const imageData = ctx.createImageData(
-    //       256,
-    //       240
-    //     )
-
-    //     for (let i = 0; i < 256 * 240 * 4; i++) {
-    //       imageData.data[i] = sabUint8[i]
-    //     }
-
-    //     ctx.putImageData(imageData, 0, 0)
-    //   }
-    // }
-
     const step: FrameRequestCallback = (
       timestamp: DOMHighResTimeStamp
     ) => {
@@ -87,8 +139,6 @@ document.querySelector('#test')?.addEventListener('click', async () => {
           256,
           240
         )
-
-        // console.log(sabUint8)
 
         for (let i = 0; i < 256 * 240 * 4; i += 1) {
           imageData.data[i] = Atomics.load(sabUint8, i)
