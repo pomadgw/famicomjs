@@ -37,8 +37,6 @@ export default class NESRunner {
   private audioContext: Option<AudioContext>
   private isWasmLoaded: boolean
 
-  isDoneInitialize: Promise<boolean>
-
   constructor() {
     this.audioContext = createNone()
     this.sabScreenMemory = createNone()
@@ -50,12 +48,9 @@ export default class NESRunner {
       console.error(
         'Cannot use SharedArrayBuffer; security requirement is not met!'
       )
-
-      this.isDoneInitialize = Promise.resolve(false)
     } else {
       this.sabScreenMemory = createSome(new SharedArrayBuffer(256 * 240 * 4))
       this.sabController = createSome(new NESStatus(new SharedArrayBuffer(16)))
-      this.isDoneInitialize = Promise.resolve(false)
     }
   }
 
@@ -77,7 +72,7 @@ export default class NESRunner {
       )
     }
 
-    this.isDoneInitialize = createMyAudioProcessor().then((processor) => {
+    return createMyAudioProcessor().then((processor) => {
       if (this.audioContext.ok && processor.ok) {
         processor.val.connect(this.audioContext.val.destination)
 
@@ -108,8 +103,6 @@ export default class NESRunner {
 
       return false
     })
-
-    return this.isDoneInitialize
   }
 
   loadROM(arrayBuffer: ArrayBuffer) {
