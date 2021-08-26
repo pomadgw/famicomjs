@@ -49,7 +49,7 @@ impl NES {
             bus: Nes::new_from_array(&data).unwrap(),
             screenbuffer: vec![0; NES_WIDTH_SIZE * NES_HEIGHT_SIZE * 4],
             audio_time: 0.0,
-            audio_buffer: vec![0.0; 512],
+            audio_buffer: vec![0.0; 128],
         }
     }
 
