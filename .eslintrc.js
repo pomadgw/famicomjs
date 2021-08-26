@@ -14,10 +14,13 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 11,
     sourceType: 'module',
-    parser: '@babel/eslint-parser'
+    parser: '@typescript-eslint/parser'
   },
-  plugins: ['vue'],
+  plugins: ['vue', '@typescript-eslint/eslint-plugin'],
   // plugins: ['@typescript-eslint'],
   // parser: '@typescript-eslint/parser',
-  rules: {}
+  rules: {
+    '@typescript-eslint/no-unused-vars': 'error',
+    'no-unused-vars': 'off'
+  }
 }

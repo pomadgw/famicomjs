@@ -11,3 +11,4 @@ nestest.log
 dist
 dist-ssr
 *.local
+audio.esm.js

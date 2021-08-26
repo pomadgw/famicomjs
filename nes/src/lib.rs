@@ -1,12 +1,17 @@
 extern crate nesrs;
+
 mod utils;
 
 use nesrs::bus::*;
 use nesrs::ppu::*;
 use nesrs::controller::ButtonStatus;
 use six_five::memory::Memory;
+use six_five::cpu::CPU;
 use wasm_bindgen::prelude::*;
 use js_sys;
+use web_sys;
+
+use std::time::Instant;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -27,6 +32,10 @@ pub fn get_screen_height() -> usize {
 #[wasm_bindgen]
 pub struct NES {
     bus: Nes,
+    screenbuffer: Vec<u8>,
+
+    audio_time: f32,
+    audio_buffer: Vec<f32>,
 }
 
 #[wasm_bindgen]
@@ -38,11 +47,37 @@ impl NES {
 
         NES {
             bus: Nes::new_from_array(&data).unwrap(),
+            screenbuffer: vec![0; NES_WIDTH_SIZE * NES_HEIGHT_SIZE * 4],
+            audio_time: 0.0,
+            audio_buffer: vec![0.0; 128],
         }
+    }
+
+    pub fn replace_cartridge(&mut self, rom_data: js_sys::Uint8Array) {
+        let mut data: Vec<u8> = Vec::new();
+        data.resize(rom_data.length() as usize, 0);
+        rom_data.copy_to(&mut data[..]);
+
+        self.bus.replace_cartridge_with_array(&data).unwrap();
+    }
+
+    pub fn set_sample_rate(&mut self, rate: u32  ) {
+        self.bus.set_audio_sample_rate(rate)
     }
 
     pub fn clock(&mut self) {
         self.bus.clock();
+
+        if self.bus.is_done_drawing() {
+            self.bus.copy_framebuffer_on_done_drawing(&mut self.screenbuffer);
+            web_sys::console::log_1(&"done drawing".into());
+        }
+    }
+
+    pub fn sin(&mut self) -> f32 {
+        self.audio_time += 1.0 / 44100.0;
+        
+        (self.audio_time * 440.0 * 2.0 * 3.1415).sin() * 0.5
     }
 
     pub fn clock_until_frame_done(&mut self) {
@@ -50,7 +85,33 @@ impl NES {
     }
 
     pub fn clock_until_audio_ready(&mut self) -> f32 {
-        self.bus.clock_until_audio_ready()
+        let audio = self.bus.clock_until_audio_ready();
+        self.bus.copy_framebuffer(&mut self.screenbuffer);
+        audio
+    }
+
+    pub fn clock_until_audio_ready_2(&mut self) {
+        for buffer in self.audio_buffer.iter_mut() {
+            *buffer = self.bus.clock_until_audio_ready();
+        }
+
+        self.bus.copy_framebuffer_on_done_drawing(&mut self.screenbuffer);
+    }
+
+    pub fn get_audio_buffer_pointer(&mut self) -> *const f32 {
+        self.audio_buffer.as_ptr()
+    }
+
+    pub fn get_audio_buffer_len(&self) -> usize {
+        self.audio_buffer.len()
+    }
+
+    pub fn cpu_total_cycles(&self) -> u32 {
+        self.bus.cpu_total_cycles()
+    }
+
+    pub fn audio_output(&mut self) -> f32 {
+        self.bus.audio_output
     }
 
     pub fn done_drawing(&self) -> bool {
@@ -90,6 +151,22 @@ impl NES {
     }
 
     pub fn get_screen_buffer_pointer(&mut self) -> *const u8 {
-        self.bus.ppu().get_screen_buffer_pointer()
+        self.screenbuffer.as_ptr()
+    }
+
+    pub fn get_screen_buffer_len(&self) -> usize {
+        self.screenbuffer.len()
+    }
+
+    pub fn set_pause(&mut self, value: bool) {
+        self.bus.pause = value;
+    }
+
+    pub fn pause(&self) -> bool {
+        self.bus.pause
+    }
+
+    pub fn pc(&self) -> u16 {
+        self.bus.cpu.regs.pc
     }
 }

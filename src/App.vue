@@ -9,12 +9,48 @@
       />
     </div>
     <div>
+      <div v-if="isNESStart" class="px-4 py-2">
+        <div class="custom-file">
+          <input
+            type="file"
+            class="custom-file-input"
+            id="customFile"
+            @change="loadROM"
+          />
+          <label class="custom-file-label" for="customFile">Choose file</label>
+        </div>
+      </div>
       <div class="px-4 py-2">
-        <button class="w-full bg-red-400 rounded-md p-2 mb-2" @click="resetNES">
+        <button
+          v-if="!isNESStart"
+          class="w-full bg-red-400 rounded-md p-2 mb-2"
+          @click="initializeNES"
+        >
+          Initialize
+        </button>
+        <button
+          v-if="isNESStart"
+          class="w-full bg-red-400 rounded-md p-2 mb-2"
+          @click="pauseNES"
+        >
+          Pause
+        </button>
+        <button
+          v-if="isNESStart"
+          class="w-full bg-red-400 rounded-md p-2 mb-2"
+          @click="resumeNES"
+        >
+          Resume
+        </button>
+        <button
+          v-if="isNESStart"
+          class="w-full bg-red-400 rounded-md p-2 mb-2"
+          @click="resetNES"
+        >
           Reset
         </button>
       </div>
-      <div class="flex justify-around">
+      <div v-if="isNESStart" class="flex justify-around">
         <div class="d-pad">
           <div style="grid-column: 2; grid-row: 1">
             <button
