@@ -13,6 +13,7 @@ class NesAudio extends AudioWorkletProcessor {
 
     this.start = Date.now()
     this.buffer = []
+    this.sab_controller = new NESStatus(new SharedArrayBuffer(10))
 
     this.port.onmessage = (e) => {
       const { event, value } = e.data
@@ -85,9 +86,9 @@ class NesAudio extends AudioWorkletProcessor {
     if (this.nes && this.wasmMemory) {
       if (this.sab_controller.checkButton()) {
         if (this.sab_controller.isKeyDown()) {
-          this.nes.press_button(0, this.sab_controller.pressedButton, false)
-        } else {
           this.nes.press_button(0, this.sab_controller.pressedButton, true)
+        } else {
+          this.nes.press_button(0, this.sab_controller.pressedButton, false)
         }
       }
 
