@@ -25,7 +25,6 @@ export default defineComponent({
   },
   async mounted() {
     this.nes = new NESRunner()
-    await this.nes.isDoneInitialize
 
     const canvas: HTMLCanvasElement | null = this.$refs
       .canvas as HTMLCanvasElement
@@ -40,6 +39,8 @@ export default defineComponent({
     async initializeNES() {
       if (this.nes) {
         await this.nes.initializeAudioContext()
+
+        this.nes.installKeyboardEventListener()
         this.isNESStart = true
 
         if (this.romData.byteLength > 0) {
