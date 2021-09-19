@@ -2,11 +2,11 @@ extern crate nesrs;
 
 mod utils;
 
+use cpurs::CPU;
 use nesrs::bus::*;
 use nesrs::ppu::*;
 use nesrs::controller::ButtonStatus;
-use six_five::memory::Memory;
-use six_five::cpu::CPU;
+use cpurs::memory::Memory;
 use wasm_bindgen::prelude::*;
 use js_sys;
 use web_sys;
@@ -123,11 +123,11 @@ impl NES {
     }
 
     pub fn read(&mut self, address: u16) -> u8 {
-        self.bus.memory().read(address, false)
+        self.bus.memory().memory_read(address.into(), false)
     }
 
     pub fn write(&mut self, address: u16, value: u8) {
-        self.bus.memory().write(address, value);
+        self.bus.memory().memory_write(address.into(), value);
     }
 
     pub fn is_cpu_done(&self) -> bool {
@@ -139,11 +139,11 @@ impl NES {
     }
 
     pub fn debug(&self) -> String {
-        self.bus.cpu.debug()
+        self.bus.cpu.debug_str().to_string()
     }
 
     pub fn change_pc(&mut self, pc: u16) {
-        self.bus.cpu.regs.pc = pc;
+        self.bus.cpu.pc = pc;
     }
 
     pub fn press_button(&mut self, id: usize, button: u8, status: bool) {
@@ -167,6 +167,6 @@ impl NES {
     }
 
     pub fn pc(&self) -> u16 {
-        self.bus.cpu.regs.pc
+        self.bus.cpu.pc
     }
 }

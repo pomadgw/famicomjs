@@ -3,6 +3,8 @@ name = "nes"
 version = "0.1.0"
 authors = ["Rahadian Yusuf <rahadian.y@gmail.com>"]
 edition = "2018"
+license = "ISC"
+description = "NES Emulator in WASM"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -29,7 +31,8 @@ console_error_panic_hook = { version = "0.1.6", optional = true }
 wee_alloc = { version = "0.4.5", optional = true }
 # nesrs = { git = "https://github.com/pomadgw/nesrs", branch = "main" }
 nesrs = { path = "./neslib" }
-six_five = { path = "./neslib/six-five" }
+cpurs = { path = "./neslib/cpurs" }
+getrandom = { version = "0.2", features = ["js"] }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.13"
