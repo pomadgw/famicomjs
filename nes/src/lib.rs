@@ -6,12 +6,10 @@ use cpurs::CPU;
 use nes::bus::*;
 use nes::ppu::*;
 use nes::controller::ButtonStatus;
-use cpurs::memory::Memory;
+use ::utils::memory::Memory;
 use wasm_bindgen::prelude::*;
 use js_sys;
 use web_sys;
-
-use std::time::Instant;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
