@@ -1,5 +1,5 @@
 [package]
-name = "nes"
+name = "nes-wasm"
 version = "0.1.0"
 authors = ["Rahadian Yusuf <rahadian.y@gmail.com>"]
 edition = "2018"
@@ -30,7 +30,7 @@ console_error_panic_hook = { version = "0.1.6", optional = true }
 # Unfortunately, `wee_alloc` requires nightly Rust when targeting wasm for now.
 wee_alloc = { version = "0.4.5", optional = true }
 # nesrs = { git = "https://github.com/pomadgw/nesrs", branch = "main" }
-nesrs = { path = "./neslib" }
+nes = { path = "./neslib/nes" }
 cpurs = { path = "./neslib/cpurs" }
 getrandom = { version = "0.2", features = ["js"] }
 

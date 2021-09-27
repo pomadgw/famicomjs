@@ -1,11 +1,11 @@
-extern crate nesrs;
+extern crate nes;
 
 mod utils;
 
 use cpurs::CPU;
-use nesrs::bus::*;
-use nesrs::ppu::*;
-use nesrs::controller::ButtonStatus;
+use nes::bus::*;
+use nes::ppu::*;
+use nes::controller::ButtonStatus;
 use cpurs::memory::Memory;
 use wasm_bindgen::prelude::*;
 use js_sys;
