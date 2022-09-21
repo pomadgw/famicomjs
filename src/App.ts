@@ -63,6 +63,16 @@ export default defineComponent({
         this.nes.reset()
       }
     },
+    saveData() {
+      if (this.nes) {
+        this.nes.saveData()
+      }
+    },
+    loadData() {
+      if (this.nes) {
+        this.nes.loadData()
+      }
+    },
     click(button: number) {
       if (this.nes) {
         this.keyDownButton(button)
@@ -76,11 +86,13 @@ export default defineComponent({
 
       if (files && files.length > 0) {
         const file = files[0]
+        const name = file.name
 
         await file.arrayBuffer().then((arrayBuffer) => {
           this.romData = arrayBuffer
 
           if (this.isNESStart) {
+            this.nes?.setName(name)
             this.nes?.loadROM(arrayBuffer)
           }
         })

@@ -4,7 +4,7 @@ import { NESStatus } from './utils'
 import { EVENT_TYPE } from './worker-constants'
 
 import audioUrl from '../audio.esm?url'
-import nesWasmURL from '../nes/pkg/nes_bg.wasm?url'
+import nesWasmURL from '../nes/pkg/nes_wasm_bg.wasm?url'
 
 const A = 1 << 0
 const B = 1 << 1
@@ -36,6 +36,7 @@ export default class NESRunner {
   private sabController: Option<NESStatus>
   private audioContext: Option<AudioContext>
   private isWasmLoaded: boolean
+  private name: string
 
   constructor() {
     this.audioContext = createNone()
@@ -43,6 +44,7 @@ export default class NESRunner {
     this.sabController = createNone()
     this.processor = createNone()
     this.isWasmLoaded = false
+    this.name = ''
 
     if (!crossOriginIsolated) {
       console.error(
@@ -87,6 +89,26 @@ export default class NESRunner {
           value: this.sabController.val?.sab
         })
 
+        processor.val.port.onmessage = (e) => {
+          const { event, value } = e.data
+
+          switch (event) {
+            case EVENT_TYPE.SAVE_DATA:
+              {
+                console.log('saving')
+                const view = new Uint8Array(value)
+                window.localStorage.setItem(
+                  this.name,
+                  JSON.stringify([...view])
+                )
+                console.log(`Game "${this.name}" is saved`)
+              }
+              break
+            default:
+              break
+          }
+        }
+
         return fetch(nesWasmURL)
           .then((r) => r.arrayBuffer())
           .then((buffer) => {
@@ -121,9 +143,31 @@ export default class NESRunner {
     })
   }
 
+  setName(name: string) {
+    this.name = name
+  }
+
   reset() {
     this.postMessageToWorker({
       event: EVENT_TYPE.RESET
+    })
+  }
+
+  saveData() {
+    console.log('begin saving')
+    this.postMessageToWorker({
+      event: EVENT_TYPE.SAVE_DATA
+    })
+  }
+
+  loadData() {
+    if (!window.localStorage.getItem(this.name)) return
+    const data = JSON.parse(window.localStorage.getItem(this.name) as string)
+    const array = new Uint8Array(data)
+
+    this.postMessageToWorker({
+      event: EVENT_TYPE.LOAD_DATA,
+      value: array
     })
   }
 

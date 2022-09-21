@@ -6,5 +6,7 @@ export const EVENT_TYPE = {
   LOAD_WASM: 'load_wasm',
   RESET: 'reset',
   PAUSE: 'pause',
-  RESUME: 'resume'
+  RESUME: 'resume',
+  SAVE_DATA: 'save_data',
+  LOAD_DATA: 'load_data'
 }

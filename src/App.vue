@@ -45,6 +45,20 @@
         <button
           v-if="isNESStart"
           class="w-full bg-red-400 rounded-md p-2 mb-2"
+          @click="saveData"
+        >
+          Save
+        </button>
+        <button
+          v-if="isNESStart"
+          class="w-full bg-red-400 rounded-md p-2 mb-2"
+          @click="loadData"
+        >
+          Load
+        </button>
+        <button
+          v-if="isNESStart"
+          class="w-full bg-red-400 rounded-md p-2 mb-2"
           @click="resetNES"
         >
           Reset

@@ -7,9 +7,11 @@ use nes::bus::*;
 use nes::ppu::*;
 use nes::controller::ButtonStatus;
 use ::utils::memory::Memory;
+use ::utils::saveable::Saveable;
 use wasm_bindgen::prelude::*;
 use js_sys;
 use web_sys;
+use std::io::Cursor;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -34,6 +36,8 @@ pub struct NES {
 
     audio_time: f32,
     audio_buffer: Vec<f32>,
+
+    save_data: Vec<u8>,
 }
 
 #[wasm_bindgen]
@@ -48,6 +52,7 @@ impl NES {
             screenbuffer: vec![0; NES_WIDTH_SIZE * NES_HEIGHT_SIZE * 4],
             audio_time: 0.0,
             audio_buffer: vec![0.0; 128],
+            save_data: Vec::new(),
         }
     }
 
@@ -156,6 +161,14 @@ impl NES {
         self.screenbuffer.len()
     }
 
+    pub fn get_save_data_pointer(&mut self) -> *const u8 {
+        self.save_data.as_ptr()
+    }
+
+    pub fn get_save_data_len(&self) -> usize {
+        self.save_data.len()
+    }
+
     pub fn set_pause(&mut self, value: bool) {
         self.bus.pause = value;
     }
@@ -166,5 +179,22 @@ impl NES {
 
     pub fn pc(&self) -> u16 {
         self.bus.cpu.pc
+    }
+
+    pub fn get_save_data(&mut self) {
+        let mut data: Vec<u8> = Vec::new();
+
+        self.bus.save(&mut data);
+
+        self.save_data = data;
+    }
+
+    pub fn load_save_data(&mut self, save_data: js_sys::Uint8Array) {
+        let mut data: Vec<u8> = Vec::new();
+        data.resize(save_data.length() as usize, 0);
+        save_data.copy_to(&mut data[..]);
+        let mut cursor = Cursor::new(data);
+
+        self.bus.load(&mut cursor);
     }
 }

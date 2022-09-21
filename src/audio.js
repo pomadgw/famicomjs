@@ -1,6 +1,6 @@
 import './url'
 import './textdecoder'
-import wasm, { NES } from '../nes/pkg/nes'
+import wasm, { NES } from '../nes/pkg/nes_wasm'
 
 import { EVENT_TYPE } from './worker-constants'
 import { NESStatus } from './utils'
@@ -44,6 +44,34 @@ class NesAudio extends AudioWorkletProcessor {
         case EVENT_TYPE.SET_SAMPLE_RATE:
           if (this.nes) {
             this.nes.set_sample_rate(value)
+          }
+          break
+        case EVENT_TYPE.SAVE_DATA:
+          if (this.nes) {
+            console.log('saving...')
+            this.nes.get_save_data()
+            console.log('get save data...')
+            const pointer = this.nes.get_save_data_pointer()
+            const len = this.nes.get_save_data_len()
+            const saveData = new Uint8Array(
+              this.wasmObject.memory.buffer,
+              pointer,
+              len
+            )
+
+            console.log('send save data...')
+            const dst = new ArrayBuffer(saveData.byteLength)
+            new Uint8Array(dst).set(saveData)
+
+            this.port.postMessage({
+              event: EVENT_TYPE.SAVE_DATA,
+              value: dst
+            })
+          }
+          break
+        case EVENT_TYPE.LOAD_DATA:
+          if (this.nes) {
+            this.nes.load_save_data(value)
           }
           break
         case EVENT_TYPE.LOAD_WASM:
